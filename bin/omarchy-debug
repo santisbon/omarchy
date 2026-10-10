@@ -42,7 +42,7 @@ Omarchy Package: $(dpkg-query -W -f='${Package} ${Version}' omarchy-tools 2>/dev
 =========================================
 SYSTEM INFORMATION
 =========================================
-$(inxi -Farz)
+$(command -v inxi >/dev/null && inxi -Farz || echo "inxi is not installed")
 
 =========================================
 DMESG

@@ -7,13 +7,12 @@
 # these are already on. The repeats are harmless and keep the list explicit.
 # Unit names were checked in the stonking Contents index under
 # usr/lib/systemd/system/: cups.service (cups-daemon), avahi-daemon.service
-# (avahi-daemon), docker.socket (docker.io), power-profiles-daemon.service
+# (avahi-daemon), power-profiles-daemon.service
 # (power-profiles-daemon), sddm.service (sddm), bluetooth.service (bluez),
 # systemd-oomd.service (systemd-oomd), NetworkManager-wait-online.service
 # (network-manager).
 systemctl enable cups.service
 systemctl enable avahi-daemon.service
-systemctl enable docker.socket
 # Don't let network-online.target hold up graphical.target waiting for
 # DHCP/Wi-Fi association. Nothing in the session needs to block on the network.
 # Mirrors the systemd-networkd-wait-online mask in install/hardware/network.sh.

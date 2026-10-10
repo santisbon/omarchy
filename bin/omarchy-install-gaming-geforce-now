@@ -7,7 +7,7 @@
 set -e
 
 echo "Installing GeForce NOW..."
-# flatpak is in the base package set; this covers a system it was removed from.
+# flatpak is not in the desktop's package set; this installer is its only user.
 omarchy-pkg-add flatpak
 
 # NVIDIA's installer is a self-extracting script that adds the Flathub remote

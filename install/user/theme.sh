@@ -12,5 +12,3 @@ if [[ ! -s $HOME/.local/state/omarchy/current/theme.name ]]; then
 fi
 omarchy-theme-set-pi --activate
 
-mkdir -p ~/.config/btop/themes
-ln -snf "$HOME/.local/state/omarchy/current/theme/btop.theme" ~/.config/btop/themes/current.theme

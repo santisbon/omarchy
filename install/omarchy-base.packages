@@ -10,27 +10,18 @@ bluez
 bluez-tools
 bolt
 brightnessctl
-btop
-build-essential
 cups
 cups-filters
 cups-pk-helper
 ddcutil
-docker.io
-docker-buildx
-docker-compose-v2
 dosfstools
-dua-cli
-evince
 exfatprogs
-eza
 fastfetch
 fcitx5
 fcitx5-frontend-gtk3
 fcitx5-frontend-gtk4
 fcitx5-frontend-qt6
 fd-find
-ffmpegthumbnailer
 fontconfig
 foot
 fzf
@@ -47,26 +38,18 @@ hyprsunset
 imagemagick
 imv
 inotify-tools
-inxi
 network-manager
 jq
-kdenlive
-lazygit
 less
-libsecret-tools
 libvips-tools
-libreoffice
 man-db
 mpv
 mpv-mpris
 nautilus
 python3-nautilus
-gnome-disk-utility
 fonts-noto-core
 fonts-noto-cjk
 fonts-noto-color-emoji
-neovim
-obs-studio
 plocate
 power-profiles-daemon
 # upower: the shell's power panel and battery widget read UPower (Quickshell.Services.UPower);
@@ -80,14 +63,10 @@ qt6-image-formats-plugins
 ripgrep
 slurp
 socat
-starship
 gnome-sushi
 system-config-printer
 tesseract-ocr
 tesseract-ocr-eng
-tealdeer
-tree-sitter-cli
-tmux
 udiskie
 # ufw: Ubuntu's default firewall tool, left exactly as Ubuntu ships it (installed, disabled)
 ufw
@@ -95,18 +74,13 @@ ufw
 # stock desktop as a Recommends of python3-software-properties, which Install-Recommends off
 # would skip); its postinst writes 20auto-upgrades with the debconf default of enabled
 unattended-upgrades
-unzip
-whois
 wireless-regdb
 wl-clipboard
 wtype
 fonts-font-awesome
 xdg-terminal-exec
-xournalpp
 yaru-theme-icon
-yt-dlp
 zbar-tools
-zoxide
 playerctl
 libxkbcommon-tools
 xdg-utils
@@ -126,8 +100,6 @@ pamu2fcfg
 fido2-tools
 libfido2-1
 blueman
-flatpak
-wf-recorder
 # Added beyond Omarchy's list: omarchy-pkg-repo-add and the browser installers
 # fetch keys and debs with curl over https and convert armored keys with gpg;
 # Ubuntu's minimal set installs neither curl nor, in every image, gpg.
@@ -165,3 +137,13 @@ ca-certificates
 # zram-generator (systemd-zram-generator): not in Ubuntu's desktop seeds, and stonking's package
 # creates a zram0 swap device from its own default config just by being installed; swap is the
 # installer's (step 7), with Ubuntu's defaults
+#
+# Removed 2026-10-10 (the distro's split of the list into what the desktop needs and what was
+# Omarchy's taste; see the distro repository's docs/6, "Core and apps"):
+# libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls
+# docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
+# flatpak: only the GeForce NOW installer used it, and it adds the package itself
+# build-essential, neovim, lazygit, tmux, btop, tree-sitter-cli, dua-cli, tealdeer, inxi, yt-dlp,
+#   starship, zoxide, eza: command-line preferences; the shell rc guards starship, zoxide and eza
+# whois, unzip, wf-recorder, libsecret-tools: nothing in the port calls them
+# evince, gnome-disk-utility, ffmpegthumbnailer: the optional omarchy-desktop-apps package

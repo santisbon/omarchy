@@ -15,10 +15,11 @@ fi
 if [[ -f $default_editor ]]; then
   read -r editor <"$default_editor"
 else
-  editor="nvim"
+  editor="nano"
 fi
 
-omarchy-cmd-present "$editor" || editor="nvim"
+# nano is the fallback: Ubuntu installs it with ubuntu-minimal, and this port no longer ships neovim.
+omarchy-cmd-present "$editor" || editor="nano"
 
 case "${editor##*/}" in
 nvim | vim | nano | micro | hx | helix | fresh)

@@ -21,11 +21,20 @@ announce_browser_installed() {
   echo "$1 browser installed. Make it the default via Setup > Defaults > Browser."
 }
 
+# Seed Chromium's first run: follow system appearance ("device") instead of dark,
+# and skip the terms-of-service dialog Chromium 151 turned on by default. Written
+# here, when a Chromium-based browser is installed, not at system install time.
+seed_chromium_initial_preferences() {
+  sudo mkdir -p /usr/lib/chromium
+  echo '{"distribution":{"require_eula":false},"browser":{"theme":{"color_scheme":0,"color_scheme2":0}}}' |
+    sudo tee /usr/lib/chromium/initial_preferences >/dev/null
+}
+
 copy_chromium_flags() {
   mkdir -p ~/.config
   cp -f "$OMARCHY_PATH/config/chromium-flags.conf" "$1"
   omarchy-install-chromium-copy-url
-  omarchy-install-chromium-ytdlp
+  seed_chromium_initial_preferences
 }
 
 setup_firefox_wayland() {

@@ -1,5 +1,3 @@
-run_logged "$OMARCHY_INSTALL/config/theme-system.sh"
 run_logged "$OMARCHY_INSTALL/config/browser-policy.sh"
 run_logged "$OMARCHY_INSTALL/config/lockscreen-pam.sh"
-run_logged "$OMARCHY_INSTALL/config/docker.sh"
 run_logged "$OMARCHY_INSTALL/config/enable-services.sh"
