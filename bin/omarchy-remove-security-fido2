@@ -34,7 +34,6 @@ if [[ -e $authdir || -L $authdir ]]; then
   sudo rm -rf "$authdir"
 fi
 
-echo "Removing FIDO2 packages..."
-omarchy-pkg-drop libfido2 pam-u2f
-
+# libpam-u2f and fido2-tools stay installed: they are part of the distro's
+# base image, so only the PAM lines and the registration file are removed.
 echo -e "\e[32mFIDO2 authentication has been completely removed.\e[0m"

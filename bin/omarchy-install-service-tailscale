@@ -4,7 +4,22 @@
 # omarchy:requires-sudo=true
 
 echo -e "\nInstalling Tailscale..."
-omarchy-pkg-add tailscale
+
+# Tailscale publishes one key and list per Ubuntu codename under
+# https://pkgs.tailscale.com/stable/ubuntu/. On 2026-10-10 stonking.noarmor.gpg
+# answered HEAD 404 and resolute.noarmor.gpg (26.04) HEAD 200, so the running
+# codename is tried first and the newest published one stands in until
+# Tailscale adds it. The package is a static binary, so the older suite works.
+codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
+if ! curl -fsSI --max-time 15 "https://pkgs.tailscale.com/stable/ubuntu/$codename.noarmor.gpg" >/dev/null 2>&1; then
+  echo "Tailscale has no $codename packages yet; using the resolute suite."
+  codename=resolute
+fi
+
+omarchy-pkg-repo-add tailscale \
+  "https://pkgs.tailscale.com/stable/ubuntu/$codename.noarmor.gpg" \
+  https://pkgs.tailscale.com/stable/ubuntu "$codename" main amd64 || exit 1
+omarchy-pkg-add tailscale || exit 1
 
 echo -e "\nStarting Tailscale..."
 sudo systemctl enable --now tailscaled.service

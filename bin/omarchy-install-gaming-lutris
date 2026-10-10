@@ -1,23 +1,35 @@
 #!/bin/bash
 
-# omarchy:summary=Install Lutris with Wine + DXVK for running Windows games (Battle.net, EA, Ubisoft Connect, etc.)
+# omarchy:summary=Install Lutris with Wine for running Windows games (Battle.net, EA, Ubisoft Connect, etc.)
 # omarchy:requires-sudo=true
 
 set -e
 
 echo "Installing Lutris..."
-omarchy-pkg-add lutris umu-launcher wine-staging wine-mono wine-gecko winetricks python-protobuf
-omarchy-install-gaming-gpu-lib32
 
-# Lutris ships with `#!/usr/bin/env python3`, which resolves to mise's Python and
-# fails to import the lutris module. Pin the shebang to the system Python.
-sudo sed -i '/env python3/ c\#!/bin/python3' /usr/bin/lutris
+# Most Windows games are 32-bit or carry 32-bit pieces, and Ubuntu's wine32 is
+# built for i386 only (the wine metapackage lists "wine64 | wine32" as its
+# dependency, and wine32 is absent from the amd64 index), so the i386
+# architecture is enabled the same way the Steam installer does it.
+if ! dpkg --print-foreign-architectures | grep -qx i386; then
+  echo "Enabling 32-bit packages for Wine..."
+  sudo dpkg --add-architecture i386
+  sudo apt-get update
+fi
 
-cat <<'EOF'
+# lutris is in multiverse; wine, winetricks and python3-protobuf are its
+# Recommends and are named here because omarchy-pkg-add skips Recommends.
+# umu-launcher has no Ubuntu package; Lutris downloads its own runners.
+omarchy-pkg-add lutris wine wine32:i386 winetricks python3-protobuf
+
+# Ubuntu's /usr/games/lutris already starts with #!/usr/bin/python3 (Debian
+# policy forbids env in packaged shebangs), so mise's Python never shadows it.
+
+cat <<'MSG'
 
 Lutris will open and auto-fetch its DXVK and VKD3D runtimes in the background
 (watch the bottom status bar). Once that finishes, click the + to add or install games.
 
-EOF
+MSG
 
 setsid lutris >/dev/null 2>&1 &

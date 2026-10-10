@@ -73,4 +73,5 @@ magick -size ${canvas_w}x${canvas_h} "xc:#$bg_hex" \
   "${bullet_args[@]}" \
   "$output_path"
 
-imv -f "$output_path"
+# Ubuntu names the imv binary imv-wayland (/usr/bin/imv belongs to renameutils there).
+imv-wayland -f "$output_path"

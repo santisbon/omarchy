@@ -5,4 +5,4 @@
 # command's arguments exactly, so it cannot be stretched into extra ones. The
 # helper revalidates the same shape, since the terminal path does not come
 # through this rule.
-%wheel ALL=(root) NOPASSWD: /usr/bin/omarchy-theme-set-browser-policy [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
+%sudo ALL=(root) NOPASSWD: /usr/bin/omarchy-theme-set-browser-policy [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]

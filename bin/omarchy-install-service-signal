@@ -6,6 +6,12 @@
 set -e
 
 echo "Installing Signal..."
+
+# Signal publishes one suite, still named xenial, for every Debian and Ubuntu
+# release. HEAD 200 on 2026-10-10 for the key and dists/xenial/InRelease.
+omarchy-pkg-repo-add signal \
+  https://updates.signal.org/desktop/apt/keys.asc \
+  https://updates.signal.org/desktop/apt xenial main amd64
 omarchy-pkg-add signal-desktop
 
 echo "Opening Signal..."

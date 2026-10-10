@@ -1,6 +1,6 @@
 [SddmGreeterTheme]
 Name=Omarchy
-Description=Minimal terminal-style login theme matching the Limine bootloader aesthetic
+Description=Minimal terminal-style login theme matching the Plymouth boot screen aesthetic
 Author=Omarchy
 Type=sddm-theme
 Version=1.0

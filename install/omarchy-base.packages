@@ -1,150 +1,160 @@
-# Omarchy core package list pacstrapped by the ISO.
-# The ISO builder also reads this file when constructing the offline mirror.
-
-aether
+# Ubuntu 26.10 (stonking) package names, one per line. The oaxaca-desktop meta
+# package's Depends are generated from this file. Every name below was checked
+# against the stonking Packages indexes on 2026-10-10.
 alsa-utils
-asdcontrol
-avahi
+avahi-daemon
+libnss-mdns
 bash-completion
 bat
 bluez
 bluez-tools
-bluez-utils
 bolt
 brightnessctl
 btop
-chromium
-clang
-cliamp
+build-essential
 cups
 cups-filters
 cups-pk-helper
 ddcutil
-docker
+docker.io
 docker-buildx
-docker-compose
+docker-compose-v2
 dosfstools
-dotnet-runtime
 dua-cli
 evince
 exfatprogs
-expac
 eza
-fakeroot
 fastfetch
 fcitx5
-fcitx5-gtk
-fcitx5-qt
-fd
+fcitx5-frontend-gtk3
+fcitx5-frontend-gtk4
+fcitx5-frontend-qt6
+fd-find
 ffmpegthumbnailer
 fontconfig
 foot
 fzf
 git
-gnome-keyring
 gnome-themes-extra
 grim
-gpu-screen-recorder
+gpu-screen-recorder-cli
 gum
-gvfs-mtp
-gvfs-nfs
-gvfs-smb
-herdr
-hyprland
+gvfs-backends
+gvfs-fuse
 hyprland-guiutils
-hyprland-preview-share-picker
 hyprpicker
 hyprsunset
 imagemagick
 imv
-inetutils
 inotify-tools
 inxi
-networkmanager
+network-manager
 jq
 kdenlive
-kernel-modules-hook
-lazydocker
 lazygit
 less
-libsecret
-libvips
-libyaml
-libreoffice-fresh
-llvm
-localsend
-lua51
-luarocks
+libsecret-tools
+libvips-tools
+libreoffice
 man-db
-mariadb-libs
-mise-bin
-moonlight-qt
 mpv
 mpv-mpris
 nautilus
-nautilus-python
+python3-nautilus
 gnome-disk-utility
-noto-fonts
-noto-fonts-cjk
-noto-fonts-emoji
-nss-mdns
-nvim
+fonts-noto-core
+fonts-noto-cjk
+fonts-noto-color-emoji
+neovim
 obs-studio
-obsidian
-omacalc
-omacut
-omawrite
-omarchy-nvim
-pacman-contrib
-pamixer
-pinta
 plocate
-plymouth
-postgresql-libs
 power-profiles-daemon
-python-gobject
-python-poetry-core
-ttfx
-qemu-user-static-binfmt
+# upower: the shell's power panel and battery widget read UPower (Quickshell.Services.UPower);
+# Arch pulls it in through quickshell, Ubuntu's quickshell does not depend on it.
+upower
+# systemd-oomd is its own package on Ubuntu (part of systemd on Arch); enable-services.sh enables it.
+systemd-oomd
+python3-gi
 qrencode
-qt6-imageformats
-quickshell
+qt6-image-formats-plugins
 ripgrep
-ruby
-tensaku
-sddm
 slurp
 socat
 starship
-sushi
+gnome-sushi
 system-config-printer
-tesseract
-tesseract-data-eng
-tldr
+tesseract-ocr
+tesseract-ocr-eng
+tealdeer
 tree-sitter-cli
 tmux
-tobi-try
-ttf-ia-writer
-ttf-jetbrains-mono-nerd-basic
-tzupdate
 udiskie
 ufw
-ufw-docker
 unzip
-usage
-uwsm
 whois
 wireless-regdb
-wireplumber
 wl-clipboard
 wtype
-woff2-font-awesome
-xdg-desktop-portal-gtk
-xdg-desktop-portal-hyprland
+fonts-font-awesome
 xdg-terminal-exec
 xournalpp
-yaru-icon-theme
-yay
+yaru-theme-icon
 yt-dlp
-zbar
+zbar-tools
 zoxide
+playerctl
+libxkbcommon-tools
+xdg-utils
+xdg-user-dirs
+desktop-file-utils
+libglib2.0-bin
+dconf-cli
+python3
+perl
+pciutils
+usbutils
+fuse3
+fprintd
+libpam-fprintd
+libpam-u2f
+pamu2fcfg
+fido2-tools
+libfido2-1
+blueman
+flatpak
+systemd-zram-generator
+wf-recorder
+# Added beyond Omarchy's list: omarchy-pkg-repo-add and the browser installers
+# fetch keys and debs with curl over https and convert armored keys with gpg;
+# Ubuntu's minimal set installs neither curl nor, in every image, gpg.
+curl
+gpg
+ca-certificates
+
+# Dropped from Omarchy's Arch list, with the reason:
+# aether, cliamp, herdr, omacalc, omacut, omawrite, tensaku, tobi-try, ttfx:
+#   Omarchy's own OPR packages, no Ubuntu build
+# asdcontrol: separate package
+# chromium: Ubuntu's chromium is a snap placeholder and snapd is pinned out
+# dotnet-runtime, ruby, lua51, luarocks, python-poetry-core: dev-env installs them via mise
+# expac, fakeroot, pacman-contrib, yay: pacman tooling
+# hyprland: the session layer packages it separately
+# hyprland-preview-share-picker: separate package
+# inetutils: not needed; hostname comes from hostname (essential)
+# kernel-modules-hook: pacman hook, no apt counterpart
+# lazydocker: not in stonking
+# libyaml: runtime library comes in through its users' Depends
+# localsend: not in stonking
+# mariadb-libs, postgresql-libs: come in through their users' Depends
+# mise-bin: not in stonking; Install > Development > mise runs the vendor script
+# moonlight-qt: not in stonking
+# obsidian, pinta: not in stonking
+# omarchy-nvim (nvim config): separate package
+# plymouth: step 7
+# qemu-user-static-binfmt: not needed
+# quickshell, sddm, uwsm, wireplumber, gnome-keyring, xdg-desktop-portal*: session layer
+# tldr: tealdeer ships /usr/bin/tldr
+# ttf-ia-writer, ttf-jetbrains-mono-nerd-basic: separate fonts package
+# tzupdate: not in stonking
+# ufw-docker: not in stonking
+# usage: mise installs it on demand

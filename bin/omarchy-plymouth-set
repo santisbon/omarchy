@@ -373,9 +373,9 @@ fi
 if [[ $mode != "refresh-sddm" ]]; then
   sudo plymouth-set-default-theme omarchy
 
-  if omarchy-cmd-present limine-mkinitcpio; then
-    sudo limine-mkinitcpio
-  else
-    sudo mkinitcpio -P
-  fi
+  # Ubuntu builds the initramfs with initramfs-tools (stonking Contents:
+  # usr/sbin/update-initramfs in utils/initramfs-tools). Its plymouth hook
+  # copies the default theme into the image, so the new theme only reaches the
+  # boot splash after a rebuild. -u rebuilds the running kernel's image.
+  sudo update-initramfs -u
 fi

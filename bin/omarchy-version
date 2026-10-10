@@ -17,11 +17,9 @@ if [[ $omarchy_path != "/usr/share/omarchy" ]]; then
   exit 0
 fi
 
-# The edge channel installs omarchy-dev instead of omarchy, so check both.
-for package in omarchy-dev omarchy; do
-  version=$(pacman -Q "$package" 2>/dev/null | awk '{ print $2 }')
-  [[ -n $version ]] && break
-done
+# omarchy-tools is the package that ships these scripts, so its version is the
+# installed version.
+version=$(dpkg-query -W -f='${Version}' omarchy-tools 2>/dev/null || true)
 
 [[ -n $version ]] || exit 1
 

@@ -1,8 +1,14 @@
 #!/bin/bash
 
 # omarchy:summary=Install a supported browser
-# omarchy:args=<chrome|brave|brave-origin|edge|firefox|zen>
+# omarchy:args=<chrome|brave|edge|firefox>
 # omarchy:examples=omarchy install browser firefox | omarchy install browser brave
+# omarchy:requires-sudo=true
+
+# Ubuntu's archive carries firefox and chromium only as placeholders that pull
+# in snapd, and the distro pins snapd out, so every browser here comes from its
+# vendor's own apt repository or deb. Every URL below answered HTTP 200 to a
+# HEAD request on 2026-10-10.
 
 source "$OMARCHY_PATH/install/helpers/browser-policy.sh"
 
@@ -27,10 +33,32 @@ setup_firefox_wayland() {
   echo "MOZ_ENABLE_WAYLAND=1" > ~/.config/environment.d/omarchy-firefox-wayland.conf
 }
 
+# Google publishes no repository to add first: the deb itself writes
+# /etc/apt/sources.list.d/google-chrome.list and its key on install, and apt
+# keeps Chrome current from there.
+install_chrome_deb() {
+  local tmp status
+  tmp=$(mktemp -d)
+  # apt downloads as the _apt user, which cannot read a 0700 mktemp directory.
+  chmod 755 "$tmp"
+
+  curl -fsSL --retry 3 \
+    https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    -o "$tmp/google-chrome-stable.deb" || { rm -rf "$tmp"; return 1; }
+  chmod 644 "$tmp/google-chrome-stable.deb"
+
+  # A path with a slash makes apt-get treat the argument as a local deb and
+  # resolve its dependencies from the archive, which dpkg -i alone would not.
+  sudo apt-get install -y "$tmp/google-chrome-stable.deb"
+  status=$?
+  rm -rf "$tmp"
+  (( status == 0 )) && omarchy-pkg-present google-chrome-stable
+}
+
 case $1 in
 chrome)
   echo "Installing Chrome..."
-  omarchy-pkg-aur-add google-chrome || exit 1
+  install_chrome_deb || exit 1
 
   setup_chromium_policy_directory /etc/opt/chrome/policies/managed
   copy_chromium_flags ~/.config/chrome-flags.conf
@@ -39,7 +67,15 @@ chrome)
   ;;
 edge)
   echo "Installing Edge..."
-  omarchy-pkg-aur-add microsoft-edge-stable-bin || exit 1
+  omarchy-pkg-repo-add microsoft-edge \
+    https://packages.microsoft.com/keys/microsoft.asc \
+    https://packages.microsoft.com/repos/edge stable main amd64 || exit 1
+  omarchy-pkg-add microsoft-edge-stable || exit 1
+
+  # Edge's own postinst writes a one-line microsoft-edge.list when it finds no
+  # .list file naming its repository; the deb822 source above already covers
+  # it, and two sources for one repository make apt warn on every update.
+  sudo rm -f /etc/apt/sources.list.d/microsoft-edge.list
 
   setup_chromium_policy_directory /etc/opt/edge/policies/managed
   copy_chromium_flags ~/.config/microsoft-edge-stable-flags.conf
@@ -48,40 +84,33 @@ edge)
   ;;
 brave)
   echo "Installing Brave..."
-  omarchy-pkg-aur-add brave-bin || exit 1
+  omarchy-pkg-repo-add brave-browser \
+    https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
+    https://brave-browser-apt-release.s3.brave.com stable main amd64 || exit 1
+  omarchy-pkg-add brave-browser || exit 1
 
   setup_chromium_policy_directory /etc/brave/policies/managed
   copy_chromium_flags ~/.config/brave-flags.conf
   omarchy-theme-set-browser
   announce_browser_installed "Brave"
   ;;
-brave-origin)
-  echo "Installing Brave Origin..."
-  omarchy-pkg-aur-add brave-origin-bin || exit 1
-
-  setup_chromium_policy_directory /etc/brave/policies/managed
-  copy_chromium_flags ~/.config/brave-origin-flags.conf
-  omarchy-theme-set-browser
-  announce_browser_installed "Brave Origin"
-  ;;
 firefox)
   echo "Installing Firefox..."
+  # The archive's firefox is the snap placeholder, so Mozilla's repository is
+  # pinned above it; without the pin apt would pick the archive's higher
+  # epoch and install the placeholder.
+  omarchy-pkg-repo-add mozilla \
+    https://packages.mozilla.org/apt/repo-signing-key.gpg \
+    https://packages.mozilla.org/apt mozilla main --pin 1000 || exit 1
   omarchy-pkg-add firefox || exit 1
 
+  # Mozilla's deb installs under /usr/lib/firefox.
   browser_policy_setup_firefox_distribution /usr/lib/firefox/distribution
   setup_firefox_wayland
   announce_browser_installed "Firefox"
   ;;
-zen)
-  echo "Installing Zen..."
-  omarchy-pkg-aur-add zen-browser-bin || exit 1
-
-  browser_policy_setup_firefox_distribution /opt/zen-browser/distribution
-  setup_firefox_wayland
-  announce_browser_installed "Zen"
-  ;;
 *)
-  echo "Usage: omarchy-install-browser <chrome|brave|brave-origin|edge|firefox|zen>"
+  echo "Usage: omarchy-install-browser <chrome|brave|edge|firefox>"
   exit 1
   ;;
 esac

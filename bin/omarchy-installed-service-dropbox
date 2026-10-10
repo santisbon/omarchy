@@ -5,8 +5,13 @@
 
 set -euo pipefail
 
-if omarchy-cmd-present dropbox-cli && dropbox-cli running >/dev/null 2>&1; then
-  exit 0
+# Ubuntu's nautilus-dropbox installs the control command as dropbox, not
+# dropbox-cli. Its "running" subcommand answers backwards: the dropbox.py source
+# documents it as "Returns 1 if running 0 if not running".
+if omarchy-cmd-present dropbox; then
+  status=0
+  dropbox running >/dev/null 2>&1 || status=$?
+  (( status == 1 )) && exit 0
 fi
 
 pgrep -x dropbox >/dev/null 2>&1

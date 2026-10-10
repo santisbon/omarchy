@@ -6,7 +6,15 @@
 set -e
 
 echo "Installing Spotify..."
-omarchy-pkg-add spotify
+
+# The key URL is the one https://www.spotify.com/us/download/linux/ printed on
+# 2026-10-10 (pubkey_5384CE82BA52C83A.asc, HEAD 200); Spotify rotates it, so
+# a failing download here means that page has a newer one. The repository's
+# only component is non-free.
+omarchy-pkg-repo-add spotify \
+  https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc \
+  https://repository.spotify.com stable non-free amd64
+omarchy-pkg-add spotify-client
 
 echo "Opening Spotify..."
 setsid uwsm-app -- /usr/bin/spotify >/dev/null 2>&1 &

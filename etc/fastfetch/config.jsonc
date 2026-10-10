@@ -74,18 +74,6 @@
       "text": "version=$(omarchy-version) && echo \"Omarchy $version\""
     },
     {
-      "type": "command",
-      "key": "│ ├󰘬",
-      "keyColor": "blue",
-      "text": "omarchy-version-branch"
-    },
-    {
-      "type": "command",
-      "key": "│ ├󰔫",
-      "keyColor": "blue",
-      "text": "channel=$(omarchy-version-channel); echo \"$channel\""
-    },
-    {
       "type": "kernel",
       "key": "│ ├",
       "keyColor": "blue"

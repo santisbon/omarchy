@@ -4,10 +4,19 @@
 
 update_log="/tmp/omarchy-update.log"
 
-# Check for initramfs generation failure
-if grep -q "Updating linux initcpios" "$update_log"; then
-  if ! grep -q "Initcpio image generation successful" "$update_log"; then
+# Check for initramfs generation failure. Ubuntu's kernel hooks run
+# update-initramfs, which announces each image with "Generating /boot/initrd.img-..."
+# and a failure with "update-initramfs: failed for ...".
+if grep -q "update-initramfs: Generating" "$update_log"; then
+  if grep -q "update-initramfs: failed" "$update_log"; then
     echo -e '\e[31mError: Initramfs generation may have failed. Review logs before restart.\e[0m'
     echo
   fi
+fi
+
+# A package whose maintainer script failed leaves apt with this line, and dpkg
+# then holds that package half configured until someone fixes it.
+if grep -q "Sub-process /usr/bin/dpkg returned an error code" "$update_log"; then
+  echo -e '\e[31mError: dpkg reported a failed package. Run "sudo apt-get install -f" and review the output above.\e[0m'
+  echo
 fi

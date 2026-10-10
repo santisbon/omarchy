@@ -1,70 +1,59 @@
 #!/bin/bash
 
 # omarchy:summary=Remove a supported browser and clean up Omarchy browser defaults
-# omarchy:args=<chrome|brave|brave-origin|edge|firefox|zen>
+# omarchy:args=<chrome|brave|edge|firefox>
 # omarchy:examples=omarchy remove browser firefox | omarchy remove browser brave
 # omarchy:requires-sudo=true
 
-set_fallback_default_browser() {
+# The distro ships no browser of its own to fall back on, so when the removed
+# browser was the default, the default is left to whatever xdg-settings still
+# resolves it to and the user is told to pick another.
+note_default_browser_removed() {
   local current_browser
-  current_browser=$(env -u BROWSER xdg-settings get default-web-browser)
+  current_browser=$(env -u BROWSER xdg-settings get default-web-browser 2>/dev/null)
 
-  if [[ $current_browser != $1 ]]; then
-    return
-  fi
-
-  if omarchy-cmd-present chromium; then
-    env -u BROWSER xdg-settings set default-web-browser chromium.desktop || true
+  if [[ $current_browser == "$1" ]]; then
+    echo ""
+    echo "That was the default browser. Pick another via Setup > Defaults > Browser."
   fi
 }
 
 case $1 in
 chrome)
   echo "Removing Chrome..."
-  set_fallback_default_browser google-chrome.desktop
-  omarchy-pkg-drop google-chrome
+  omarchy-pkg-drop google-chrome-stable
+  # The deb wrote these on install; purge leaves them behind.
+  sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/trusted.gpg.d/google-chrome.gpg
   rm -f ~/.config/chrome-flags.conf
   sudo rm -f /etc/opt/chrome/policies/managed/color.json
+  note_default_browser_removed google-chrome.desktop
   ;;
 edge)
   echo "Removing Edge..."
-  set_fallback_default_browser microsoft-edge.desktop
-  omarchy-pkg-drop microsoft-edge-stable-bin
+  omarchy-pkg-drop microsoft-edge-stable
+  sudo rm -f /etc/apt/sources.list.d/microsoft-edge.list
+  omarchy-pkg-repo-remove microsoft-edge
   rm -f ~/.config/microsoft-edge-stable-flags.conf
   sudo rm -f /etc/opt/edge/policies/managed/color.json
+  note_default_browser_removed microsoft-edge.desktop
   ;;
 brave)
   echo "Removing Brave..."
-  set_fallback_default_browser brave-browser.desktop
-  omarchy-pkg-drop brave-bin
+  omarchy-pkg-drop brave-browser
+  omarchy-pkg-repo-remove brave-browser
   rm -f ~/.config/brave-flags.conf
-
-  if omarchy-pkg-missing brave-origin-bin; then
-    sudo rm -rf /etc/brave
-  fi
-  ;;
-brave-origin)
-  echo "Removing Brave Origin..."
-  set_fallback_default_browser brave-origin.desktop
-  omarchy-pkg-drop brave-origin-bin
-  rm -f ~/.config/brave-origin-flags.conf
-
-  if omarchy-pkg-missing brave-bin; then
-    sudo rm -rf /etc/brave
-  fi
+  sudo rm -rf /etc/brave
+  note_default_browser_removed brave-browser.desktop
   ;;
 firefox)
   echo "Removing Firefox..."
-  set_fallback_default_browser firefox.desktop
   omarchy-pkg-drop firefox
-  ;;
-zen)
-  echo "Removing Zen..."
-  set_fallback_default_browser zen.desktop
-  omarchy-pkg-drop zen-browser-bin
+  omarchy-pkg-repo-remove mozilla
+  rm -f ~/.config/environment.d/omarchy-firefox-wayland.conf
+  note_default_browser_removed firefox.desktop
   ;;
 *)
-  echo "Usage: omarchy-remove-browser <chrome|brave|brave-origin|edge|firefox|zen>"
+  echo "Usage: omarchy-remove-browser <chrome|brave|edge|firefox>"
   exit 1
   ;;
 esac

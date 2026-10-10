@@ -33,7 +33,6 @@ echo -e "\e[32mRemoving fingerprint scanner from authentication.\n\e[0m"
 remove_pam_config
 remove_lock_fingerprint_pam
 
-echo "Removing fingerprint packages..."
-omarchy-pkg-drop fprintd libfprint libfprint-git
-
+# fprintd and libpam-fprintd stay installed: they are part of the distro's base
+# image, so only the PAM lines and the enrolled prints' use are removed here.
 echo -e "\e[32mFingerprint authentication has been completely removed.\e[0m"

@@ -1,0 +1,5 @@
+# omarchy-menu-timezone sets the zone from a menu with no terminal to carry a
+# password prompt. The regular expression only admits zone names of the shape
+# tzdata uses (Area/Location), so the grant cannot be stretched into other
+# timedatectl verbs or arguments.
+%sudo ALL=(root) NOPASSWD: /usr/bin/timedatectl ^set-timezone [A-Za-z0-9_+][A-Za-z0-9_+.-]*(/[A-Za-z0-9_+][A-Za-z0-9_+.-]*)*$

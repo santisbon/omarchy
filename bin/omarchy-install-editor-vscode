@@ -1,13 +1,22 @@
 #!/bin/bash
 
 # omarchy:summary=Install VS Code and configure Omarchy defaults for secrets, updates, and theme
+# omarchy:requires-sudo=true
 
 echo "Installing VSCode..."
-omarchy-pkg-add visual-studio-code-bin
+
+# Microsoft's repository (HEAD 200 on 2026-10-10 for both the key and
+# repos/code/dists/stable/InRelease). The source is named vscode because the
+# code package's own postinst writes /etc/apt/sources.list.d/vscode.sources
+# when it finds none; sharing the name means there is one file either way.
+omarchy-pkg-repo-add vscode \
+  https://packages.microsoft.com/keys/microsoft.asc \
+  https://packages.microsoft.com/repos/code stable main amd64 || exit 1
+omarchy-pkg-add code || exit 1
 
 mkdir -p ~/.vscode ~/.config/Code/User
 
-cat > ~/.vscode/argv.json << 'EOF'
+cat > ~/.vscode/argv.json << 'ARGV'
 // This configuration file allows you to pass permanent command line arguments to VS Code.
 // Only a subset of arguments is currently supported to reduce the likelihood of breaking
 // the installation.
@@ -18,7 +27,7 @@ cat > ~/.vscode/argv.json << 'EOF'
 {
   "password-store":"gnome-libsecret"
 }
-EOF
+ARGV
 
 # Ensure VSC's own auto-update feature is turned off
 printf '{\n  "update.mode": "none"\n}\n' > ~/.config/Code/User/settings.json

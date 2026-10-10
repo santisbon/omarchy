@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Remove Tailscale and its bar plugin.
+# omarchy:summary=Remove Tailscale, its vendor repository and its bar plugin.
 # omarchy:requires-sudo=true
 
 tailscale down 2>/dev/null || true
@@ -9,6 +9,7 @@ sudo systemctl disable --now tailscaled.service 2>/dev/null || true
 omarchy-plugin-disable omarchy.tailscale
 omarchy-webapp-remove "Tailscale" 2>/dev/null || true
 omarchy-pkg-drop tailscale
+omarchy-pkg-repo-remove tailscale
 
 echo ""
 echo "Tailscale has been removed."

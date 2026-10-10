@@ -1,5 +1,7 @@
 # Enable thermald for Intel laptops (Sandy Bridge and newer)
 # Thermald is useful for Intel Sandy Bridge (2nd gen Core, model 42/45) and newer CPUs.
+# Ubuntu's package and unit are both named thermald (stonking Contents:
+# usr/lib/systemd/system/thermald.service in admin/thermald).
 
 if omarchy-hw-intel; then
   # Check if Sandy Bridge or newer (model >= 42). Sandy Bridge: model 42 (mobile), 45 (desktop)

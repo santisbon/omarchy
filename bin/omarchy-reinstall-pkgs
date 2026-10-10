@@ -1,18 +1,17 @@
 #!/bin/bash
 
-# omarchy:summary=Reinstall all default Omarchy packages from the stable channel
+# omarchy:summary=Reinstall all default Omarchy packages
 # omarchy:requires-sudo=true
 
 set -e
 
-# Reinstall all default Omarchy packages from the stable channel and downgrade any packages that are too new.
+sudo apt-get update
 
-# Set the package repository to the stable mirrors
-omarchy-refresh-pacman
+# The desktop meta package depends on everything in omarchy-base.packages, so
+# installing it brings back whatever was removed.
+sudo apt-get install -y --no-install-recommends omarchy-desktop
 
-# Downgrade any packages to the stable setup
-sudo env OMARCHY_UPDATE_PACMAN=1 pacman -Suu --noconfirm
-
-# Ensure all packages are installed
-mapfile -t packages < <(grep -v '^#' "$OMARCHY_PATH/install/omarchy-base.packages" | grep -v '^$')
-sudo env OMARCHY_UPDATE_PACMAN=1 pacman -Syu --noconfirm --needed "${packages[@]}"
+# --reinstall then puts every listed package's files back on disk, which the
+# meta package alone would not do for one that is installed but damaged.
+mapfile -t packages < <(grep -v '^#' "$OMARCHY_PATH/install/omarchy-base.packages" | grep -v '^$' | awk '{ print $1 }')
+sudo apt-get install -y --no-install-recommends --reinstall "${packages[@]}"

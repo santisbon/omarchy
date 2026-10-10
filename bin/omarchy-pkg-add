@@ -1,21 +1,24 @@
 #!/bin/bash
 
-# omarchy:summary=Install Arch packages if they are missing
+# omarchy:summary=Install Ubuntu packages if they are missing
 # omarchy:args=<packages...>
 # omarchy:examples=omarchy pkg add jq ripgrep
 # omarchy:requires-sudo=true
 
 if omarchy-pkg-missing "$@"; then
+  # --no-install-recommends keeps a request for one tool from dragging in the
+  # archive's suggestions around it; callers name everything they need.
   if (( EUID == 0 )); then
-    pacman -S --noconfirm --needed "$@" || exit 1
+    apt-get install -y --no-install-recommends "$@" || exit 1
   else
-    sudo pacman -S --noconfirm --needed "$@" || exit 1
+    sudo apt-get install -y --no-install-recommends "$@" || exit 1
   fi
 fi
 
 for pkg in "$@"; do
-  # Secondary check to handle states where pacman doesn't actually register an error
-  if ! pacman -Q "$pkg" &>/dev/null; then
+  # Secondary check: apt-get can exit 0 while dpkg left a package half
+  # configured, and dpkg's status field is what says the install finished.
+  if [[ $(dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null) != "installed" ]]; then
     echo -e "\033[31mError: Package '$pkg' did not install\033[0m" >&2
     exit 1
   fi

@@ -10,7 +10,7 @@ usage() {
 Usage: omarchy finalize user [--force] [--first-install]
 
 Runs the per-user setup steps that /etc/skel can't seed:
-dev-aware skill symlinks, xdg-user-dirs + gtk bookmarks (need \$HOME),
+xdg-user-dirs + gtk bookmarks (need \$HOME),
 default browser/mailto, and install/user/all.sh.
 
 For shipped configs see /etc/skel (new users) and omarchy-reinstall-configs
@@ -67,8 +67,8 @@ export OMARCHY_SETUP_CONTEXT="${OMARCHY_SETUP_CONTEXT:-runtime}"
 export PATH="$OMARCHY_PATH/bin:$PATH"
 
 if (( first_install )) && [[ $OMARCHY_SETUP_CONTEXT == "runtime" ]]; then
-  # The ISO chroot doesn't set a context; omarchy-provision-owner runs first-install
-  # finalization too but with OMARCHY_SETUP_CONTEXT=provision-owner already set.
+  # The image build chroot doesn't set a context, so a first install with none
+  # set is that chroot.
   export OMARCHY_SETUP_CONTEXT=iso-chroot
 fi
 
@@ -81,26 +81,8 @@ else
   }
 fi
 
-# Dev-aware skill symlinks. Cannot live in /etc/skel because OMARCHY_PATH may
-# point at a dev checkout (omarchy dev link) where the target differs.
-# Loops every skill directory, so shipping a new one needs no edit here.
-mkdir -p ~/.agents/skills ~/.claude/skills ~/.codex/skills ~/.pi/agent/skills ~/.hermes/skills
-for skill in "$OMARCHY_PATH"/default/agents/skills/*/; do
-  skill=${skill%/}
-  name=${skill##*/}
-  ln -sfn "$skill" ~/.agents/skills/"$name"
-  ln -sfn "$skill" ~/.claude/skills/"$name"
-  ln -sfn "$skill" ~/.codex/skills/"$name"
-  ln -sfn "$skill" ~/.pi/agent/skills/"$name"
-  ln -sfn "$skill" ~/.hermes/skills/"$name"
-  if [[ -d ~/.hermes/profiles ]]; then
-    for profile in ~/.hermes/profiles/*/; do
-      [[ -d $profile ]] || continue
-      mkdir -p "$profile/skills"
-      ln -sfn "$skill" "$profile/skills/$name"
-    done
-  fi
-done
+# Omarchy's AI-agent skill files (default/agents/skills) are not shipped: they describe
+# Omarchy's own contributing workflow and repositories.
 
 mkdir -p ~/Downloads ~/Pictures ~/Videos ~/.config/gtk-3.0
 xdg-user-dirs-update --set TEMPLATES "$HOME"

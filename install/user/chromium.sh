@@ -1,6 +1,12 @@
-# Chromium ships in the base packages, so it never goes through
-# omarchy-install-browser, and fresh installs mark every migration as already
-# applied. Without this, the bundled extensions load but have no native
-# messaging host to talk to.
+# No browser is preinstalled on this distro, so the Chromium native messaging
+# hosts only make sense once Chromium is actually on the machine. Without this
+# gate the two installers below would run against a browser that is not there.
+if omarchy-cmd-missing chromium; then
+  exit 0
+fi
+
+# Fresh installs mark every migration as already applied, so a Chromium that
+# was put on the machine by hand gets its native messaging hosts from here.
+# Without them the bundled extensions load but have nothing to talk to.
 omarchy-install-chromium-copy-url
 omarchy-install-chromium-ytdlp

@@ -3,9 +3,9 @@
 # omarchy:summary=Remove Dropbox and its bar plugin.
 # omarchy:requires-sudo=true
 
-dropbox-cli stop 2>/dev/null || true
+dropbox stop 2>/dev/null || true
 omarchy-plugin-disable omarchy.dropbox
-omarchy-pkg-drop dropbox dropbox-cli libappindicator-gtk3 python-gpgme nautilus-dropbox
+omarchy-pkg-drop nautilus-dropbox python3-gpg
 
 echo ""
 echo "Dropbox has been removed."

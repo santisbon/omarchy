@@ -21,8 +21,8 @@ local function read_vconsole()
   return values
 end
 
--- Layouts that can't type Latin letters. Keep in sync with the list in
--- etc/mkinitcpio.conf.d/omarchy_hooks.conf.
+-- Layouts that can't type Latin letters. Omarchy's Arch build kept a second
+-- copy of this list in its mkinitcpio hook config; this is the only copy here.
 local non_latin_layouts =
   " af am ara bd bg by et ge gr il in iq ir kg kh kz la lk mk mm mn mv np rs ru sy th tj ua "
 

@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# omarchy:summary=Add a third-party apt repository and its signing key as a deb822 source
+# omarchy:args=<name> <key-url> <uri> <suite> <components> [arch] [--pin <priority>]
+# omarchy:examples=omarchy pkg repo-add signal https://updates.signal.org/desktop/apt/keys.asc https://updates.signal.org/desktop/apt xenial main amd64
+# omarchy:requires-sudo=true
+
+# Writes three root-owned files, all named after <name>:
+#   /etc/apt/keyrings/<name>.gpg           the vendor's signing key, binary form
+#   /etc/apt/sources.list.d/<name>.sources the repository in deb822 format
+#   /etc/apt/preferences.d/<name>          only with --pin: a priority for that origin
+# omarchy-pkg-repo-remove <name> takes all three away again.
+
+set -e
+
+usage() {
+  echo "Usage: omarchy-pkg-repo-add <name> <key-url> <uri> <suite> <components> [arch] [--pin <priority>]" >&2
+  exit 1
+}
+
+pin=""
+positional=()
+while (( $# > 0 )); do
+  case "$1" in
+    --pin)
+      [[ -n ${2:-} ]] || usage
+      pin="$2"
+      shift 2
+      ;;
+    --pin=*)
+      pin="${1#--pin=}"
+      shift
+      ;;
+    -*)
+      usage
+      ;;
+    *)
+      positional+=("$1")
+      shift
+      ;;
+  esac
+done
+
+(( ${#positional[@]} == 5 || ${#positional[@]} == 6 )) || usage
+
+name=${positional[0]}
+key_url=${positional[1]}
+uri=${positional[2]}
+suite=${positional[3]}
+components=${positional[4]}
+arch=${positional[5]:-}
+
+# The name becomes three file names under /etc/apt, so it has to be plain.
+if [[ ! $name =~ ^[a-z0-9][a-z0-9.-]*$ ]]; then
+  echo "Error: repository name '$name' must match ^[a-z0-9][a-z0-9.-]*\$" >&2
+  exit 1
+fi
+
+if [[ -n $pin && ! $pin =~ ^[0-9]+$ ]]; then
+  echo "Error: --pin takes a whole number, got '$pin'" >&2
+  exit 1
+fi
+
+keyring=/etc/apt/keyrings/$name.gpg
+sources=/etc/apt/sources.list.d/$name.sources
+preferences=/etc/apt/preferences.d/$name
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+echo "Fetching the signing key for $name..."
+curl -fsSL --retry 3 "$key_url" -o "$tmp/key"
+
+# Vendors publish either an ASCII-armored key (Mozilla, Microsoft, Signal,
+# 1Password, Spotify) or a binary keyring (Brave, Tailscale's .noarmor.gpg).
+# apt's Signed-By reads both, but the armored form is converted so every file
+# under /etc/apt/keyrings looks the same. gpg --dearmor fails on input that is
+# already binary, so the armor header decides instead of trial and error.
+if grep -q -- '-----BEGIN PGP PUBLIC KEY BLOCK-----' "$tmp/key"; then
+  gpg --batch --yes --dearmor -o "$tmp/key.gpg" "$tmp/key"
+else
+  mv "$tmp/key" "$tmp/key.gpg"
+fi
+
+sudo install -d -m 0755 /etc/apt/keyrings
+sudo install -m 0644 "$tmp/key.gpg" "$keyring"
+
+# A suite ending in / is apt's "flat repository" form (Sublime Text uses
+# apt/stable/), which carries no Components line at all.
+{
+  echo "Types: deb"
+  echo "URIs: $uri"
+  echo "Suites: $suite"
+  if [[ $suite != */ && -n $components ]]; then
+    echo "Components: $components"
+  fi
+  [[ -z $arch ]] || echo "Architectures: $arch"
+  echo "Signed-By: $keyring"
+} >"$tmp/sources"
+sudo install -m 0644 "$tmp/sources" "$sources"
+
+if [[ -n $pin ]]; then
+  # "Pin: origin" matches the host name of the URI, without scheme, port or path.
+  host=${uri#*://}
+  host=${host%%/*}
+  host=${host%%:*}
+  printf 'Package: *\nPin: origin %s\nPin-Priority: %s\n' "$host" "$pin" >"$tmp/preferences"
+  sudo install -m 0644 "$tmp/preferences" "$preferences"
+fi
+
+sudo apt-get update

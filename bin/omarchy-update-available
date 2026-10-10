@@ -20,19 +20,22 @@ if [[ $OMARCHY_PATH != "/usr/share/omarchy" ]]; then
   fi
 fi
 
-package=""
-if pacman -Qq omarchy-dev >/dev/null 2>&1; then
-  package=omarchy-dev
-elif pacman -Qq omarchy >/dev/null 2>&1; then
-  package=omarchy
-fi
+# The apt-daily timer refreshes the package lists on its own, so this reads
+# them as they are: no apt-get update, and therefore no sudo, from a bar
+# widget. apt list prints one line per package in the form
+#   name/suite new-version arch [upgradable from: old-version]
+# and the distro's own packages all share the omarchy- prefix. The line is
+# reshaped to "name old -> new", the shape Omarchy printed before.
+mapfile -t package_updates < <(
+  apt list --upgradable 2>/dev/null |
+    awk -F'[/ ]' '$1 ~ /^omarchy-/ {
+      old = $0; sub(/.*upgradable from: /, "", old); sub(/\].*/, "", old)
+      print $1, old, "->", $3
+    }' || true
+)
 
-if [[ -n $package ]]; then
-  update=$(checkupdates --nocolor 2>/dev/null | awk -v package="$package" '$1 == package { print; exit }' || true)
-fi
-
-if [[ -n ${update:-} ]]; then
-  updates+=("$update")
+if (( ${#package_updates[@]} > 0 )); then
+  updates+=("${package_updates[@]}")
 fi
 
 if (( ${#updates[@]} > 0 )); then

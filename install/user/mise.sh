@@ -1,3 +1,9 @@
+# mise is not part of the distro's base install. Without it there is nothing
+# to configure, and every omarchy-mise-install below would fail.
+if omarchy-cmd-missing mise; then
+  exit 0
+fi
+
 # Upgrades must not delete the version a running process is executing from:
 # mise up would prune the old install dir out from under a live session.
 mise settings set upgrade.auto_prune false

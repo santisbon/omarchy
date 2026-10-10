@@ -7,10 +7,15 @@
 set -e
 
 echo "Installing GeForce NOW..."
+# flatpak is in the base package set; this covers a system it was removed from.
 omarchy-pkg-add flatpak
-cd /tmp
 
-# Download and run GeForce NOW
+# NVIDIA's installer is a self-extracting script that adds the Flathub remote
+# and installs com.nvidia.geforcenow. HEAD 200 on 2026-10-10.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+cd "$tmp"
+
 curl -LO https://international.download.nvidia.com/GFNLinux/GeForceNOWSetup.bin
 chmod +x GeForceNOWSetup.bin
 ./GeForceNOWSetup.bin

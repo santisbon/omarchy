@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# omarchy:summary=Remove a third-party apt repository added with omarchy-pkg-repo-add
+# omarchy:args=<name>
+# omarchy:examples=omarchy pkg repo-remove signal
+# omarchy:requires-sudo=true
+
+set -e
+
+name=${1:-}
+
+if [[ -z $name ]]; then
+  echo "Usage: omarchy-pkg-repo-remove <name>" >&2
+  exit 1
+fi
+
+# Same rule as omarchy-pkg-repo-add, so this can never be asked to delete a
+# path outside the three files that script writes.
+if [[ ! $name =~ ^[a-z0-9][a-z0-9.-]*$ ]]; then
+  echo "Error: repository name '$name' must match ^[a-z0-9][a-z0-9.-]*\$" >&2
+  exit 1
+fi
+
+sudo rm -f \
+  "/etc/apt/keyrings/$name.gpg" \
+  "/etc/apt/sources.list.d/$name.sources" \
+  "/etc/apt/preferences.d/$name"
+
+# Drop the cached package lists for the gone source now rather than at the
+# next refresh, so apt-cache stops offering packages nobody can download.
+sudo apt-get update

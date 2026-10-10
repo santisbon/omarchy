@@ -1,13 +1,24 @@
 #!/bin/bash
 
-# omarchy:summary=Install Steam and graphics drivers selected for this system
+# omarchy:summary=Install Steam from the Ubuntu archive
 # omarchy:requires-sudo=true
 
 set -e
 
 echo "Installing Steam..."
-omarchy-pkg-add steam
-omarchy-install-gaming-gpu-lib32
+
+# steam-installer (multiverse) depends on steam-libs-i386, which lives in the
+# i386 half of the archive. dpkg only sees that half for an architecture it has
+# been told about, and apt only downloads its lists after that.
+if ! dpkg --print-foreign-architectures | grep -qx i386; then
+  echo "Enabling 32-bit packages for Steam's libraries..."
+  sudo dpkg --add-architecture i386
+  sudo apt-get update
+fi
+
+# The 32-bit Mesa libraries arrive as dependencies of steam-libs-i386; Arch's
+# separate lib32 driver step has no counterpart here.
+omarchy-pkg-add steam-installer
 
 echo ""
 echo "Steam will start automatically now. This might take a while..."

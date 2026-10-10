@@ -28,16 +28,15 @@ as_root() {
 
 echo "Configuring lock screen password authentication..."
 
+# Ubuntu builds every PAM service from the common-* stacks that pam-auth-update
+# maintains, so the lock screen includes those instead of spelling out
+# pam_unix and friends the way Omarchy's Arch build did. Arch's
+# system-local-login does not exist here, and pam_faillock is not part of
+# Ubuntu's default stacks, so the lockout lines are gone with it.
 as_root tee /etc/pam.d/omarchy-lock-password >/dev/null <<'EOF'
 #%PAM-1.0
-auth       required                    pam_faillock.so preauth silent deny=10 unlock_time=120
--auth      [success=2 default=ignore]  pam_systemd_home.so
-auth       [success=1 default=bad]     pam_unix.so try_first_pass nullok
-auth       [default=die]               pam_faillock.so authfail deny=10 unlock_time=120
-auth       optional                    pam_permit.so
-auth       required                    pam_env.so
-auth       required                    pam_faillock.so authsucc
-account    include                     system-local-login
+auth       include                     common-auth
+account    include                     common-account
 EOF
 
 if [[ -x /usr/bin/fprintd-list ]] &&
@@ -46,7 +45,7 @@ if [[ -x /usr/bin/fprintd-list ]] &&
   as_root tee /etc/pam.d/omarchy-lock-fingerprint >/dev/null <<'EOF'
 #%PAM-1.0
 auth       required                    pam_fprintd.so
-account    include                     system-local-login
+account    include                     common-account
 EOF
 else
   as_root rm -f /etc/pam.d/omarchy-lock-fingerprint

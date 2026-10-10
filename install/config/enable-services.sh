@@ -1,17 +1,25 @@
 # Enable services only. Installs are followed by reboot, so don't start/reload
-# daemons mid-install. UFW and hardware-gated services stay in their own scripts.
+# daemons mid-install. UFW is enabled in firewall.sh next to the ENABLED=yes
+# write it depends on, and hardware-gated services stay in their own scripts.
+#
+# Ubuntu enables a package's units when the package is installed, so most of
+# these are already on. The repeats are harmless and keep the list explicit.
+# Unit names were checked in the stonking Contents index under
+# usr/lib/systemd/system/: cups.service (cups-daemon), avahi-daemon.service
+# (avahi-daemon), docker.socket (docker.io), power-profiles-daemon.service
+# (power-profiles-daemon), sddm.service (sddm), bluetooth.service (bluez),
+# systemd-oomd.service (systemd-oomd), NetworkManager-wait-online.service
+# (network-manager).
 systemctl enable cups.service
 systemctl enable avahi-daemon.service
-systemctl enable linux-modules-cleanup.service
 systemctl enable docker.socket
-systemctl enable systemd-resolved.service
-systemctl enable NetworkManager.service
 # Don't let network-online.target hold up graphical.target waiting for
 # DHCP/Wi-Fi association. Nothing in the session needs to block on the network.
 # Mirrors the systemd-networkd-wait-online mask in install/hardware/network.sh.
 systemctl mask NetworkManager-wait-online.service
 systemctl enable power-profiles-daemon.service
 systemctl enable sddm.service
+systemctl enable bluetooth.service
 # Kill one runaway app scope instead of letting reclaim thrashing take the
 # whole session down. [Install] pulls in systemd-oomd.socket via Also=, which
 # is what the user manager reports app.slice candidacy over.

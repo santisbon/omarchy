@@ -65,22 +65,30 @@ if [[ $mode == "pending" ]]; then
   fi
 fi
 
-wait_for_pacman_transaction() {
-  local lock_file=/var/lib/pacman/db.lck
+# apt and dpkg hold /var/lib/dpkg/lock-frontend with an fcntl lock for the
+# whole transaction, but that file is root-only (mode 0640), so a user process
+# cannot ask the kernel whether the lock is held. Watch the process table
+# instead: a running apt, apt-get, dpkg or unattended-upgrade is the
+# transaction. The comm name the kernel keeps is 15 characters, which is why
+# unattended-upgrade appears as unattended-upgr.
+wait_for_apt_transaction() {
+  apt_running() {
+    pgrep -x 'apt|apt-get|dpkg|unattended-upgr' >/dev/null
+  }
 
-  [[ -e $lock_file ]] || return 0
-  echo "Waiting for pacman transaction to finish before running Omarchy migrations..."
+  apt_running || return 0
+  echo "Waiting for apt transaction to finish before running Omarchy migrations..."
 
   for _ in {1..900}; do
-    [[ -e $lock_file ]] || return 0
+    apt_running || return 0
     sleep 1
   done
 
-  echo "Pacman transaction is still running; Omarchy migrations will retry on next login."
+  echo "apt transaction is still running; Omarchy migrations will retry on next login."
   exit 0
 }
 
-wait_for_pacman_transaction
+wait_for_apt_transaction
 
 mkdir -p "$STATE_DIR"
 [[ -d $MIGRATIONS_DIR ]] || exit 0

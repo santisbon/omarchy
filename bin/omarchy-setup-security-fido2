@@ -6,6 +6,29 @@
 set -e
 set -o pipefail
 
+# Ubuntu's polkitd ships its PAM stack as /usr/lib/pam.d/polkit-1 (stonking
+# Contents: "usr/lib/pam.d/polkit-1  admin/polkitd"); Linux-PAM reads that
+# vendor copy only while /etc/pam.d/polkit-1 is absent. Seed /etc/pam.d/polkit-1
+# from the vendor copy so the insertion below edits the stack polkit really
+# uses. Without a vendor copy, write the stock Ubuntu shape: the four common-*
+# includes every Ubuntu PAM service is built from.
+ensure_polkit_pam() {
+  [[ -f /etc/pam.d/polkit-1 ]] && return 0
+
+  echo "Creating /etc/pam.d/polkit-1 from Ubuntu's defaults..."
+  if [[ -f /usr/lib/pam.d/polkit-1 ]]; then
+    sudo install -m 644 /usr/lib/pam.d/polkit-1 /etc/pam.d/polkit-1
+  else
+    sudo tee /etc/pam.d/polkit-1 >/dev/null <<'EOF'
+#%PAM-1.0
+@include common-auth
+@include common-account
+@include common-password
+@include common-session
+EOF
+  fi
+}
+
 
 check_fido2_hardware() {
   tokens=$(fido2-token -L 2>/dev/null)
@@ -17,34 +40,30 @@ check_fido2_hardware() {
 }
 
 setup_pam_config() {
-  # Configure sudo
+  # Configure sudo. Ubuntu's /etc/pam.d/sudo starts with "@include common-auth",
+  # so a line inserted at the top runs before the password modules.
   if ! grep -q pam_u2f.so /etc/pam.d/sudo; then
     echo "Configuring sudo for FIDO2 authentication..."
     sudo sed -i '1i auth    sufficient pam_u2f.so cue authfile=/etc/fido2/fido2' /etc/pam.d/sudo
   fi
 
   # Configure polkit
-  if [[ -f /etc/pam.d/polkit-1 ]] && ! grep -q 'pam_u2f.so' /etc/pam.d/polkit-1; then
+  ensure_polkit_pam
+  if ! grep -q 'pam_u2f.so' /etc/pam.d/polkit-1; then
     echo "Configuring polkit for FIDO2 authentication..."
     sudo sed -i '1i auth      sufficient pam_u2f.so cue authfile=/etc/fido2/fido2' /etc/pam.d/polkit-1
-  elif [[ ! -f /etc/pam.d/polkit-1 ]]; then
-    echo "Creating polkit configuration with FIDO2 authentication..."
-    sudo tee /etc/pam.d/polkit-1 >/dev/null <<'EOF'
-auth      sufficient pam_u2f.so cue authfile=/etc/fido2/fido2
-auth      required pam_unix.so
-
-account   required pam_unix.so
-password  required pam_unix.so
-session   required pam_unix.so
-EOF
   fi
 }
 
 echo -e "\e[32mSetting up FIDO2 device for authentication.\n\e[0m"
 
-# Install required packages
-echo "Installing required packages..."
-omarchy-pkg-add libfido2 pam-u2f
+# libpam-u2f, pamu2fcfg, fido2-tools and libfido2-1 are part of the distro's
+# base install (policy decided 2026-10-09), so this script never installs
+# packages. A missing tool means the image is broken, not that setup is needed.
+if omarchy-cmd-missing fido2-token || omarchy-cmd-missing pamu2fcfg; then
+  echo -e "\e[31mfido2-tools or pamu2fcfg is not installed; the distro image should always ship them.\e[0m"
+  exit 1
+fi
 
 if ! check_fido2_hardware; then
   exit 1

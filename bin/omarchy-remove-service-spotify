@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Remove Spotify and its vendor repository.
+# omarchy:requires-sudo=true
+
+omarchy-pkg-drop spotify-client
+omarchy-pkg-repo-remove spotify
+
+echo ""
+echo "Spotify has been removed."

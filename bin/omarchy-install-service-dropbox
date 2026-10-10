@@ -1,13 +1,18 @@
 #!/bin/bash
 
 # omarchy:summary=Install and start the Dropbox service. Must then be authenticated via the web.
+# omarchy:requires-sudo=true
 
 echo "Installing all dependencies..."
-omarchy-pkg-add dropbox dropbox-cli libappindicator-gtk3 python-gpgme nautilus-dropbox
+# nautilus-dropbox (multiverse) ships the dropbox command and the Nautilus
+# extension; the proprietary daemon itself is downloaded into ~/.dropbox-dist
+# by "dropbox start -i". python3-gpg is the package's Recommends that lets
+# that download's signature be checked, so it is named here on purpose.
+omarchy-pkg-add nautilus-dropbox python3-gpg
 
 echo "Adding Dropbox to the bar..."
 omarchy-plugin-enable omarchy.dropbox
 
 echo "Starting Dropbox..."
-uwsm-app -- dropbox-cli start &>/dev/null &
-echo "See Dropbox icon behind  hover tray in top right and right-click for setup."
+uwsm-app -- dropbox start -i &>/dev/null &
+echo "See Dropbox icon behind  hover tray in top right and right-click for setup."

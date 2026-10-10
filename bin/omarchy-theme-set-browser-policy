@@ -54,7 +54,7 @@ fi
 
 # True when sudo would run this exact command without stopping for a password.
 # `sudo -l` on its own reports whether a command is permitted, which the blanket
-# %wheel rule answers yes to for everything; the long listing prints the matched
+# %sudo rule answers yes to for everything; the long listing prints the matched
 # entry's tags, so !authenticate is the grant in
 # etc/sudoers.d/omarchy-theme-browser and nothing else. Listing runs nothing
 # and, under -n, prompts for nothing.

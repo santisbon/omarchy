@@ -1,6 +1,10 @@
 # Install Intel Low Power Mode Daemon for supported hybrid Intel CPUs (Alder Lake and newer)
 # Supported models: Alder Lake (151/154), Raptor Lake (183/186/191),
 # Meteor Lake (170/172), Lunar Lake (189), Panther Lake (204)
+#
+# Ubuntu names the package intel-lpmd and its unit intel_lpmd.service, with an
+# underscore (stonking Contents: usr/lib/systemd/system/intel_lpmd.service in
+# universe/admin/intel-lpmd).
 
 if omarchy-hw-intel && omarchy-battery-present; then
   cpu_model=$(grep -m1 "^model\s*:" /proc/cpuinfo 2>/dev/null | cut -d: -f2 | tr -d ' ')

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Remove Signal and its vendor repository.
+# omarchy:requires-sudo=true
+
+omarchy-pkg-drop signal-desktop
+omarchy-pkg-repo-remove signal
+
+echo ""
+echo "Signal has been removed."

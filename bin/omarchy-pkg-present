@@ -4,7 +4,7 @@
 # omarchy:args=<packages...>
 
 for pkg in "$@"; do
-  pacman -Q "$pkg" &>/dev/null || exit 1
+  [[ $(dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null) == "installed" ]] || exit 1
 done
 
 exit 0

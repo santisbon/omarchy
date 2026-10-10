@@ -10,7 +10,8 @@ AUTHORIZED_KEYS="$HOME/.ssh/authorized_keys"
 echo -e "\e[32mRemoving SSH server access.\n\e[0m"
 
 echo "Stopping and disabling the OpenSSH server..."
-sudo systemctl disable --now sshd.service 2>/dev/null || true
+# Ubuntu's OpenSSH server unit is ssh.service (package openssh-server).
+sudo systemctl disable --now ssh.service 2>/dev/null || true
 
 if omarchy-cmd-present ufw; then
   echo "Closing the SSH port in the firewall..."
@@ -29,4 +30,4 @@ if [[ -s $AUTHORIZED_KEYS ]]; then
 fi
 
 echo -e "\e[32m\nThe SSH server has been disabled and its firewall port closed.\e[0m"
-echo "The openssh package remains installed since it also provides the ssh client."
+echo "The openssh-server package stays installed; only its service is disabled."

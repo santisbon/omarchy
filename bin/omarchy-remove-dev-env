@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # omarchy:summary=Remove a development environment that was previously installed via omarchy-install-dev-env.
-# omarchy:args=<ruby|node|bun|deno|go|php|laravel|symfony|python|elixir|phoenix|zig|rust|java|dotnet|ocaml|clojure|scala>
+# omarchy:args=<ruby|node|bun|deno|go|php|laravel|python|elixir|phoenix|zig|rust|java|dotnet|ocaml|clojure|scala>
 # omarchy:requires-sudo=true
 
 if [[ -z $1 ]]; then
-  echo "Usage: omarchy-remove-dev-env <ruby|node|bun|deno|go|php|laravel|symfony|python|elixir|phoenix|zig|rust|java|dotnet|ocaml|clojure|scala>" >&2
+  echo "Usage: omarchy-remove-dev-env <ruby|node|bun|deno|go|php|laravel|python|elixir|phoenix|zig|rust|java|dotnet|ocaml|clojure|scala>" >&2
   exit 1
 fi
 
 remove_php() {
-  sudo pacman -Rns --noconfirm php composer php-sqlite xdebug 2>/dev/null || true
+  # The same set omarchy-install-dev-env php installs.
+  omarchy-pkg-drop php composer php-sqlite3 php-xdebug php-bcmath php-intl php-mysql \
+    php-curl php-mbstring php-xml php-zip
 }
 
 case "$1" in
@@ -47,10 +49,6 @@ php)
 laravel)
   echo -e "Removing Laravel...\n"
   composer global remove laravel/installer 2>/dev/null || true
-  ;;
-symfony)
-  echo -e "Removing Symfony CLI...\n"
-  sudo pacman -Rns --noconfirm symfony-cli 2>/dev/null || true
   ;;
 python)
   echo -e "Removing Python...\n"

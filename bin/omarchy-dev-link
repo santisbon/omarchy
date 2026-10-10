@@ -34,8 +34,7 @@ systemd, shell, or app-launcher environment; reboot to make every layer agree.
 Affects only \$OMARCHY_PATH-resolved trees: bin/, default/, shell/,
 themes/, applications/, config/. Files installed at fixed system paths
 (/etc/, /usr/lib/systemd/, udev rule bodies, /etc/skel after user
-creation) are NOT covered — for those, use omarchy-dev-pkg-test to build
-and install the package from the checkout.
+creation) are NOT covered: for those, build the packages from the checkout and install them.
 
 The Plymouth and SDDM themes under /usr/share are the exception: omarchy
 plymouth set and omarchy refresh plymouth republish them from the checkout,
@@ -90,7 +89,7 @@ for required in bin default shell; do
 done
 
 # Staged and parsed before anything is installed: a sudoers file sudo refuses to
-# read takes every rule after it down with it, including the %wheel grant, and
+# read takes every rule after it down with it, including the %sudo grant, and
 # the password prompt needed to undo that is on the other side of the breakage.
 staged_sudoers=$(mktemp)
 trap 'rm -f "$staged_sudoers"' EXIT
