@@ -1,10 +1,5 @@
-# Set links for Nautilus action icons
-mkdir -p /usr/share/icons/Yaru/scalable/actions
-ln -snf /usr/share/icons/Adwaita/symbolic/actions/go-previous-symbolic.svg \
-          /usr/share/icons/Yaru/scalable/actions/go-previous-symbolic.svg
-ln -snf /usr/share/icons/Adwaita/symbolic/actions/go-next-symbolic.svg \
-          /usr/share/icons/Yaru/scalable/actions/go-next-symbolic.svg
-gtk-update-icon-cache /usr/share/icons/Yaru &>/dev/null || true
+# Ubuntu's yaru-theme-icon already ships the go-previous/go-next symbolic action icons
+# Omarchy linked in from Adwaita on Arch, so nothing is added to Yaru here.
 
 # Seed Chromium's first run: follow system appearance ("device") instead of dark,
 # and skip the terms-of-service dialog Chromium 151 turned on by default.

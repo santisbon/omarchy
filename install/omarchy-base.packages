@@ -91,6 +91,10 @@ tmux
 udiskie
 # ufw: Ubuntu's default firewall tool, left exactly as Ubuntu ships it (installed, disabled)
 ufw
+# unattended-upgrades: Ubuntu desktops get daily security updates through it (it reaches a
+# stock desktop as a Recommends of python3-software-properties, which Install-Recommends off
+# would skip); its postinst writes 20auto-upgrades with the debconf default of enabled
+unattended-upgrades
 unzip
 whois
 wireless-regdb
@@ -123,7 +127,6 @@ fido2-tools
 libfido2-1
 blueman
 flatpak
-systemd-zram-generator
 wf-recorder
 # Added beyond Omarchy's list: omarchy-pkg-repo-add and the browser installers
 # fetch keys and debs with curl over https and convert armored keys with gpg;
@@ -159,3 +162,6 @@ ca-certificates
 # tzupdate: not in stonking
 # ufw-docker: not in stonking, and no longer needed: the port applies no ufw rules
 # usage: mise installs it on demand
+# zram-generator (systemd-zram-generator): not in Ubuntu's desktop seeds, and stonking's package
+# creates a zram0 swap device from its own default config just by being installed; swap is the
+# installer's (step 7), with Ubuntu's defaults

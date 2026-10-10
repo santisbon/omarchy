@@ -17,7 +17,6 @@ systemctl enable docker.socket
 # Don't let network-online.target hold up graphical.target waiting for
 # DHCP/Wi-Fi association. Nothing in the session needs to block on the network.
 # Mirrors the systemd-networkd-wait-online mask in install/hardware/network.sh.
-systemctl mask NetworkManager-wait-online.service
 systemctl enable power-profiles-daemon.service
 systemctl enable sddm.service
 systemctl enable bluetooth.service

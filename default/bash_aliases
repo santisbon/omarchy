@@ -1,0 +1,4 @@
+# Omarchy's shell defaults: aliases, prompt and tool initialisation. Ubuntu's own
+# ~/.bashrc, kept exactly as the bash package ships it, sources this file near its
+# end. Remove the line below to opt out, or add your own aliases after it.
+[[ -r /usr/share/omarchy/default/bashrc ]] && source /usr/share/omarchy/default/bashrc

@@ -45,3 +45,5 @@ DISTRO_ID=x DISTRO_NAME=X port/rename.sh --tree <a copy>   # proves the rename s
 Then rebuild `packages/desktop` in `santisbon/oaxaca` and run its boot test. What Omarchy added
 under `migrations/` since the previous tag is reviewed there, not here (the distro ships no
 migrations until it has released).
+
+- Ubuntu components keep Ubuntu's configuration (stonking's packages, not another release's) unless a reason specific to this desktop is written down; see the distro repository's `docs/6 - omarchy-port.md`, section "Ubuntu's configuration, not Omarchy's".

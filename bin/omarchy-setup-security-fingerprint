@@ -5,66 +5,18 @@
 
 set -e
 
-# Ubuntu's polkitd ships its PAM stack as /usr/lib/pam.d/polkit-1 (stonking
-# Contents: "usr/lib/pam.d/polkit-1  admin/polkitd"); Linux-PAM reads that
-# vendor copy only while /etc/pam.d/polkit-1 is absent. Seed /etc/pam.d/polkit-1
-# from the vendor copy so the insertion below edits the stack polkit really
-# uses. Without a vendor copy, write the stock Ubuntu shape: the four common-*
-# includes every Ubuntu PAM service is built from.
-ensure_polkit_pam() {
-  [[ -f /etc/pam.d/polkit-1 ]] && return 0
-
-  echo "Creating /etc/pam.d/polkit-1 from Ubuntu's defaults..."
-  if [[ -f /usr/lib/pam.d/polkit-1 ]]; then
-    sudo install -m 644 /usr/lib/pam.d/polkit-1 /etc/pam.d/polkit-1
-  else
-    sudo tee /etc/pam.d/polkit-1 >/dev/null <<'EOF'
-#%PAM-1.0
-@include common-auth
-@include common-account
-@include common-password
-@include common-session
-EOF
-  fi
-}
-
-
+# Ubuntu manages the common-* PAM stacks with pam-auth-update, and libpam-fprintd
+# ships the profile for it (/usr/share/pam-configs/fprintd, "Fingerprint
+# authentication", off by default). Enabling that profile puts pam_fprintd into
+# common-auth, which sudo, polkit, SDDM and this desktop's lock screen all
+# include, so no PAM file is edited by hand here. Omarchy on Arch inserted the
+# module into /etc/pam.d/sudo and polkit-1 itself, behind a clamshell gate that
+# skipped the reader with the lid shut; Ubuntu's profile has no such gate, and
+# pam_fprintd's own max-tries=1 timeout=10 is the fallback to the password.
 setup_pam_config() {
-  # A clamshell gate runs before pam_fprintd in every stack: when the lid is
-  # shut the reader is unreachable, so it skips fingerprint (success=1) and PAM
-  # drops straight to the password prompt instead of blocking on the reader
-  # until it times out. Lid open → fingerprint, then password as the fallback.
-  #
-  # pam_exec needs a literal absolute path (no env expansion). Point at the
-  # fixed /usr/bin path the omarchy package always provides, so the gate keeps
-  # working across package installs and dev-link — the latter overlays
-  # $OMARCHY_PATH trees but leaves /usr/bin untouched.
-  local fprintd_gate="auth      [success=1 default=ignore] pam_exec.so quiet /usr/bin/omarchy-hw-laptop-closed"
-
-  # Configure sudo. Ubuntu's /etc/pam.d/sudo starts with "@include common-auth",
-  # so a line inserted at the top runs before the password modules.
-  if ! grep -q pam_fprintd.so /etc/pam.d/sudo; then
-    echo "Configuring sudo for fingerprint authentication..."
-    sudo sed -i '1i auth      sufficient pam_fprintd.so' /etc/pam.d/sudo
-  fi
-  if ! grep -q 'omarchy-hw-laptop-closed' /etc/pam.d/sudo; then
-    echo "Adding clamshell gate to sudo..."
-    # Insert immediately before pam_fprintd so success=1 skips exactly it.
-    sudo sed -i "/pam_fprintd\.so/i $fprintd_gate" /etc/pam.d/sudo
-  fi
-
-  # Configure polkit
-  ensure_polkit_pam
-  if ! grep -q 'pam_fprintd.so' /etc/pam.d/polkit-1; then
-    echo "Configuring polkit for fingerprint authentication..."
-    sudo sed -i '1i auth      sufficient pam_fprintd.so' /etc/pam.d/polkit-1
-  fi
-  if ! grep -q 'omarchy-hw-laptop-closed' /etc/pam.d/polkit-1; then
-    echo "Adding clamshell gate to polkit..."
-    sudo sed -i "/pam_fprintd\.so/i $fprintd_gate" /etc/pam.d/polkit-1
-  fi
+  echo "Enabling Ubuntu's fingerprint PAM profile (pam-auth-update --enable fprintd)..."
+  sudo pam-auth-update --package --enable fprintd
 }
-
 setup_lock_fingerprint_pam() {
   echo "Configuring lock screen for fingerprint authentication..."
   sudo tee /etc/pam.d/omarchy-lock-fingerprint >/dev/null <<'EOF'

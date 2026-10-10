@@ -28,14 +28,17 @@ as_root() {
 
 echo "Configuring lock screen password authentication..."
 
-# Ubuntu builds every PAM service from the common-* stacks that pam-auth-update
-# maintains, so the lock screen includes those instead of spelling out
-# pam_unix and friends the way Omarchy's Arch build did. Arch's
-# system-local-login does not exist here, and pam_faillock is not part of
-# Ubuntu's default stacks, so the lockout lines are gone with it.
+# The lock screen runs two PAM contexts side by side: this password-only one
+# and, when a print is enrolled, the fingerprint one below. On Ubuntu the
+# fingerprint and FIDO2 setups enable pam-auth-update profiles that put
+# pam_fprintd and pam_u2f into common-auth, so including common-auth here would
+# make the password prompt wait on the reader or the key first. pam_unix is
+# named directly instead, with the nullok Ubuntu's common-auth gives it; the
+# account check still comes from Ubuntu's common-account. Arch's
+# system-local-login and pam_faillock do not exist here.
 as_root tee /etc/pam.d/omarchy-lock-password >/dev/null <<'EOF'
 #%PAM-1.0
-auth       include                     common-auth
+auth       required                    pam_unix.so nullok
 account    include                     common-account
 EOF
 

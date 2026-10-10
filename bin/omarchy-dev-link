@@ -21,7 +21,8 @@ prompt_reboot=1
 # the checkout's bin keeps root on the code being edited — the same trust the
 # link already extends to every system script Omarchy runs out of $OMARCHY_PATH.
 sudoers_file="/etc/sudoers.d/omarchy-dev-path"
-system_secure_path="/usr/local/sbin:/usr/local/bin:/usr/bin"
+# Ubuntu's secure_path from sudo-common's /etc/sudoers (stonking 1.2ubuntu).
+system_secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
 
 if (( $# < 1 || $# > 2 )) || [[ $1 == "-h" || $1 == "--help" ]]; then
   cat <<USAGE

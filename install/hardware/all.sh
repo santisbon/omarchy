@@ -1,5 +1,3 @@
-run_logged "$OMARCHY_INSTALL/hardware/network.sh"
-run_logged "$OMARCHY_INSTALL/hardware/fix-fkeys.sh"
 run_logged "$OMARCHY_INSTALL/hardware/fix-synaptic-touchpad.sh"
 run_logged "$OMARCHY_INSTALL/hardware/bluetooth.sh"
 
