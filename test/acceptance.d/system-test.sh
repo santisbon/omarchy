@@ -68,12 +68,12 @@ verify_services() {
   for unit in \
     avahi-daemon.service docker.socket \
     NetworkManager.service power-profiles-daemon.service sddm.service \
-    systemd-resolved.service ufw.service; do
+    systemd-resolved.service; do
     systemctl is-enabled --quiet "$unit" || fail "core system services are enabled" "$unit is not enabled"
   done
   pass "core system services are enabled"
 
-  for unit in NetworkManager.service systemd-resolved.service ufw.service; do
+  for unit in NetworkManager.service systemd-resolved.service; do
     systemctl is-active --quiet "$unit" || fail "critical system services are running" "$unit is not active"
   done
   pass "critical system services are running"

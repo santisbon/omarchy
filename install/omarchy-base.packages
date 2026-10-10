@@ -89,6 +89,7 @@ tealdeer
 tree-sitter-cli
 tmux
 udiskie
+# ufw: Ubuntu's default firewall tool, left exactly as Ubuntu ships it (installed, disabled)
 ufw
 unzip
 whois
@@ -156,5 +157,5 @@ ca-certificates
 # tldr: tealdeer ships /usr/bin/tldr
 # ttf-ia-writer, ttf-jetbrains-mono-nerd-basic: separate fonts package
 # tzupdate: not in stonking
-# ufw-docker: not in stonking
+# ufw-docker: not in stonking, and no longer needed: the port applies no ufw rules
 # usage: mise installs it on demand
