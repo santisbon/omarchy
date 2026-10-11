@@ -371,7 +371,12 @@ else
 fi
 
 if [[ $mode != "refresh-sddm" ]]; then
-  sudo plymouth-set-default-theme omarchy
+  # Ubuntu selects the boot theme through update-alternatives on default.plymouth
+  # (the theme packages register themselves there, plymouth-theme-spinner's bgrt at
+  # priority 110); stonking ships no plymouth-set-default-theme. The settings package
+  # registers this theme at priority 150 in its postinst, so this is normally already
+  # the selected alternative; --set makes it so after a user picked another.
+  sudo update-alternatives --set default.plymouth /usr/share/plymouth/themes/omarchy/omarchy.plymouth
 
   # Ubuntu builds the initramfs with initramfs-tools (stonking Contents:
   # usr/sbin/update-initramfs in utils/initramfs-tools). Its plymouth hook

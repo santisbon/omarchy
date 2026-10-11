@@ -53,6 +53,8 @@ fonts-noto-core
 fonts-noto-cjk
 fonts-noto-color-emoji
 plocate
+# plymouth: the boot splash; the settings package registers its theme with update-alternatives (step 7)
+plymouth
 power-profiles-daemon
 # upower: the shell's power panel and battery widget read UPower (Quickshell.Services.UPower);
 # Arch pulls it in through quickshell, Ubuntu's quickshell does not depend on it.
@@ -130,7 +132,6 @@ ca-certificates
 # moonlight-qt: not in stonking
 # obsidian, pinta: not in stonking
 # omarchy-nvim (nvim config): separate package
-# plymouth: step 7
 # qemu-user-static-binfmt: not needed
 # quickshell, sddm, uwsm, wireplumber, gnome-keyring, xdg-desktop-portal*: session layer
 # tldr: tealdeer ships /usr/bin/tldr
