@@ -42,8 +42,13 @@ git rebase <new tag> oaxaca
 DISTRO_ID=x DISTRO_NAME=X port/rename.sh --tree <a copy>   # proves the rename still applies
 ```
 
-Then rebuild `packages/desktop` in `santisbon/oaxaca` and run its boot test. What Omarchy added
-under `migrations/` since the previous tag is reviewed there, not here (the distro ships no
-migrations until it has released).
+Then rebuild `packages/desktop` in `santisbon/oaxaca` and run its boot test and its upgrade test
+(`make upgrade-test`, which upgrades the published packages to the new build in a chroot and runs
+the migrations for a seeded user).
+
+- Migrations: `migrations/` holds only the port's own (its README says why Omarchy's 106 were
+  deleted). Every migration the new tag adds is ported or deleted during the rebase, never kept
+  as it comes, because Omarchy's call pacman, limine and snapper. A change on this branch that
+  moves a user's files gets a migration of its own through `omarchy-dev-add-migration`.
 
 - Ubuntu components keep Ubuntu's configuration (stonking's packages, not another release's) unless a reason specific to this desktop is written down; see the distro repository's `docs/6 - omarchy-port.md`, section "Ubuntu's configuration, not Omarchy's".

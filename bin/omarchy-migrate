@@ -69,11 +69,17 @@ fi
 # whole transaction, but that file is root-only (mode 0640), so a user process
 # cannot ask the kernel whether the lock is held. Watch the process table
 # instead: a running apt, apt-get, dpkg or unattended-upgrade is the
-# transaction. The comm name the kernel keeps is 15 characters, which is why
-# unattended-upgrade appears as unattended-upgr.
+# transaction. unattended-upgrade is matched on its command line, not its
+# process name: Ubuntu's unattended-upgrades package also runs
+# unattended-upgrade-shutdown --wait-for-signal for the whole session
+# (unattended-upgrades.service), and the 15-character name the kernel keeps for
+# both is unattended-upgr, so a name match waited the full 15 minutes on every
+# desktop and never ran a migration (found 2026-10-11). The upgrader's command
+# line ends in /unattended-upgrade, optionally followed by options; the
+# shutdown helper's does not.
 wait_for_apt_transaction() {
   apt_running() {
-    pgrep -x 'apt|apt-get|dpkg|unattended-upgr' >/dev/null
+    pgrep -x 'apt|apt-get|dpkg' >/dev/null || pgrep -f '/unattended-upgrade( |$)' >/dev/null
   }
 
   apt_running || return 0
