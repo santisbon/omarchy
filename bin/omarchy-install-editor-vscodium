@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# omarchy:summary=Install VSCodium from Flathub and configure Omarchy defaults for secrets, updates, and theme
+# omarchy:requires-sudo=true
+
+echo "Installing VSCodium..."
+
+# Flathub's com.vscodium.codium, system-wide. The sandbox gives the app its own
+# XDG directories: ~/.var/app/com.vscodium.codium/config/VSCodium holds the user
+# settings and ~/.var/app/com.vscodium.codium/data/codium is the data directory
+# that ~/.vscode-oss would be outside Flatpak (argv.json, extensions). Read on
+# 2026-10-10 from a run of the Flatpak.
+omarchy-pkg-flatpak-add com.vscodium.codium || exit 1
+
+app=~/.var/app/com.vscodium.codium
+mkdir -p "$app/data/codium" "$app/config/VSCodium/User"
+
+cat > "$app/data/codium/argv.json" << 'ARGV'
+// This configuration file allows you to pass permanent command line arguments to VSCodium.
+// Only a subset of arguments is currently supported to reduce the likelihood of breaking
+// the installation.
+//
+// PLEASE DO NOT CHANGE WITHOUT UNDERSTANDING THE IMPACT
+//
+// NOTE: Changing this file requires a restart of VSCodium.
+{
+  "password-store":"gnome-libsecret"
+}
+ARGV
+
+# Updates come through Flatpak, so the editor's own update check is turned off
+printf '{\n  "update.mode": "none"\n}\n' > "$app/config/VSCodium/User/settings.json"
+
+# Apply the Omarchy theme (omarchy-theme-set-vscode has a branch for this Flatpak)
+omarchy-theme-set-vscode
+
+setsid uwsm-app -- flatpak run com.vscodium.codium >/dev/null 2>&1 &

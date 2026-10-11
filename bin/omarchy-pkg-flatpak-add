@@ -1,0 +1,6 @@
+#!/bin/bash
+# omarchy:summary=Install a Flatpak application from Flathub, system-wide
+# omarchy:args=<application id>
+# omarchy:requires-sudo=true
+set -euo pipefail
+sudo flatpak install --system -y --noninteractive flathub "${1:?application id}"

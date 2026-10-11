@@ -1,0 +1,8 @@
+#!/bin/bash
+# omarchy:summary=Remove Mullvad VPN and its apt repository
+# omarchy:requires-sudo=true
+set -e
+
+echo "Removing Mullvad VPN..."
+omarchy-pkg-drop mullvad-vpn
+omarchy-pkg-repo-remove mullvad

@@ -18,6 +18,11 @@ else
   editor="nano"
 fi
 
+# VSCodium comes from Flathub and has no codium command on PATH.
+if [[ $editor == codium ]] && ! omarchy-cmd-present codium && flatpak info --system com.vscodium.codium &>/dev/null; then
+  exec setsid uwsm-app -- flatpak run com.vscodium.codium "$@"
+fi
+
 # nano is the fallback: Ubuntu installs it with ubuntu-minimal, and this port no longer ships neovim.
 omarchy-cmd-present "$editor" || editor="nano"
 

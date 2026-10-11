@@ -1,0 +1,4 @@
+#!/bin/bash
+# omarchy:summary=Exit 0 when the named Flatpak application is installed system-wide
+# omarchy:args=<application id>
+flatpak info --system "${1:?application id}" &>/dev/null

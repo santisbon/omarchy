@@ -23,7 +23,6 @@ fi
 POLICY_DIRS=(
   /etc/chromium/policies/managed
   /etc/opt/chrome/policies/managed
-  /etc/opt/edge/policies/managed
   /etc/brave/policies/managed
 )
 

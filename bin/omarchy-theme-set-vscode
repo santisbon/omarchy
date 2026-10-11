@@ -93,12 +93,18 @@ EOF
   register_generated_extension "$ext_dir"
 }
 
+# VSCodium from Flathub has no command on PATH; the editor is reached through
+# flatpak run, wrapped in a function so set_theme can call it like a command.
+codium_flatpak() {
+  flatpak run com.vscodium.codium "$@"
+}
+
 set_theme() {
   local editor_cmd="$1"
   local settings_path="$2"
   local ext_base="$3"
 
-  omarchy-cmd-present "$editor_cmd" || return 0
+  omarchy-cmd-present "$editor_cmd" || declare -F "$editor_cmd" >/dev/null || return 0
 
   local theme_name=""
 
@@ -150,4 +156,5 @@ set_theme() {
 ! omarchy-toggle-enabled skip-vscode-theme-changes && set_theme "code" "$HOME/.config/Code/User/settings.json" "$HOME/.vscode/extensions"
 ! omarchy-toggle-enabled skip-vscode-insiders-theme-changes && set_theme "code-insiders" "$HOME/.config/Code - Insiders/User/settings.json" "$HOME/.vscode-insiders/extensions"
 ! omarchy-toggle-enabled skip-codium-theme-changes && set_theme "codium" "$HOME/.config/VSCodium/User/settings.json" "$HOME/.vscode-oss/extensions"
+! omarchy-toggle-enabled skip-codium-theme-changes && flatpak info --system com.vscodium.codium &>/dev/null && set_theme codium_flatpak "$HOME/.var/app/com.vscodium.codium/config/VSCodium/User/settings.json" "$HOME/.var/app/com.vscodium.codium/data/codium/extensions"
 ! omarchy-toggle-enabled skip-cursor-theme-changes && set_theme "/usr/bin/cursor" "$HOME/.config/Cursor/User/settings.json" "$HOME/.cursor/extensions"

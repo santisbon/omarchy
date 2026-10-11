@@ -1,0 +1,19 @@
+#!/bin/bash
+# omarchy:summary=Install Mullvad VPN from Mullvad's apt repository
+# omarchy:requires-sudo=true
+set -e
+
+echo "Installing Mullvad VPN..."
+
+# Mullvad's repository as its download page documents (mullvad.net/en/download/vpn/linux,
+# read 2026-10-10): the key from repository.mullvad.net, the deb repository
+# repository.mullvad.net/deb/stable, suite stable, package mullvad-vpn. The package's
+# postinst enables and starts mullvad-daemon.service and mullvad-early-boot-blocking.service
+# itself; it writes no apt source of its own.
+omarchy-pkg-repo-add mullvad \
+  https://repository.mullvad.net/deb/mullvad-keyring.asc \
+  https://repository.mullvad.net/deb/stable stable main amd64 || exit 1
+omarchy-pkg-add mullvad-vpn || exit 1
+
+echo ""
+echo "Mullvad VPN installed. Log in with your account number in the Mullvad app."

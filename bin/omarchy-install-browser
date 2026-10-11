@@ -1,14 +1,17 @@
 #!/bin/bash
 
 # omarchy:summary=Install a supported browser
-# omarchy:args=<chrome|brave|edge|firefox>
-# omarchy:examples=omarchy install browser firefox | omarchy install browser brave
+# omarchy:args=<chromium|chrome|brave-origin|firefox>
+# omarchy:examples=omarchy install browser firefox | omarchy install browser chromium
 # omarchy:requires-sudo=true
 
 # Ubuntu's archive carries firefox and chromium only as placeholders that pull
-# in snapd, and the distro pins snapd out, so every browser here comes from its
-# vendor's own apt repository or deb. Every URL below answered HTTP 200 to a
-# HEAD request on 2026-10-10.
+# in snapd, and the distro pins snapd out. Firefox comes from Mozilla's own apt
+# repository and Brave Origin from Brave's; Chromium has no vendor repository
+# for Ubuntu, so it comes from the xtradeb PPA on Launchpad, a community build
+# of upstream Chromium for each Ubuntu series, pinned below Ubuntu's archive so
+# that only packages the archive lacks come from it. Every URL below answered
+# on 2026-10-10.
 
 source "$OMARCHY_PATH/install/helpers/browser-policy.sh"
 
@@ -42,6 +45,7 @@ setup_firefox_wayland() {
   echo "MOZ_ENABLE_WAYLAND=1" > ~/.config/environment.d/omarchy-firefox-wayland.conf
 }
 
+
 # Google publishes no repository to add first: the deb itself writes
 # /etc/apt/sources.list.d/google-chrome.list and its key on install, and apt
 # keeps Chrome current from there.
@@ -74,34 +78,35 @@ chrome)
   omarchy-theme-set-browser
   announce_browser_installed "Chrome"
   ;;
-edge)
-  echo "Installing Edge..."
-  omarchy-pkg-repo-add microsoft-edge \
-    https://packages.microsoft.com/keys/microsoft.asc \
-    https://packages.microsoft.com/repos/edge stable main amd64 || exit 1
-  omarchy-pkg-add microsoft-edge-stable || exit 1
-
-  # Edge's own postinst writes a one-line microsoft-edge.list when it finds no
-  # .list file naming its repository; the deb822 source above already covers
-  # it, and two sources for one repository make apt warn on every update.
-  sudo rm -f /etc/apt/sources.list.d/microsoft-edge.list
-
-  setup_chromium_policy_directory /etc/opt/edge/policies/managed
-  copy_chromium_flags ~/.config/microsoft-edge-stable-flags.conf
+chromium)
+  echo "Installing Chromium..."
+  # xtradeb's PPA (Launchpad: ~xtradeb/+archive/ubuntu/apps, signing key
+  # 5301FA4FD93244FBC6F6149982BB6851C64F6880, fetched from Ubuntu's keyserver).
+  # The pin keeps Ubuntu's archive ahead for every package both carry.
+  codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
+  omarchy-pkg-repo-add xtradeb \
+    'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x5301FA4FD93244FBC6F6149982BB6851C64F6880' \
+    https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu "$codename" main amd64 --pin 400 || exit 1
+  omarchy-pkg-add chromium || exit 1
+  setup_chromium_policy_directory /etc/chromium/policies/managed
+  copy_chromium_flags ~/.config/chromium-flags.conf
   omarchy-theme-set-browser
-  announce_browser_installed "Edge"
+  announce_browser_installed "Chromium"
   ;;
-brave)
-  echo "Installing Brave..."
-  omarchy-pkg-repo-add brave-browser \
+brave-origin)
+  echo "Installing Brave Origin..."
+  # Brave's one apt repository carries brave-browser and brave-origin. The
+  # source is named brave-origin because the package's own postinst writes
+  # /etc/apt/sources.list.d/brave-origin.sources when it finds none; sharing
+  # the name means there is one file either way.
+  omarchy-pkg-repo-add brave-origin \
     https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
     https://brave-browser-apt-release.s3.brave.com stable main amd64 || exit 1
-  omarchy-pkg-add brave-browser || exit 1
-
+  omarchy-pkg-add brave-origin || exit 1
   setup_chromium_policy_directory /etc/brave/policies/managed
   copy_chromium_flags ~/.config/brave-flags.conf
   omarchy-theme-set-browser
-  announce_browser_installed "Brave"
+  announce_browser_installed "Brave Origin"
   ;;
 firefox)
   echo "Installing Firefox..."
@@ -119,7 +124,7 @@ firefox)
   announce_browser_installed "Firefox"
   ;;
 *)
-  echo "Usage: omarchy-install-browser <chrome|brave|edge|firefox>"
+  echo "Usage: omarchy-install-browser <chromium|chrome|brave-origin|firefox>"
   exit 1
   ;;
 esac

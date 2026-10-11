@@ -1,0 +1,8 @@
+#!/bin/bash
+# omarchy:summary=Install a snap from the Snap Store (add --classic for classic confinement)
+# omarchy:args=<snap> [--classic]
+# omarchy:requires-sudo=true
+set -euo pipefail
+snap=${1:?snap name}
+shift
+sudo snap install "$@" "$snap"

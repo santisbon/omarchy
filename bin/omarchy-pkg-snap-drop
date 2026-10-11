@@ -1,0 +1,6 @@
+#!/bin/bash
+# omarchy:summary=Remove a snap
+# omarchy:args=<snap>
+# omarchy:requires-sudo=true
+set -euo pipefail
+sudo snap remove "${1:?snap name}"

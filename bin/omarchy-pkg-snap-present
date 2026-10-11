@@ -1,0 +1,4 @@
+#!/bin/bash
+# omarchy:summary=Exit 0 when the named snap is installed
+# omarchy:args=<snap>
+snap list "${1:?snap name}" &>/dev/null

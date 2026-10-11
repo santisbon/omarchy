@@ -1,0 +1,6 @@
+#!/bin/bash
+# omarchy:summary=Remove a Flatpak application and its data
+# omarchy:args=<application id>
+# omarchy:requires-sudo=true
+set -euo pipefail
+sudo flatpak uninstall --system -y --noninteractive --delete-data "${1:?application id}"
