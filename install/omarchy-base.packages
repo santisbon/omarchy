@@ -55,6 +55,12 @@ fonts-noto-color-emoji
 plocate
 # plymouth: the boot splash; the settings package registers its theme with update-alternatives (step 7)
 plymouth
+# plymouth-label: the label plugin (label.so) that renders text for script themes; Arch's plymouth
+# package builds it in, Ubuntu splits it out. The Omarchy theme draws text with Image.Text(), and
+# without the plugin Plymouth's console viewer is never created and the script plugin of Ubuntu's
+# 24.004.60 snapshot crashes in script_lib_sprite_refresh (seen booting the live ISO on the Legion
+# laptop, 2026-10-11; fixed upstream on 2026-08-06 by a null check the snapshot predates).
+plymouth-label
 power-profiles-daemon
 # upower: the shell's power panel and battery widget read UPower (Quickshell.Services.UPower);
 # Arch pulls it in through quickshell, Ubuntu's quickshell does not depend on it.
