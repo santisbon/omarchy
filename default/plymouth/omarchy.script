@@ -76,11 +76,13 @@ fun hide_progress_bar() {
 fun show_password_dialog() {
   lock.sprite.SetOpacity(1);
   entry.sprite.SetOpacity(1);
+  hint.sprite.SetOpacity(1);
 }
 
 fun hide_password_dialog() {
   lock.sprite.SetOpacity(0);
   entry.sprite.SetOpacity(0);
+  hint.sprite.SetOpacity(0);
 
   for (index = 0; bullet.sprites[index]; index++) {
     bullet.sprites[index].SetOpacity(0);
@@ -128,6 +130,15 @@ lock.sprite.SetOpacity(0);
 
 # Bullet array
 bullet.sprites = [];
+
+# A line under the entry saying what the field is for. Without it this screen and the login
+# screen after it (SDDM with this theme's twin, which shows the user's name) looked the same,
+# and a passphrase went into the wrong one (Oaxaca on a Lenovo Legion Pro 7, 2026-10-12).
+# Drawn with the label plugin (plymouth-label), which the distro installs with Plymouth.
+hint.image = Image.Text("Enter the passphrase to unlock the disk", 0.75, 0.79, 0.96);
+hint.sprite = Sprite(hint.image);
+hint.sprite.SetPosition(Window.GetWidth() / 2 - hint.image.GetWidth() / 2, entry.y + entry.image.GetHeight() + 20, 10001);
+hint.sprite.SetOpacity(0);
 
 fun display_normal_callback() {
   hide_password_dialog();

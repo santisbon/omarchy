@@ -55,6 +55,16 @@ Rectangle {
       anchors.horizontalCenter: parent.horizontalCenter
     }
 
+    // The user who will log in, above the password field. The theme has no user field, and
+    // without this line it looked the same as the disk passphrase screen before it, so the
+    // passphrase went into the wrong one (Oaxaca on a Lenovo Legion Pro 7, 2026-10-12).
+    Text {
+      text: root.currentUser
+      color: "#c0caf5"
+      font.pixelSize: 22
+      anchors.horizontalCenter: parent.horizontalCenter
+    }
+
     Row {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 15

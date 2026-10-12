@@ -68,7 +68,7 @@ else
       { [[ -L $HOME/.local/bin/$agent ]] || ! grep -q '^mise use -g' "$HOME/.local/bin/$agent"; }
   }
   agent_present() { user_install || mise where "$agent_package" &>/dev/null; }
-  agent_install() { user_install || mise use -g "$agent_package"; }
+  agent_install() { user_install || { omarchy-mise-ensure && PATH="$HOME/.local/bin:$PATH" mise use -g "$agent_package"; }; }
 fi
 
 if [[ $installing == "false" ]] && ! agent_present; then

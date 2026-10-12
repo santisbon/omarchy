@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# omarchy:summary=Install mise into ~/.local/bin when it is not installed yet.
+# omarchy:hidden=true
+
+# Omarchy's agents and tool wrappers run mise, which Arch packages; Ubuntu's archive has no mise
+# (stonking, checked 2026-10-11), so this port installs it on demand with the vendor's script,
+# the same command as the menu's Install > Development > mise, into ~/.local/bin. The commands
+# that run mise call this first; "Setting up default agent" failed with "mise: command not
+# found" on a fresh install before it existed (2026-10-12).
+command -v mise >/dev/null && exit 0
+[[ -x $HOME/.local/bin/mise ]] && exit 0
+echo "Installing mise (https://mise.run) into ~/.local/bin..."
+curl -fsSL https://mise.run | sh || { echo "Could not install mise" >&2; exit 1; }

@@ -52,6 +52,8 @@ rm -f "$HOME/.local/bin/$command"
 cat >"$HOME/.local/bin/$command" <<EOF
 #!/bin/bash
 export MISE_MINIMUM_RELEASE_AGE=0
+omarchy-mise-ensure >&2 || exit 1
+export PATH="\$HOME/.local/bin:\$PATH"
 mise use -g --quiet $package_arg || exit 1
 exec mise x $package_arg -- $bin_arg "\$@"
 EOF

@@ -9,12 +9,19 @@ if [[ -z $default_browser ]]; then
 fi
 browser_exec=$(sed -n 's/^Exec=\([^ ]*\).*/\1/p' {~/.local,~/.nix-profile,/usr}/share/applications/$default_browser 2>/dev/null | head -1)
 
-if $browser_exec --help 2>/dev/null | grep -q MOZ_LOG; then
-  private_flag="--private-window"
-elif [[ $browser_exec =~ edge ]]; then
-  private_flag="--inprivate"
-else
-  private_flag="--incognito"
+# The private-window flag differs by browser, and telling Firefox apart means running the
+# browser once with --help. Only do that when a private window was asked for: run on every
+# launch it cost seconds before the browser itself started, more for a snap or a Flatpak
+# (Oaxaca on a Lenovo Legion Pro 7, 2026-10-12).
+private_flag=""
+if [[ " $* " == *" --private "* ]]; then
+  if $browser_exec --help 2>/dev/null | grep -q MOZ_LOG; then
+    private_flag="--private-window"
+  elif [[ $browser_exec =~ edge ]]; then
+    private_flag="--inprivate"
+  else
+    private_flag="--incognito"
+  fi
 fi
 
 systemd-run --user --quiet --collect --unit="omarchy-browser-$(date +%s%N)" \

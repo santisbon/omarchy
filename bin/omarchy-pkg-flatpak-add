@@ -3,4 +3,9 @@
 # omarchy:args=<application id>
 # omarchy:requires-sudo=true
 set -euo pipefail
-sudo flatpak install --system -y --noninteractive flathub "${1:?application id}"
+# Flatpak warns when its export directory is missing from XDG_DATA_DIRS, and sudo's environment
+# has none: the session's does (flatpak's systemd user environment generator), so the app shows
+# in the menu, but the warning made the install look broken (2026-10-12). Pass the session's
+# value, with the export directory in front, to the root process.
+sudo env XDG_DATA_DIRS="/var/lib/flatpak/exports/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}" \
+  flatpak install --system -y --noninteractive flathub "${1:?application id}"
