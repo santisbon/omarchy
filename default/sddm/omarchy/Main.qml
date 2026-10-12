@@ -7,7 +7,19 @@ Rectangle {
   height: 480
   color: "#1a1b26"
 
-  property string currentUser: userModel.lastUser
+  // The user to log in. SDDM records the last user who logged in through it; on a fresh install
+  // nobody has, lastUser is empty, and the theme has no user field, so every password failed
+  // (Oaxaca on the Legion laptop, 2026-10-12; Omarchy's Arch install uses autologin and only
+  // reaches this screen after a logout). Fall back to the first user SDDM lists: on a
+  // single-user machine, the user the installer created. UserModel's name role is
+  // Qt.UserRole + 1 (sddm's UserModel.h, NameRole).
+  property string currentUser: {
+    if (userModel.lastUser && userModel.lastUser.length > 0)
+      return userModel.lastUser
+    if (userModel.rowCount() > 0)
+      return (userModel.data(userModel.index(0, 0), Qt.UserRole + 1) || "").toString()
+    return ""
+  }
   property bool loginFailed: false
   property int sessionIndex: {
     for (var i = 0; i < sessionModel.rowCount(); i++) {
