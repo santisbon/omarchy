@@ -61,6 +61,10 @@ plymouth
 # 24.004.60 snapshot crashes in script_lib_sprite_refresh (seen booting the live ISO on the Legion
 # laptop, 2026-10-11; fixed upstream on 2026-08-06 by a null check the snapshot predates).
 plymouth-label
+# pulseaudio-utils: pactl, which omarchy-audio-output-volume (the volume keys) and the other
+# audio commands call against PipeWire's PulseAudio server; Arch's libpulse ships pactl, Ubuntu
+# puts the client tools in this package (volume keys did nothing in the live session, 2026-10-11).
+pulseaudio-utils
 power-profiles-daemon
 # upower: the shell's power panel and battery widget read UPower (Quickshell.Services.UPower);
 # Arch pulls it in through quickshell, Ubuntu's quickshell does not depend on it.
