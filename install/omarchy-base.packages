@@ -65,6 +65,23 @@ plymouth-label
 # audio commands call against PipeWire's PulseAudio server; Arch's libpulse ships pactl, Ubuntu
 # puts the client tools in this package (volume keys did nothing in the live session, 2026-10-11).
 pulseaudio-utils
+# gawk: Omarchy's scripts are written for GNU awk (omarchy-menu-keybindings uses the
+# three-argument match()); Ubuntu's default awk is mawk, which rejects that syntax, so the
+# keybindings menu listed nothing (live session, 2026-10-11). Installing gawk makes it the
+# system awk through the alternatives system (priority above mawk's).
+gawk
+# libgtk-3-bin: gtk-launch, which the shell's application menu uses to start a desktop entry
+# ("uwsm-app -- gtk-launch <id>.desktop", shell/services/AppLibrary.qml); Arch's gtk3 package
+# ships it, Ubuntu splits it out. Without it nothing launched from the menu (2026-10-11).
+libgtk-3-bin
+# thermald, intel-lpmd, lsp-plugins-lv2: what install/hardware/*.sh add with omarchy-pkg-add on
+# matching hardware (Intel laptops on battery, the speaker-tuning table). Shipped in the image so
+# that an install without a network does not fail at those steps: omarchy-pkg-add skips apt for a
+# package that is already installed, and the daemons stay inert where the hardware is absent
+# (Legion laptop, 2026-10-11: "Package 'thermald' has no installation candidate" offline).
+thermald
+intel-lpmd
+lsp-plugins-lv2
 power-profiles-daemon
 # upower: the shell's power panel and battery widget read UPower (Quickshell.Services.UPower);
 # Arch pulls it in through quickshell, Ubuntu's quickshell does not depend on it.
