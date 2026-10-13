@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# omarchy:summary=Run an application on the NVIDIA GPU of a hybrid-graphics machine
+# omarchy:args=<command> [args...]
+# omarchy:examples=omarchy-launch-nvidia steam | omarchy-launch-nvidia blender
+
+# On hybrid graphics the session keeps applications on the display GPU's Mesa driver
+# (OMARCHY_GPU_OFFLOAD=nvidia), so starting one does not wake the NVIDIA GPU. This runs one
+# command with NVIDIA's PRIME render offload variables instead (__NV_PRIME_RENDER_OFFLOAD,
+# __GLX_VENDOR_LIBRARY_NAME, __VK_LAYER_NV_optimus, from NVIDIA's driver README, "PRIME Render
+# Offload"), with the Mesa-only EGL and Vulkan selections lifted. In Steam, a game's launch
+# options can read: omarchy-launch-nvidia %command%
+(( $# )) || { echo "Usage: omarchy-launch-nvidia <command> [args...]" >&2; exit 1; }
+unset VK_DRIVER_FILES
+export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json
+export __NV_PRIME_RENDER_OFFLOAD=1
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+export __VK_LAYER_NV_optimus=NVIDIA_only
+exec "$@"
