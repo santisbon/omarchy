@@ -23,4 +23,4 @@ omarchy-pkg-add steam-installer
 echo ""
 echo "Steam will start automatically now. This might take a while..."
 
-setsid uwsm-app -- gtk-launch steam >/dev/null 2>&1 &
+setsid omarchy-launch-desktop steam >/dev/null 2>&1 &
