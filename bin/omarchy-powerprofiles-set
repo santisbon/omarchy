@@ -47,12 +47,12 @@ elif [[ -r $state_file ]]; then
   profile=$(<"$state_file")
 fi
 
+# Without a remembered choice, balanced, on AC as on battery. Omarchy picks performance on AC; on
+# this port's first machine, a Lenovo Legion Pro 7, that runs the fans and lights the power
+# button's ring red at every login, and Ubuntu's own default (power-profiles-daemon's) is
+# balanced (2026-10-12). A profile chosen in the menu is still remembered per power source.
 if [[ -z ${profile:-} ]] || ! profile_available "$profile"; then
-  if [[ $action == "ac" ]] && profile_available performance; then
-    profile=performance
-  else
-    profile=balanced
-  fi
+  profile=balanced
 fi
 
 powerprofilesctl set "$profile" || exit
