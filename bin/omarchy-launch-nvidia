@@ -9,7 +9,8 @@
 # command with NVIDIA's PRIME render offload variables instead (__NV_PRIME_RENDER_OFFLOAD,
 # __GLX_VENDOR_LIBRARY_NAME, __VK_LAYER_NV_optimus, from NVIDIA's driver README, "PRIME Render
 # Offload"), with the Mesa-only EGL and Vulkan selections lifted. In Steam, a game's launch
-# options can read: omarchy-launch-nvidia %command%
+# options can read: omarchy-launch-nvidia %command%. omarchy-launch-dgpu, which the menu uses,
+# calls this on NVIDIA machines and does the AMD equivalent on AMD ones.
 (( $# )) || { echo "Usage: omarchy-launch-nvidia <command> [args...]" >&2; exit 1; }
 unset VK_DRIVER_FILES
 export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json

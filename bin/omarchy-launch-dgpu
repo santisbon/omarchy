@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# omarchy:summary=Run an application on the discrete GPU of a hybrid-graphics machine, NVIDIA or AMD
+# omarchy:args=<command> [args...]
+# omarchy:examples=omarchy-launch-dgpu steam | omarchy-launch-dgpu blender
+
+# The session's GPU environment generator says which kind of discrete GPU sits beside the display
+# GPU, in OMARCHY_GPU_OFFLOAD:
+#   nvidia  runs the command through omarchy-launch-nvidia (NVIDIA's PRIME render offload);
+#   amd     runs the command with DRI_PRIME set to the AMD GPU's PCI address, from
+#           OMARCHY_GPU_OFFLOAD_DEVICE ("pci-0000_03_00_0"), the form Mesa's DRI_PRIME takes for
+#           both OpenGL and Vulkan (Mesa's docs/envvars.rst); "1", Mesa's "first GPU that is not
+#           the default", when the address is missing;
+#   unset   (no second GPU) runs the command unchanged, with a note on stderr.
+# The application menu starts applications on the discrete GPU through this (omarchy-launch-
+# desktop). In Steam, a game's launch options can read: omarchy-launch-dgpu %command%
+(( $# )) || { echo "Usage: omarchy-launch-dgpu <command> [args...]" >&2; exit 1; }
+case ${OMARCHY_GPU_OFFLOAD:-} in
+  nvidia) exec omarchy-launch-nvidia "$@" ;;
+  amd)
+    export DRI_PRIME=${OMARCHY_GPU_OFFLOAD_DEVICE:-1}
+    exec "$@" ;;
+  *)
+    echo "omarchy-launch-dgpu: no discrete GPU beside the display GPU; running $1 as usual" >&2
+    exec "$@" ;;
+esac

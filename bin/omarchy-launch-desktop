@@ -1,23 +1,25 @@
 #!/bin/bash
 
-# omarchy:summary=Launch a desktop entry, on the NVIDIA GPU when it asks for one on a hybrid-graphics machine
+# omarchy:summary=Launch a desktop entry, on the discrete GPU when it asks for one on a hybrid-graphics machine
 # omarchy:args=[--print] <desktop-id>
 # omarchy:examples=omarchy-launch-desktop org.gnome.Nautilus | omarchy-launch-desktop --print steam
 
 # The application menu and launcher start applications through this (shell/services/
 # AppLibrary.qml). It runs "uwsm-app -- gtk-launch <id>.desktop", as Omarchy does, except on
-# hybrid graphics (the session sets OMARCHY_GPU_OFFLOAD=nvidia, and applications default to the
-# display GPU's Mesa driver so starting one does not wake the NVIDIA GPU), where an application
-# runs on the NVIDIA GPU through omarchy-launch-nvidia when:
+# hybrid graphics, where the session sets OMARCHY_GPU_OFFLOAD to the kind of discrete GPU beside
+# the display GPU ("nvidia" or "amd"; applications default to the display GPU) and an
+# application runs on the discrete GPU through omarchy-launch-dgpu when:
 #   - its desktop entry asks for the discrete GPU: PrefersNonDefaultGPU=true (the freedesktop
 #     Desktop Entry key GNOME honors) or X-KDE-RunOnDiscreteGpu=true (KDE's); Steam's entry
 #     sets both; or
-#   - ~/.config/omarchy/nvidia-apps lists its desktop id (one per line, ".desktop" optional,
+#   - ~/.config/omarchy/dgpu-apps lists its desktop id (one per line, ".desktop" optional,
 #     "#" starts a comment), for applications whose entry does not ask, such as Heroic or OBS.
-# A line "-<id>" in that file keeps an application on the display GPU even if its entry asks.
-# The offload variables are set inside the application's own unit (uwsm-app starts the command
-# with the session's environment, not the caller's), and gtk-launch passes them to the program.
-# --print prints the decision and the command instead of running it.
+#     ~/.config/omarchy/nvidia-apps, the list's first name (NVIDIA only, 2026-10-12), is read
+#     too, before dgpu-apps.
+# A line "-<id>" in a list keeps an application on the display GPU even if its entry asks; a
+# later line wins. The offload variables are set inside the application's own unit (uwsm-app
+# starts the command with the session's environment, not the caller's), and gtk-launch passes
+# them to the program. --print prints the decision and the command instead of running it.
 print=0
 [[ ${1:-} == --print ]] && { print=1; shift; }
 id=${1:?Usage: omarchy-launch-desktop [--print] <desktop-id>}
@@ -29,26 +31,32 @@ for dir in "${dirs[@]}"; do
   [[ -f $dir/applications/$id.desktop ]] && { entry=$dir/applications/$id.desktop; break; }
 done
 
-on_nvidia=0
+on_dgpu=0
 reason="the display GPU (not a hybrid-graphics session)"
-if [[ ${OMARCHY_GPU_OFFLOAD:-} == nvidia ]]; then
+case ${OMARCHY_GPU_OFFLOAD:-} in
+  nvidia) dgpu="the NVIDIA GPU" ;;
+  amd) dgpu="the AMD discrete GPU (DRI_PRIME=${OMARCHY_GPU_OFFLOAD_DEVICE:-1})" ;;
+  *) dgpu="" ;;
+esac
+if [[ -n $dgpu ]]; then
   reason="the display GPU (its entry does not ask for the discrete GPU)"
   if [[ -n $entry ]] && sed -n '/^\[Desktop Entry\]/,/^\[/p' "$entry" | grep -qE '^(PrefersNonDefaultGPU|X-KDE-RunOnDiscreteGpu)=true'; then
-    on_nvidia=1; reason="NVIDIA (its desktop entry asks for the discrete GPU)"
+    on_dgpu=1; reason="$dgpu (its desktop entry asks for the discrete GPU)"
   fi
-  list=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/nvidia-apps
-  if [[ -f $list ]]; then
+  config=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy
+  for list in "$config/nvidia-apps" "$config/dgpu-apps"; do
+    [[ -f $list ]] || continue
     while IFS= read -r line; do
       line=${line%%#*}; line=${line//[[:space:]]/}; line=${line%.desktop}
       [[ -z $line ]] && continue
-      if [[ $line == "$id" ]]; then on_nvidia=1; reason="NVIDIA (listed in $list)"; fi
-      if [[ $line == "-$id" ]]; then on_nvidia=0; reason="the display GPU (kept there by $list)"; fi
+      if [[ $line == "$id" ]]; then on_dgpu=1; reason="$dgpu (listed in $list)"; fi
+      if [[ $line == "-$id" ]]; then on_dgpu=0; reason="the display GPU (kept there by $list)"; fi
     done <"$list"
-  fi
+  done
 fi
 
-if (( on_nvidia )); then
-  cmd=(uwsm-app -- omarchy-launch-nvidia gtk-launch "$id.desktop")
+if (( on_dgpu )); then
+  cmd=(uwsm-app -- omarchy-launch-dgpu gtk-launch "$id.desktop")
 else
   cmd=(uwsm-app -- gtk-launch "$id.desktop")
 fi

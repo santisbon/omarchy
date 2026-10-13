@@ -21,7 +21,7 @@ echo "nvidia: ${nv:-none} runtime=$(state) control=$(cat "$nv/power/control" 2>/
 # The kernel driver bound to the GPU: "nvidia", or "nouveau" when NVIDIA's driver is not installed
 # (2026-10-12: nouveau, whose wake from runtime suspend cost three seconds per launch).
 echo "nvidia driver: $(cat /sys/module/nvidia/version 2>/dev/null || echo not loaded) bound: $(basename "$(readlink "$nv/driver" 2>/dev/null)" 2>/dev/null) prime: $(prime-select query 2>/dev/null)"
-echo "session env: $(systemctl --user show-environment | grep -E '^(__GLX_VENDOR_LIBRARY_NAME|LIBVA_DRIVER_NAME|NVD_BACKEND|AQ_DRM_DEVICES|GSK_RENDERER|__EGL_VENDOR_LIBRARY_FILENAMES|VK_DRIVER_FILES|GDK_SCALE)=' | paste -sd' ')"
+echo "session env: $(systemctl --user show-environment | grep -E '^(__GLX_VENDOR_LIBRARY_NAME|LIBVA_DRIVER_NAME|NVD_BACKEND|AQ_DRM_DEVICES|GSK_RENDERER|__EGL_VENDOR_LIBRARY_FILENAMES|VK_DRIVER_FILES|GDK_SCALE|OMARCHY_GPU_OFFLOAD|OMARCHY_GPU_OFFLOAD_DEVICE)=' | paste -sd' ')"
 win() { hyprctl clients -j | jq -e --arg c "$class" '.[] | select(.class == $c)' >/dev/null; }
 close() { hyprctl clients -j | jq -r --arg c "$class" '.[] | select(.class == $c) | .pid' | xargs -r kill 2>/dev/null; sleep 2; }
 time_it() {
