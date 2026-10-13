@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# omarchy:summary=Time how long an application takes from launch to window, four ways
+# omarchy:group=debug
+# omarchy:args=[desktop-id] [window-class]
+# omarchy:examples=omarchy-debug-launch | omarchy-debug-launch org.gnome.Nautilus org.gnome.Nautilus
+
+# Where does an application's start time go? Prints the session's GPU-related settings, the
+# NVIDIA GPU's runtime power state, and the time from start to first window for one application
+# (Files by default), launched four ways: as the menu does (uwsm-app -- gtk-launch), directly,
+# without the NVIDIA settings the session exports (__GLX_VENDOR_LIBRARY_NAME, LIBVA_DRIVER_NAME,
+# NVD_BACKEND), and with Mesa's EGL and Vulkan only. Between runs it closes the application's
+# windows and waits, so a GPU that powers down can do so. Added for slow launches on a hybrid
+# laptop (Lenovo Legion Pro 7, 2026-10-12): send the output with the report.
+#   omarchy-debug-launch | tee ~/launch-timing.txt
+id=${1:-org.gnome.Nautilus}
+class=${2:-$id}
+nv=$(for d in /sys/bus/pci/devices/*; do [[ $(cat "$d/vendor") == 0x10de && $(cat "$d/class") == 0x03* ]] && echo "$d"; done | head -1)
+state() { [[ -n $nv ]] && cat "$nv/power/runtime_status" 2>/dev/null || echo none; }
+echo "nvidia: ${nv:-none} runtime=$(state) control=$(cat "$nv/power/control" 2>/dev/null)"
+echo "nvidia driver: $(cat /sys/module/nvidia/version 2>/dev/null || echo not loaded) prime: $(prime-select query 2>/dev/null)"
+echo "session env: $(systemctl --user show-environment | grep -E '^(__GLX_VENDOR_LIBRARY_NAME|LIBVA_DRIVER_NAME|NVD_BACKEND|AQ_DRM_DEVICES|GSK_RENDERER|__EGL_VENDOR_LIBRARY_FILENAMES|VK_DRIVER_FILES|GDK_SCALE)=' | paste -sd' ')"
+win() { hyprctl clients -j | jq -e --arg c "$class" '.[] | select(.class == $c)' >/dev/null; }
+close() { hyprctl clients -j | jq -r --arg c "$class" '.[] | select(.class == $c) | .pid' | xargs -r kill 2>/dev/null; sleep 2; }
+time_it() {
+  local label=$1; shift
+  close; sleep 8
+  local before; before=$(state)
+  local t0; t0=$(date +%s%N)
+  "$@" >/dev/null 2>&1 &
+  for _ in $(seq 1 300); do win && break; sleep 0.1; done
+  echo "$label: $(( ($(date +%s%N) - t0) / 1000000 )) ms (nvidia before: $before, after: $(state))"
+}
+exe=$(sed -n 's/^Exec=\([^ ]*\).*/\1/p' "/usr/share/applications/$id.desktop" 2>/dev/null | head -1)
+exe=${exe:-nautilus}
+time_it "menu path (uwsm-app -- gtk-launch)" uwsm-app -- gtk-launch "$id.desktop"
+time_it "direct ($exe)" "$exe"
+time_it "without the NVIDIA settings" env -u __GLX_VENDOR_LIBRARY_NAME -u LIBVA_DRIVER_NAME -u NVD_BACKEND "$exe"
+time_it "Mesa only (EGL and Vulkan)" env -u __GLX_VENDOR_LIBRARY_NAME -u LIBVA_DRIVER_NAME -u NVD_BACKEND \
+  __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json VK_DRIVER_FILES=/usr/share/vulkan/icd.d/intel_icd.json "$exe"
+close
