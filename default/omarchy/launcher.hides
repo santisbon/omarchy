@@ -20,9 +20,6 @@ kbd-layout-viewer5
 kcm_fcitx5
 kcm_kaccounts
 kvantummanager
-libreoffice-base
-libreoffice-draw
-libreoffice-math
 libreoffice-startcenter
 libreoffice-xsltfilter
 lstopo
@@ -31,6 +28,8 @@ org.fcitx.fcitx5-config-qt
 org.fcitx.fcitx5-migrator
 org.fcitx.fcitx5-qt5-gui-wrapper
 org.fcitx.fcitx5-qt6-gui-wrapper
+org.libreoffice.LibreOffice
+org.libreoffice.LibreOffice.xsltfilter
 qv4l2
 qvidcap
 uuctl
