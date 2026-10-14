@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# omarchy:summary=Make the launcher rescan every application folder, new ones included
+# omarchy:hidden=true
+
+# The launcher's app list is Quickshell's DesktopEntries. It watches only the application
+# folders that existed when the shell started (DesktopEntryMonitor::startMonitoring skips a
+# missing one), so the first Flatpak install, which creates
+# /var/lib/flatpak/exports/share/applications, went unseen (2026-10-14). A change in any
+# watched folder makes it rescan all of them, missing-at-start ones included: create and
+# delete a file in the user's own applications folder, which exists from the first login.
+mkdir -p ~/.local/share/applications
+poke=$(mktemp -p ~/.local/share/applications .rescan-XXXXXX) && rm -f "$poke"

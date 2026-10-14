@@ -96,7 +96,7 @@ fi
 if omarchy-cmd-present flatpak && flatpak info "${desktop_file_name%.desktop}" >/dev/null 2>&1; then
   flatpak_id="${desktop_file_name%.desktop}"
   quoted_flatpak="$(printf '%q' "$flatpak_id")"
-  exec omarchy-launch-floating-terminal-with-presentation "flatpak uninstall $quoted_flatpak"
+  exec omarchy-launch-floating-terminal-with-presentation "flatpak uninstall $quoted_flatpak && omarchy-launcher-rescan"
 fi
 
 echo "Don't know how to uninstall $desktop_file_name" >&2

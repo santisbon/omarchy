@@ -19,6 +19,7 @@ cd "$tmp"
 curl -LO https://international.download.nvidia.com/GFNLinux/GeForceNOWSetup.bin
 chmod +x GeForceNOWSetup.bin
 ./GeForceNOWSetup.bin
+omarchy-launcher-rescan
 
 # Ensure a separate browser process not started by GFN is available.
 # If not, it seems like GFN has a tendency to hang on login.

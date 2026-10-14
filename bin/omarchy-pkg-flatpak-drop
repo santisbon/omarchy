@@ -4,3 +4,4 @@
 # omarchy:requires-sudo=true
 set -euo pipefail
 sudo flatpak uninstall --system -y --noninteractive --delete-data "${1:?application id}"
+omarchy-launcher-rescan

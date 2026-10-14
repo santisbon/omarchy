@@ -8,6 +8,7 @@ set -e
 
 if omarchy-cmd-present flatpak && flatpak info com.nvidia.geforcenow &>/dev/null; then
   flatpak uninstall -y --delete-data com.nvidia.geforcenow
+  omarchy-launcher-rescan
 fi
 
 echo ""

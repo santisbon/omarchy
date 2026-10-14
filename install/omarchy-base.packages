@@ -91,6 +91,10 @@ systemd-oomd
 python3-gi
 qrencode
 qt6-image-formats-plugins
+# rfkill: omarchy-bluetooth-power, -restart-bluetooth and -restart-wifi run it; Arch ships the
+# command in util-linux, Ubuntu in its own rfkill package. Without it the bar's Bluetooth
+# switch could not lift the soft block (2026-10-14).
+rfkill
 ripgrep
 slurp
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)

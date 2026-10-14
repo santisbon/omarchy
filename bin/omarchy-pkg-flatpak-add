@@ -9,3 +9,4 @@ set -euo pipefail
 # value, with the export directory in front, to the root process.
 sudo env XDG_DATA_DIRS="/var/lib/flatpak/exports/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}" \
   flatpak install --system -y --noninteractive flathub "${1:?application id}"
+omarchy-launcher-rescan

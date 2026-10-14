@@ -20,7 +20,9 @@ fzf_args=(
 # prints a line of its own and the store's featured snaps. Either way the table starts
 # at its "Name Version Publisher Notes Summary" header, so everything above it is cut;
 # a search with no matches prints only a message and exits 0, so no table means none.
-query=$(gum input --prompt "Search the Snap Store> " --placeholder "name or keyword; empty for featured snaps") || exit 0
+# bash's own prompt, not gum input: gum draws inline and redraws when the terminal resizes,
+# and the window's first resize after opening left two prompts on screen (2026-10-14).
+read -e -r -p "Search the Snap Store (a name or keyword; Enter alone lists featured snaps): " query || exit 0
 results=$(snap find --color=never --unicode=never ${query:+"$query"} 2>&1 | sed -n '/^Name  *Version/,$p')
 if [[ -z $results ]]; then
   echo "No snaps match \"$query\"."
@@ -37,7 +39,11 @@ if [[ -n $picks ]]; then
   # one without --classic, so ask before passing it.
   while read -r name _ _ notes _; do
     if [[ ,$notes, == *,classic,* ]]; then
-      gum confirm "$name uses classic confinement: it runs outside the snap sandbox, with full access to your files and system. Install it?" || continue
+      # The explanation goes to the terminal, which wraps it; gum confirm keeps its prompt on one
+      # line and cut a long one off at the window's edge (2026-10-14).
+      echo
+      echo "$name uses classic confinement: it runs outside the snap sandbox, with full access to your files and system."
+      gum confirm "Install $name anyway?" || continue
       omarchy-pkg-snap-add "$name" --classic
     else
       omarchy-pkg-snap-add "$name"
