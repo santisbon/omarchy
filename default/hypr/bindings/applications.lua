@@ -9,6 +9,7 @@ o.bind("SUPER + SHIFT + N", "Editor", { omarchy = "editor" })
 
 if o.preinstalled_bindings_enabled() then
   -- Bindings for preinstalled Omarchy applications, TUIs, and web apps.
+  o.bind("SUPER + ALT + RETURN", "Tmux", { omarchy = "terminal-tmux" })
   o.bind("SUPER + SHIFT + M", "Music", { omarchy = "spotify" })
   o.bind("SUPER + SHIFT + G", "Signal", { omarchy = "signal" })
   o.bind("SUPER + SHIFT + SLASH", "Passwords", { omarchy = "1password" })

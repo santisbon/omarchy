@@ -97,6 +97,8 @@ qt6-image-formats-plugins
 rfkill
 ripgrep
 slurp
+# tmux: preinstalled again 2026-10-14, with Omarchy's config (config/tmux), theme sync and bindings
+tmux
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)
 snapd
 socat
@@ -181,7 +183,7 @@ ca-certificates
 # Omarchy's taste; see the distro repository's docs/6, "Core and apps"):
 # libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
-# build-essential, neovim, lazygit, tmux, btop, tree-sitter-cli, dua-cli, tealdeer, inxi,
+# build-essential, neovim, lazygit, btop, tree-sitter-cli, dua-cli, tealdeer, inxi,
 #   starship, zoxide, eza: command-line preferences (yt-dlp, removed with them, came back on
 #   2026-10-14 for the Download Video extension); the shell rc guards starship, zoxide and eza
 # whois, unzip, wf-recorder, libsecret-tools: nothing in the port calls them
