@@ -177,4 +177,4 @@ ca-certificates
 # build-essential, neovim, lazygit, tmux, btop, tree-sitter-cli, dua-cli, tealdeer, inxi, yt-dlp,
 #   starship, zoxide, eza: command-line preferences; the shell rc guards starship, zoxide and eza
 # whois, unzip, wf-recorder, libsecret-tools: nothing in the port calls them
-# evince, gnome-disk-utility, ffmpegthumbnailer: the optional omarchy-desktop-apps package
+# evince, gnome-disk-utility: the optional omarchy-desktop-apps package (ffmpegthumbnailer is a dependency of omarchy-desktop)
