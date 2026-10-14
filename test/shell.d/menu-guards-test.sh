@@ -89,39 +89,28 @@ prelude() {
 stub_dir=$(mktemp -d)
 trap 'rm -rf "$stub_dir"' EXIT
 
-# `pacman -Q` resolves a name through what installed packages provide, so gvim
-# answers for vim and bash answers for sh. A set built from `pacman -Qq` alone
-# would miss both and offer to install what is already there.
-#
-# `-Qi` wraps a long list onto indented continuation lines whenever COLUMNS is
-# set, so gvim's provides arrive the way a wrapped terminal would emit them.
-cat >"$stub_dir/pacman" <<'STUB'
+# dpkg-query answers one name with the status of every instance it knows,
+# concatenated, so only a name known once and installed reads "installed":
+# libc6 is known in two architectures, oldpkg only as leftover configuration,
+# wine32 only as i386. The stub keeps dpkg-query's two shapes: a listing for
+# '*' (the prelude) and the bare status string for a name (the real helpers).
+cat >"$stub_dir/dpkg-query" <<'STUB'
 #!/bin/bash
-case "$1" in
--Qq)
-  printf '%s\n' bash gvim
-  ;;
--Qi)
-  cat <<'INFO'
-Name            : bash
-Provides        : sh
-Version         : 5.3.0-1
-Name            : gvim
-Provides        : vim=9.2.0849-1
-                  xxd
-Version         : 9.2-1
-INFO
-  ;;
--Q)
-  shift
-  for want in "$@"; do
-    case "${want%%[<>=]*}" in bash | gvim | sh | vim | xxd) ;; *) exit 1 ;; esac
-  done
-  ;;
-esac
-exit 0
+db=$'installed\tbash\tamd64\ninstalled\tcoreutils\tamd64\ninstalled\tlibc6\tamd64\ninstalled\tlibc6\ti386\nconfig-files\toldpkg\tamd64\ninstalled\twine32\ti386'
+want=${!#}
+if [[ $want == '*' ]]; then
+  while IFS=$'\t' read -r status name arch; do printf '%s\t%s\n' "$status" "$name"; done <<<"$db"
+  exit 0
+fi
+name=${want%%:*}; arch=; [[ $want == *:* ]] && arch=${want#*:}
+found=1
+while IFS=$'\t' read -r status pkg pkgarch; do
+  [[ $pkg == "$name" && ( -z $arch || $arch == "$pkgarch" ) ]] || continue
+  printf '%s' "$status"; found=0
+done <<<"$db"
+exit "$found"
 STUB
-chmod +x "$stub_dir/pacman"
+chmod +x "$stub_dir/dpkg-query"
 printf '#!/bin/bash\nexit 0\n' >"$stub_dir/gvim"
 chmod +x "$stub_dir/gvim"
 
@@ -140,16 +129,16 @@ assert_helper_agrees() {
   ((real == shadowed)) || fail "$description" "$helper $*: real=$real shadowed=$shadowed"
 }
 
-# vim, sh and xxd are provided rather than installed, and xxd only appears on a
-# wrapped continuation line; bash>=1 is a version constraint no set can answer.
-pkg_cases=("bash" "vim" "sh" "xxd" "absent" "bash vim" "bash absent" "bash>=1" "vim>=1" "")
+# libc6 is known twice and oldpkg is not installed, so neither counts; wine32
+# answers by name and by name:arch; bash>=1 is no name dpkg knows.
+pkg_cases=("bash" "libc6" "libc6:i386" "oldpkg" "wine32" "wine32:i386" "wine32:amd64" "absent" "bash coreutils" "bash absent" "bash>=1" "")
 for helper in omarchy-pkg-present omarchy-pkg-missing; do
   for case in "${pkg_cases[@]}"; do
     read -r -a argv <<<"$case"
-    assert_helper_agrees "guard prelude resolves packages as pacman does" "$helper" "${argv[@]}"
+    assert_helper_agrees "guard prelude resolves packages as dpkg-query does" "$helper" "${argv[@]}"
   done
 done
-pass "guard prelude resolves packages through provides, wrapping, and constraints as pacman does"
+pass "guard prelude resolves packages as dpkg-query does, across architectures, leftover configuration and constraints"
 
 # cd is a shell builtin `command -v` finds and a PATH search does not.
 cmd_cases=("gvim" "cd" "absent" "gvim absent" "gvim cd" "")
