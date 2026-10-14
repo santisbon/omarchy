@@ -48,13 +48,19 @@ esac
 # hold a new version back for days after it ships. Exported rather than set on
 # the install line alone, so resolving the version to execute agrees with the
 # one just installed.
+# An npm: package needs Node.js to run, which mise installs only when asked ("Most CLIs still need
+# Node.js to run ... mise installs it before your npm tools, but never adds it for you", mise's npm
+# backend page). Ubuntu's base install for this distro has no Node, so the wrapper adds mise's
+# LTS Node first for those packages.
+node_line=""
+[[ $package == npm:* ]] && node_line=$'mise use -g --quiet node@lts || exit 1\n'
 rm -f "$HOME/.local/bin/$command"
 cat >"$HOME/.local/bin/$command" <<EOF
 #!/bin/bash
 export MISE_MINIMUM_RELEASE_AGE=0
 omarchy-mise-ensure >&2 || exit 1
 export PATH="\$HOME/.local/bin:\$PATH"
-mise use -g --quiet $package_arg || exit 1
+${node_line}mise use -g --quiet $package_arg || exit 1
 exec mise x $package_arg -- $bin_arg "\$@"
 EOF
 

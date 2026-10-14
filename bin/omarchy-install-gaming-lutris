@@ -21,6 +21,7 @@ fi
 # Recommends and are named here because omarchy-pkg-add skips Recommends.
 # umu-launcher has no Ubuntu package; Lutris downloads its own runners.
 omarchy-pkg-add lutris wine wine32:i386 winetricks python3-protobuf
+omarchy-install-32bit-graphics
 
 # Ubuntu's /usr/games/lutris already starts with #!/usr/bin/python3 (Debian
 # policy forbids env in packaged shebangs), so mise's Python never shadows it.

@@ -19,6 +19,7 @@ fi
 # The 32-bit Mesa libraries arrive as dependencies of steam-libs-i386; Arch's
 # separate lib32 driver step has no counterpart here.
 omarchy-pkg-add steam-installer
+omarchy-install-32bit-graphics
 
 echo ""
 echo "Steam will start automatically now. This might take a while..."

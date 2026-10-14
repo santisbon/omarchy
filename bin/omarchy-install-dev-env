@@ -52,12 +52,23 @@ install_node() {
   mise use --global node
 }
 
+# A C compiler, make and the C library headers (build-essential). Ubuntu's base install for this
+# distro has none (the port dropped build-essential with Omarchy's command-line preferences), but
+# these environments need one: Rust links through cc; opam builds the OCaml compiler from source;
+# mise compiles Erlang and Ruby from source where no precompiled build exists (mise's Erlang and
+# Ruby pages); and gems, npm modules and Python packages with native code compile on install,
+# which `gem install rails` already does.
+install_build_tools() {
+  omarchy-pkg-add build-essential "$@"
+}
+
 case "$1" in
 ruby)
   echo -e "Installing Ruby on Rails...\n"
   # mise's precompiled Ruby links against libyaml at run time (psych); Ubuntu
   # names that runtime library libyaml-0-2.
   omarchy-pkg-add libyaml-0-2
+  install_build_tools
   mise settings add ruby.compile false
   mise settings add idiomatic_version_file_enable_tools ruby
   mise use --global ruby@latest
@@ -66,6 +77,7 @@ ruby)
   echo -e "\nYou can now run: rails new myproject"
   ;;
 node)
+  install_build_tools
   install_node
   ;;
 bun)
@@ -93,12 +105,14 @@ laravel)
   ;;
 python)
   echo -e "Installing Python...\n"
+  install_build_tools
   mise use --global python@latest
   echo -e "\nInstalling uv...\n"
   curl -fsSL https://astral.sh/uv/install.sh | sh
   ;;
 elixir)
   echo -e "Installing Elixir...\n"
+  install_build_tools
   mise use --global erlang@latest
   mise use --global elixir@latest
   mise x elixir -- mix local.hex --force
@@ -106,6 +120,7 @@ elixir)
 phoenix)
   echo -e "Installing Phoenix Framework...\n"
   # Ensure Erlang/Elixir first
+  install_build_tools
   mise use --global erlang@latest
   mise use --global elixir@latest
   # Hex & Rebar
@@ -117,6 +132,7 @@ phoenix)
   ;;
 rust)
   echo -e "Installing Rust...\n"
+  install_build_tools
   bash -c "$(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs)" -- -y
   ;;
 java)
@@ -130,6 +146,8 @@ zig)
   ;;
 ocaml)
   echo -e "Installing OCaml...\n"
+  # opam fetches some package sources as zip archives.
+  install_build_tools unzip
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
   opam init --yes
   eval "$(opam env)"

@@ -3,11 +3,30 @@
 # omarchy:summary=Launch a URL as a web app in the default supported browser
 # omarchy:args=<url>
 
+# A web app opens in a Chromium-family browser's app mode (--app). The default browser is used
+# when it is one; otherwise the first installed Chromium-family browser in the list below. Omarchy
+# always has Chromium, so it fell back to chromium.desktop unconditionally; this distro installs
+# no browser by default, and with only Firefox (or none) that fallback ran an empty command.
+# When no Chromium-family browser is installed, a notification says how to get one.
+exec_of() { sed -n 's/^Exec=\([^ ]*\).*/\1/p' {~/.local,~/.nix-profile,/usr}/share/applications/"$1" 2>/dev/null | head -1; }
+
 browser=$(xdg-settings get default-web-browser)
-
 case $browser in
-google-chrome* | brave* | microsoft-edge* | opera* | vivaldi* | helium*) ;;
-*) browser="chromium.desktop" ;;
+chromium* | google-chrome* | brave* | microsoft-edge* | opera* | vivaldi* | helium*) ;;
+*) browser="" ;;
 esac
+if [[ -z $browser || -z $(exec_of "$browser") ]]; then
+  browser=""
+  for candidate in chromium.desktop google-chrome.desktop brave-origin.desktop brave-browser.desktop microsoft-edge.desktop vivaldi-stable.desktop; do
+    if [[ -n $(exec_of "$candidate") ]]; then
+      browser=$candidate
+      break
+    fi
+  done
+fi
+if [[ -z $browser ]]; then
+  omarchy-notification-send "Web apps need a Chromium-based browser" "Install Chromium, Chrome or Brave Origin under Install > Browser in the menu" -u critical
+  exit 1
+fi
 
-exec setsid uwsm-app -- $(sed -n 's/^Exec=\([^ ]*\).*/\1/p' {~/.local,~/.nix-profile,/usr}/share/applications/$browser 2>/dev/null | head -1) --app="$1" "${@:2}"
+exec setsid uwsm-app -- $(exec_of "$browser") --app="$1" "${@:2}"
