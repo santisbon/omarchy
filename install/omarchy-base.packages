@@ -111,6 +111,9 @@ slurp
 # swappy: the screenshot editor oaxaca-capture-screenshot's notification opens, in place of
 # Omarchy's Tensaku, which has no Ubuntu build (2026-10-14)
 swappy
+# tealdeer: Omarchy's tldr, preinstalled again 2026-10-14; Ubuntu has no tldr package, and tealdeer
+# is a Rust client that installs the same tldr command (config/tealdeer turns on its page download)
+tealdeer
 # tmux: preinstalled again 2026-10-14, with Omarchy's config (config/tmux), theme sync and bindings
 tmux
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)
@@ -184,7 +187,7 @@ ca-certificates
 # omarchy-nvim (nvim config): separate package
 # qemu-user-static-binfmt: not needed
 # quickshell, sddm, uwsm, wireplumber, gnome-keyring, xdg-desktop-portal*: session layer
-# tldr: tealdeer ships /usr/bin/tldr
+# tldr: tealdeer ships /usr/bin/tldr (listed above)
 # ttf-ia-writer, ttf-jetbrains-mono-nerd-basic: separate fonts package
 # tzupdate: not in stonking
 # ufw-docker: not in stonking, and no longer needed: the port applies no ufw rules
@@ -197,7 +200,7 @@ ca-certificates
 # Omarchy's taste; see the distro repository's docs/6, "Core and apps"):
 # libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
-# build-essential, lazygit, btop, tree-sitter-cli, dua-cli, tealdeer, inxi,
+# build-essential, lazygit, btop, tree-sitter-cli, dua-cli, inxi,
 #   starship, zoxide, eza: command-line preferences (yt-dlp, removed with them, came back on
 #   2026-10-14 for the Download Video extension); the shell rc guards starship, zoxide and eza
 # whois, unzip, wf-recorder, libsecret-tools: nothing in the port calls them

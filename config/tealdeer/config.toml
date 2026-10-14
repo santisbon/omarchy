@@ -1,0 +1,5 @@
+# tealdeer, the tldr client: download the pages on first use and refresh them when they are
+# older than the interval (default 720 hours), as Omarchy's Python client fetched them on
+# demand. Without this, tealdeer stops with "Page cache not found" until `tldr --update` runs.
+[updates]
+auto_update = true
