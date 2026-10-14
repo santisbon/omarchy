@@ -168,7 +168,7 @@
   "setup.config.xcompose": {"icon":"󰞅","label":"XCompose","action":"omarchy-launch-config-editor ~/.XCompose && omarchy-restart-xcompose"},
 
   // Install
-  "install.package": {"icon":"󰣇","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-install"},
+  "install.package": {"icon":"","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-install"},
   "install.webapp": {"icon":"","label":"Web App","action":"omarchy-launch-floating-terminal-with-presentation omarchy-webapp-install"},
   "install.tui": {"icon":"","label":"TUI","action":"omarchy-launch-floating-terminal-with-presentation omarchy-tui-install"},
   "install.style": {"icon":"","label":"Style"},
@@ -233,7 +233,7 @@
   "install.development.elixir.phoenix": {"icon":"","label":"Phoenix","when":"omarchy-cmd-present mise && ! compgen -G \"$HOME/.mix/archives/phx_new*\"","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env phoenix'"},
 
   // Remove
-  "remove.package": {"icon":"󰣇","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-remove"},
+  "remove.package": {"icon":"","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-remove"},
   "remove.webapp": {"icon":"","label":"Web App","when":"grep -qE '^Exec=.*(omarchy-launch-webapp|omarchy-webapp-handler)' $HOME/.local/share/applications/*.desktop","action":"omarchy-webapp-remove"},
   "remove.tui": {"icon":"","label":"TUI","when":"grep -qE '^Exec=.*(\\$TERMINAL|xdg-terminal-exec).*-e' $HOME/.local/share/applications/*.desktop","action":"omarchy-tui-remove"},
   "remove.development": {"icon":"󰵮","label":"Development","title":"Remove"},
