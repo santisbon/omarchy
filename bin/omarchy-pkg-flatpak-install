@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# omarchy:summary=Show a fuzzy-finder TUI for picking Flathub applications to install.
+# omarchy:requires-sudo=true
+
+fzf_args=(
+  --multi
+  --delimiter '\t'
+  --preview 'flatpak remote-info --system flathub {1}'
+  --preview-label='alt-p: toggle description, alt-j/k: scroll, tab: multi-select'
+  --preview-label-pos='bottom'
+  --preview-window 'down:65%:wrap'
+  --bind 'alt-p:toggle-preview'
+  --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+  --bind 'alt-k:preview-up,alt-j:preview-down'
+  --color 'pointer:green,marker:green'
+)
+
+# remote-ls fetches Flathub's index of applications (runtimes left out) without sudo, one
+# tab-separated line per app: application id, name, description.
+apps=$(flatpak remote-ls --system --app --columns=application,name,description flathub | sort)
+if [[ -z $apps ]]; then
+  echo "Could not list Flathub's applications."
+  omarchy-show-done
+  exit 1
+fi
+
+picks=$(fzf "${fzf_args[@]}" <<<"$apps")
+
+if [[ -n $picks ]]; then
+  source omarchy-sudo-keepalive
+
+  while IFS=$'\t' read -r app _; do
+    omarchy-pkg-flatpak-add "$app"
+  done <<<"$picks"
+  omarchy-show-done
+fi

@@ -169,6 +169,8 @@
 
   // Install
   "install.package": {"icon":"","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-install"},
+  "install.snap": {"icon":"","label":"Snap","when":"omarchy-cmd-present snap","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-snap-install"},
+  "install.flatpak": {"icon":"","label":"Flatpak","when":"omarchy-cmd-present flatpak","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-flatpak-install"},
   "install.webapp": {"icon":"","label":"Web App","action":"omarchy-launch-floating-terminal-with-presentation omarchy-webapp-install"},
   "install.tui": {"icon":"","label":"TUI","action":"omarchy-launch-floating-terminal-with-presentation omarchy-tui-install"},
   "install.style": {"icon":"","label":"Style"},
@@ -234,6 +236,8 @@
 
   // Remove
   "remove.package": {"icon":"","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-remove"},
+  "remove.snap": {"icon":"","label":"Snap","when":"omarchy-cmd-present snap","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-snap-remove"},
+  "remove.flatpak": {"icon":"","label":"Flatpak","when":"omarchy-cmd-present flatpak","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-flatpak-remove"},
   "remove.webapp": {"icon":"","label":"Web App","when":"grep -qE '^Exec=.*(omarchy-launch-webapp|omarchy-webapp-handler)' $HOME/.local/share/applications/*.desktop","action":"omarchy-webapp-remove"},
   "remove.tui": {"icon":"","label":"TUI","when":"grep -qE '^Exec=.*(\\$TERMINAL|xdg-terminal-exec).*-e' $HOME/.local/share/applications/*.desktop","action":"omarchy-tui-remove"},
   "remove.development": {"icon":"󰵮","label":"Development","title":"Remove"},

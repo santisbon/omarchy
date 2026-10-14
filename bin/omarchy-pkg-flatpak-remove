@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# omarchy:summary=Show a fuzzy-finder TUI for picking installed Flatpak applications to be removed.
+# omarchy:requires-sudo=true
+
+fzf_args=(
+  --multi
+  --delimiter '\t'
+  --preview 'flatpak info --system {1}'
+  --preview-label='alt-p: toggle description, alt-j/k: scroll, tab: multi-select'
+  --preview-label-pos='bottom'
+  --preview-window 'down:65%:wrap'
+  --bind 'alt-p:toggle-preview'
+  --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+  --bind 'alt-k:preview-up,alt-j:preview-down'
+  --color 'pointer:red,marker:red'
+)
+
+# Applications only, one tab-separated line each: application id, name. Runtimes go with
+# the --unused pass below, like Remove > Package's --autoremove.
+apps=$(flatpak list --system --app --columns=application,name | sort)
+if [[ -z $apps ]]; then
+  echo "No Flatpak applications are installed."
+  omarchy-show-done
+  exit 0
+fi
+
+picks=$(fzf "${fzf_args[@]}" <<<"$apps")
+
+if [[ -n $picks ]]; then
+  source omarchy-sudo-keepalive
+
+  while IFS=$'\t' read -r app _; do
+    omarchy-pkg-flatpak-drop "$app"
+  done <<<"$picks"
+  sudo flatpak uninstall --system -y --noninteractive --unused
+  omarchy-show-done
+fi

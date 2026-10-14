@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# omarchy:summary=Search the Snap Store and pick snaps to install in a fuzzy-finder TUI.
+# omarchy:requires-sudo=true
+
+fzf_args=(
+  --multi
+  --header-lines=1
+  --preview 'snap info {1}'
+  --preview-label='alt-p: toggle description, alt-j/k: scroll, tab: multi-select'
+  --preview-label-pos='bottom'
+  --preview-window 'down:65%:wrap'
+  --bind 'alt-p:toggle-preview'
+  --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+  --bind 'alt-k:preview-up,alt-j:preview-down'
+  --color 'pointer:green,marker:green'
+)
+
+# The store can't be listed whole: snap find needs a search term, and with none it
+# prints a line of its own and the store's featured snaps. Either way the table starts
+# at its "Name Version Publisher Notes Summary" header, so everything above it is cut;
+# a search with no matches prints only a message and exits 0, so no table means none.
+query=$(gum input --prompt "Search the Snap Store> " --placeholder "name or keyword; empty for featured snaps") || exit 0
+results=$(snap find --color=never --unicode=never ${query:+"$query"} 2>&1 | sed -n '/^Name  *Version/,$p')
+if [[ -z $results ]]; then
+  echo "No snaps match \"$query\"."
+  omarchy-show-done
+  exit 0
+fi
+
+picks=$(fzf "${fzf_args[@]}" <<<"$results")
+
+if [[ -n $picks ]]; then
+  source omarchy-sudo-keepalive
+
+  # Notes says "classic" for a snap that runs without the snap sandbox. snap install refuses
+  # one without --classic, so ask before passing it.
+  while read -r name _ _ notes _; do
+    if [[ ,$notes, == *,classic,* ]]; then
+      gum confirm "$name uses classic confinement: it runs outside the snap sandbox, with full access to your files and system. Install it?" || continue
+      omarchy-pkg-snap-add "$name" --classic
+    else
+      omarchy-pkg-snap-add "$name"
+    fi
+  done <<<"$picks"
+  omarchy-show-done
+fi

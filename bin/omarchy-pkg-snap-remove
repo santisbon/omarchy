@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# omarchy:summary=Show a fuzzy-finder TUI for picking installed snaps to be removed.
+# omarchy:requires-sudo=true
+
+fzf_args=(
+  --multi
+  --delimiter '\t'
+  --preview 'snap info {1}'
+  --preview-label='alt-p: toggle description, alt-j/k: scroll, tab: multi-select'
+  --preview-label-pos='bottom'
+  --preview-window 'down:65%:wrap'
+  --bind 'alt-p:toggle-preview'
+  --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+  --bind 'alt-k:preview-up,alt-j:preview-down'
+  --color 'pointer:red,marker:red'
+)
+
+# snapd's local API (GET /v2/snaps on its socket, readable without sudo) gives each snap's
+# type and commands. Only type "app" snaps that have a command are offered: the bases
+# (core24, bare), snapd itself, and content snaps that only serve other snaps
+# (gtk-common-themes, gnome-46-2404) are what installed apps run on, so they are left out,
+# the way Remove > Package leaves out what apt pulled in on its own.
+installed=$(curl -fsS --unix-socket /run/snapd.socket http://localhost/v2/snaps |
+  jq -r '.result[] | select(.type == "app" and ((.apps // []) | length) > 0) |
+    [.name, .version, .summary] | @tsv' | sort)
+if [[ -z $installed ]]; then
+  echo "No snap applications are installed."
+  omarchy-show-done
+  exit 0
+fi
+
+picks=$(fzf "${fzf_args[@]}" <<<"$installed")
+
+if [[ -n $picks ]]; then
+  source omarchy-sudo-keepalive
+
+  while IFS=$'\t' read -r name _; do
+    omarchy-pkg-snap-drop "$name"
+  done <<<"$picks"
+  omarchy-show-done
+fi
