@@ -9,3 +9,4 @@ fi
 # was put on the machine by hand gets its native messaging hosts from here.
 # Without them the bundled extensions load but have nothing to talk to.
 omarchy-install-chromium-copy-url
+omarchy-install-chromium-ytdlp
