@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# omarchy:summary=Install and configure Voxtype dictation
+# omarchy:requires-sudo=true
+
+set -e
+
+# Voxtype comes from this distro's apt repository (packages/voxtype in the distro's repository:
+# Voxtype's own release package, without its ONNX GPU builds); Omarchy installs it from the AUR.
+if gum confirm "Install Voxtype (about 230 MB) and its speech model (about 150 MB) to enable dictation?"; then
+  omarchy-pkg-add voxtype wtype
+
+  # Setup voxtype
+  mkdir -p ~/.config/voxtype
+  cp "$OMARCHY_PATH/default/voxtype/config.toml" ~/.config/voxtype/
+
+  voxtype setup --download --no-post-install
+
+  # GPU. Voxtype's own switch, voxtype setup gpu --enable, replaces /usr/bin/voxtype, a file
+  # the package owns: it needs root, and the next upgrade undoes it. The package's
+  # /usr/bin/voxtype runs the Vulkan build when VOXTYPE_GPU=1, so the choice goes into a
+  # drop-in for the user's voxtype service instead. VOXTYPE_VULKAN_DEVICE names the GPU by
+  # vendor (Voxtype narrows Vulkan's drivers to it): the discrete GPU, NVIDIA or AMD, when its
+  # Vulkan driver is installed, else the integrated one; with no Vulkan driver, the CPU builds.
+  # With two GPUs, gpu_isolation runs each transcription in a subprocess, so the discrete GPU
+  # can sleep between dictations.
+  dropin=~/.config/systemd/user/voxtype.service.d
+  rm -f "$dropin/omarchy-gpu.conf"
+  gpus=0 nvidia="" amd="" intel=""
+  for card in /sys/class/drm/card*; do
+    [[ ${card##*/} =~ ^card[0-9]+$ ]] || continue
+    gpus=$((gpus + 1))
+    case $(cat "$card/device/vendor" 2>/dev/null) in
+      0x10de) nvidia=1 ;;
+      0x1002) amd=1 ;;
+      0x8086) intel=1 ;;
+    esac
+  done
+  icd() { compgen -G "/usr/share/vulkan/icd.d/$1" >/dev/null; }
+  device=""
+  if [[ -n $nvidia ]] && icd 'nvidia_icd*.json'; then
+    device=nvidia
+  elif [[ -n $amd ]] && icd 'radeon_icd*.json'; then
+    device=amd
+  elif [[ -n $intel ]] && icd 'intel_icd*.json'; then
+    device=intel
+  fi
+  if [[ -n $device ]]; then
+    mkdir -p "$dropin"
+    printf '[Service]\nEnvironment=VOXTYPE_GPU=1\nEnvironment=VOXTYPE_VULKAN_DEVICE=%s\n' "$device" >"$dropin/omarchy-gpu.conf"
+    if ((gpus > 1)); then
+      sed -i '/^\[whisper\]/a gpu_isolation = true' ~/.config/voxtype/config.toml
+    fi
+    echo "Dictation runs on the GPU: $device$( ((gpus > 1)) && echo ', isolated so the GPU can sleep between dictations')."
+  else
+    echo "Dictation runs on the CPU: no Vulkan driver for this machine's GPU."
+  fi
+
+  voxtype setup systemd
+
+  hyprctl reload >/dev/null
+  omarchy-restart-shell
+  omarchy-notification-send -g  "Voxtype Dictation Ready" "Hold F9 to dictate (or toggle with Super + Ctrl + X)." -t 10000
+fi

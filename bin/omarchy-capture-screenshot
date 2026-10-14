@@ -16,7 +16,10 @@ fi
 
 pkill slurp && exit 0
 
-SCREENSHOT_EDITOR="${OMARCHY_SCREENSHOT_EDITOR:-tensaku-edit}"
+# swappy, not Omarchy's Tensaku: Tensaku is Omarchy's own package with no Ubuntu build, and the
+# notification's Edit action ran a command that did not exist (2026-10-14). swappy is in Ubuntu's
+# archive and in the desktop's package list.
+SCREENSHOT_EDITOR="${OMARCHY_SCREENSHOT_EDITOR:-swappy}"
 
 # Parse --editor flag from any position
 ARGS=()
@@ -68,9 +71,16 @@ case "$PROCESSING" in
 
     # Best-effort: the screenshot is already saved and on the clipboard, so a
     # notification outage must not report the capture itself as failed.
+    # swappy takes the image with -f; -o names the file its Ctrl+S writes, here the screenshot
+    # itself, so saving keeps the annotations under the same name (Ctrl+C copies them instead).
+    if [[ $SCREENSHOT_EDITOR == swappy ]]; then
+      edit_command=(swappy -f "$FILEPATH" -o "$FILEPATH")
+    else
+      edit_command=("$SCREENSHOT_EDITOR" "$FILEPATH")
+    fi
     omarchy-notification-send "Screenshot saved to clipboard and file" "Edit with Super + Alt + , (or click this)" \
       --image "$FILEPATH" \
-      --exec "$SCREENSHOT_EDITOR" "$FILEPATH" || true
+      --exec "${edit_command[@]}" || true
     ;;
   copy)
     grim -g "$SELECTION" - | wl-copy --type image/png

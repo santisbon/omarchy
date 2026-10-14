@@ -4,7 +4,7 @@ o.window({ tag = "floating-window" }, { center = true })
 o.window({ tag = "floating-window" }, { size = { 875, 600 } })
 
 o.window(
-  "(org.omarchy.btop|org.omarchy.terminal|org.omarchy.bash|org.codeberg.dnkl.foot|org.gnome.NautilusPreviewer|org.gnome.Evince|Omarchy|About|TUI.float|imv|mpv)",
+  "(org.omarchy.btop|org.omarchy.terminal|org.omarchy.bash|org.codeberg.dnkl.foot|org.gnome.NautilusPreviewer|org.gnome.Papers|Omarchy|About|TUI.float|imv|mpv)",
   {
     tag = "+floating-window",
   }
@@ -27,8 +27,10 @@ o.window("org.omarchy.about", { float = true })
 o.window("org.omarchy.about", { center = true })
 o.window("org.omarchy.about", { size = { 920, 480 } })
 
-o.window("dev.tensaku.Tensaku", { float = true })
-o.window("dev.tensaku.Tensaku", { center = true })
+-- swappy, the screenshot editor in place of Omarchy's Tensaku; GTK sets the window class from
+-- its application ID, me.jtheoof.swappy (src/application.c at swappy v1.5.1).
+o.window("me.jtheoof.swappy", { float = true })
+o.window("me.jtheoof.swappy", { center = true })
 
 -- Fullscreen screensaver.
 o.window("org.omarchy.screensaver", { fullscreen = true })

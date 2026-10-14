@@ -4,5 +4,11 @@
 
 set -e
 
+# The bar's Dictation indicator runs this when clicked. With Voxtype not installed, it opens
+# the installer (Install > AI > Dictation) instead of a configure command that does not exist.
+if omarchy-cmd-missing voxtype; then
+  exec omarchy-launch-floating-terminal-with-presentation omarchy-voxtype-install
+fi
+
 omarchy-launch-floating-terminal-with-presentation "voxtype configure"
 omarchy-restart-shell

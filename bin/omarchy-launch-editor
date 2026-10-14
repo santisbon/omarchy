@@ -23,7 +23,9 @@ if [[ $editor == codium ]] && ! omarchy-cmd-present codium && flatpak info --sys
   exec setsid uwsm-app -- flatpak run com.vscodium.codium "$@"
 fi
 
-# nano is the fallback: Ubuntu installs it with ubuntu-minimal, and this port no longer ships neovim.
+# nano is the fallback and the default: the desktop's package list installs it (Ubuntu's
+# ubuntu-standard only recommends it, and the image has no ubuntu-standard). Neovim is installed
+# too, without Omarchy's configuration; Setup > Defaults > Editor picks it.
 omarchy-cmd-present "$editor" || editor="nano"
 
 case "${editor##*/}" in
