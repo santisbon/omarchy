@@ -71,10 +71,13 @@ case "$PROCESSING" in
 
     # Best-effort: the screenshot is already saved and on the clipboard, so a
     # notification outage must not report the capture itself as failed.
-    # swappy takes the image with -f; -o names the file its Ctrl+S writes, here the screenshot
-    # itself, so saving keeps the annotations under the same name (Ctrl+C copies them instead).
+    # swappy takes the image with -f. Its Ctrl+S saves the annotated image as a new file in its
+    # save_dir and closes it (config/swappy/config: the screenshot folder, "-edited" names,
+    # early_exit); the screenshot itself stays as captured, and Escape discards the drawing.
+    # No -o: swappy 1.5.1 writes -o's file whenever its window closes, on top of Ctrl+S's
+    # file, which left two copies (2026-10-14).
     if [[ $SCREENSHOT_EDITOR == swappy ]]; then
-      edit_command=(swappy -f "$FILEPATH" -o "$FILEPATH")
+      edit_command=(swappy -f "$FILEPATH")
     else
       edit_command=("$SCREENSHOT_EDITOR" "$FILEPATH")
     fi

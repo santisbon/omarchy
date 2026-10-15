@@ -1,0 +1,8 @@
+# swappy, the screenshot editor that the screenshot notification opens (Super+Alt+,).
+# Ctrl+S saves the annotated image next to the screenshot, as screenshot-<date>-edited.png,
+# and closes swappy; the screenshot itself is left as captured. swappy expands save_dir like a
+# shell word (wordexp), so it follows OMARCHY_SCREENSHOT_DIR when that is set.
+[Default]
+save_dir=${OMARCHY_SCREENSHOT_DIR:-$HOME/Pictures}
+save_filename_format=screenshot-%Y-%m-%d_%H-%M-%S-edited.png
+early_exit=true
