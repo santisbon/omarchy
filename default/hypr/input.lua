@@ -61,8 +61,11 @@ hl.config({
     repeat_delay = 250,
     numlock_by_default = true,
 
+    -- Natural (content-follows-fingers) scrolling on touchpads, Oaxaca's default since
+    -- 2026-10-15 (Omarchy: false); mouse wheels keep the classic direction through
+    -- input.natural_scroll, which stays at Hyprland's default, false.
     touchpad = {
-      natural_scroll = false,
+      natural_scroll = true,
       clickfinger_behavior = true,
       scroll_factor = 0.4,
     },
