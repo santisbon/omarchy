@@ -25,7 +25,7 @@ helix) editor="helix"; name="Helix"; glyph= ;;
 vim) editor="vim"; name="Vim"; glyph= ;;
 emacs) editor="emacs"; name="Emacs"; glyph= ;;
 nvim) editor="nvim"; name="Neovim"; glyph= ;;
-nano) editor="nano"; name="nano"; glyph= ;;
+nano) editor="nano"; name="nano"; glyph=󰷈 ;;
 *)
   echo "Usage: omarchy-default-editor <code|codium|cursor|zed|sublime_text|helix|vim|emacs|nvim|nano>"
   exit 1
