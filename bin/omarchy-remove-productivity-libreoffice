@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# omarchy:summary=Remove the LibreOffice snap and its short-named launchers
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+omarchy-pkg-snap-drop libreoffice
+# The per-user launchers omarchy-install-productivity-libreoffice wrote (the short names).
+rm -f "$HOME"/.local/share/applications/libreoffice_*.desktop
+omarchy-launcher-rescan

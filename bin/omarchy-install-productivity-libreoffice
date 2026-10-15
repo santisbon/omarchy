@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# omarchy:summary=Install LibreOffice from the Snap Store, with short launcher names
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+omarchy-pkg-snap-add libreoffice
+omarchy-libreoffice-snap-launchers

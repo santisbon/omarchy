@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# omarchy:summary=Write short-named per-user launchers for the LibreOffice snap
+# omarchy:hidden=true
+
+# The snap's launchers are named "LibreOffice <version> Writer" and so on, which the launcher
+# cuts off after "LibreOffice 26.2" (2026-10-15). snapd rewrites its own copies in
+# /var/lib/snapd/desktop/applications on every refresh, so per-user copies with the same file
+# names, which take precedence, carry the short names. The search still finds them through the
+# launcher ID (libreoffice_writer). Icons point at the snap's "current" revision, so they
+# survive refreshes.
+apps_dir="$HOME/.local/share/applications"
+mkdir -p "$apps_dir"
+for src in /var/lib/snapd/desktop/applications/libreoffice_*.desktop; do
+  [[ -f $src ]] || continue
+  sed -E \
+    -e 's/^(Name(\[[^]]*\])?=)LibreOffice [0-9][0-9.]* /\1/' \
+    -e 's#/snap/libreoffice/[0-9]+/#/snap/libreoffice/current/#g' \
+    "$src" >"$apps_dir/${src##*/}"
+done
+omarchy-launcher-rescan
