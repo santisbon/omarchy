@@ -30,7 +30,7 @@
   // System
   "system.screensaver": {"icon":"󱄄","label":"Screensaver","action":"omarchy-launch-screensaver force"},
   "system.lock": {"icon":"","label":"Lock","action":"omarchy-system-lock"},
-  "system.suspend": {"icon":"󰒲","label":"Suspend","when":"! omarchy-toggle-enabled suspend-off","action":"systemctl suspend"},
+  "system.suspend": {"icon":"󰒲","label":"Suspend","when":"! omarchy-toggle-enabled suspend-off","action":"omarchy-system-suspend"},
   "system.logout": {"icon":"󰍃","label":"Logout","action":"omarchy-system-logout"},
   "system.reboot": {"icon":"󰜉","label":"Reboot","action":"omarchy-system-reboot"},
   "system.shutdown": {"icon":"󰐥","label":"Shutdown","action":"omarchy-system-shutdown"},

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# omarchy:summary=Suspend, after a short on-screen message, as Reboot and Shutdown show theirs
+# omarchy:examples=omarchy suspend | omarchy system suspend
+# omarchy:aliases=omarchy suspend
+
+# The session locks itself before sleep (omarchy-sleep-lock.service answers logind's
+# PrepareForSleep), so this only tells the user what is happening, then asks logind.
+omarchy-osd -i suspend -m "Suspending" -d 2000
+sleep 1
+systemctl suspend

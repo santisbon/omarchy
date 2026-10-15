@@ -20,6 +20,7 @@ function iconFor(name, percent) {
   if (n === "touch" || n === "touchscreen") return "󰝁"
   if (n === "reboot" || n === "restart") return "󰜉"
   if (n === "shutdown" || n === "power" || n === "poweroff") return "󰐥"
+  if (n === "suspend" || n === "sleep") return "󰒲"
   if (n === "logout" || n === "sign-out" || n === "leave") return "󰍃"
   if (n === "media" || n === "player") return "󰝚"
   if (n === "media-source" || n === "player-source") return "󰝚"
