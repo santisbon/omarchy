@@ -71,6 +71,14 @@ hyprctl dispatch 'hl.dsp.exec_cmd("omarchy-launch-shell")' >/dev/null
 
 for (( attempt = 0; attempt < 20; attempt++ )); do
   if OMARCHY_PATH="$session_omarchy_path" OMARCHY_SHELL_IPC_TIMEOUT=0.5s omarchy-shell shell ping >/dev/null 2>&1; then
+    # The shell answers ping before it owns org.freedesktop.Notifications, and callers often
+    # notify right after a restart: omarchy-notification-send's busctl call then failed with
+    # "Call failed: The name is not activatable" (the Dictation installer, 2026-10-14). Wait
+    # up to 3 seconds for the name.
+    for (( name_wait = 0; name_wait < 30; name_wait++ )); do
+      busctl --user status org.freedesktop.Notifications >/dev/null 2>&1 && break
+      sleep 0.1
+    done
     # The session stays compositor-locked after the old lock client died, so
     # re-acquire the lock and let the user authenticate out of it.
     if (( relock )) && ! relock_session; then
