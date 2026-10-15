@@ -3,5 +3,12 @@
 # omarchy:args=<application id>
 # omarchy:requires-sudo=true
 set -euo pipefail
-sudo flatpak uninstall --system -y --noninteractive --delete-data "${1:?application id}"
+app="${1:?application id}"
+# Root removes the system-wide install. The app's data is the user's, so the user deletes it:
+# flatpak's --delete-data removes ~/.var/app/<id> of the user running it and resets that user's
+# portal permissions over the session bus, so under sudo it touched root's home and failed to
+# reach a session bus ("failed to execute child process dbus-launch", 2026-10-14).
+sudo flatpak uninstall --system -y --noninteractive "$app"
+rm -rf "$HOME/.var/app/$app"
+flatpak permission-reset "$app" 2>/dev/null || true
 omarchy-launcher-rescan
