@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# omarchy:summary=Stop unlocking the encrypted root disk with the TPM; the disk encryption passphrase is asked at every boot again
+# omarchy:requires-sudo=true
+
+set -e
+set -o pipefail
+
+red() { echo -e "\e[31m$*\e[0m"; }
+green() { echo -e "\e[32m$*\e[0m"; }
+
+if ! device=$(omarchy-drive-root-luks); then
+  red "The root filesystem is not on an encrypted disk."
+  exit 1
+fi
+
+# clevis luks list prints one line per bound slot, such as: 1: tpm2 '{"hash":"sha256",...}'
+tpm_slots=$(sudo clevis luks list -d "$device" 2>/dev/null | awk -F: '$2 ~ /^ tpm2 / { print $1 }' || true)
+
+if [[ -z $tpm_slots ]]; then
+  echo "The TPM does not unlock $device; nothing to remove."
+  exit 0
+fi
+
+for slot in $tpm_slots; do
+  echo "Removing the TPM's LUKS key slot $slot from $device..."
+  # -f wipes the slot without asking; the disk encryption passphrase's own slot stays.
+  sudo clevis luks unbind -f -d "$device" -s "$slot"
+done
+
+# clevis-luks, clevis-tpm2 and clevis-initramfs stay installed: they are part of the distro's
+# base image, and without a TPM key slot clevis-initramfs leaves the passphrase prompt alone.
+green "The TPM unlock is removed; the next boot asks for the disk encryption passphrase."

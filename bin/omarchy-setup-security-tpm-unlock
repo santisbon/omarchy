@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# omarchy:summary=Unlock the encrypted root disk with the TPM at boot instead of the disk encryption passphrase
+# omarchy:requires-sudo=true
+
+set -e
+set -o pipefail
+
+# Clevis (clevis-luks, clevis-tpm2 and clevis-initramfs, part of the distro's base install) adds
+# a LUKS key slot whose key the TPM keeps sealed to PCR 7. PCR 7 holds the Secure Boot state: on
+# or off, the firmware's Secure Boot key databases, and the certificates that approved shim and
+# the kernel. At boot, clevis-initramfs asks the TPM for the key while the passphrase prompt
+# waits; the passphrase keeps working as the fallback.
+#
+# A PCR 7 binding is unsealed by any boot with the same Secure Boot state and signers, including
+# an Ubuntu live USB stick with a root shell. So the TPM unlock protects a disk taken out of the
+# computer, but not a stolen computer. That is why this is opt-in rather than part of the
+# installer (the build repo's docs/6 - omarchy-port.md, choice 37).
+PCR_CONFIG='{"pcr_bank":"sha256","pcr_ids":"7"}'
+
+red() { echo -e "\e[31m$*\e[0m"; }
+green() { echo -e "\e[32m$*\e[0m"; }
+
+if omarchy-cmd-missing clevis || omarchy-cmd-missing clevis-luks-bind || [[ ! -e /usr/share/initramfs-tools/scripts/local-top/clevis ]]; then
+  red "clevis-luks, clevis-tpm2 or clevis-initramfs is not installed; the distro image should always ship them."
+  exit 1
+fi
+
+if ! omarchy-hw-tpm2; then
+  red "This computer has no TPM 2.0 chip, so the disk can only be unlocked with its passphrase."
+  exit 1
+fi
+
+if ! device=$(omarchy-drive-root-luks); then
+  red "The root filesystem is not on an encrypted disk; there is nothing to unlock."
+  exit 1
+fi
+
+if ! mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled'; then
+  red "Secure Boot is off."
+  echo "Turn Secure Boot on in the firmware settings first: a binding made now would only unlock"
+  echo "the disk while Secure Boot stays off, and would stop working once it is turned on."
+  exit 1
+fi
+
+green "Setting up the TPM to unlock $device at boot.\n"
+
+# clevis luks list prints one line per bound slot, such as: 1: tpm2 '{"hash":"sha256",...}'
+tpm_slots=$(sudo clevis luks list -d "$device" 2>/dev/null | awk -F: '$2 ~ /^ tpm2 / { print $1 }' || true)
+
+if [[ -n $tpm_slots ]]; then
+  for slot in $tpm_slots; do
+    # clevis luks pass prints the slot's key once the TPM has unsealed it; only success matters.
+    if sudo clevis luks pass -d "$device" -s "$slot" >/dev/null 2>&1; then
+      green "The TPM already unlocks this disk (LUKS key slot $slot)."
+    else
+      echo "The TPM no longer releases the key of LUKS key slot $slot: Secure Boot or the firmware's"
+      echo "Secure Boot keys changed since it was set up. Binding it again to the current state."
+      echo "Type the disk encryption passphrase when asked."
+      sudo clevis luks regen -q -d "$device" -s "$slot"
+      green "LUKS key slot $slot is bound again."
+    fi
+  done
+  exit 0
+fi
+
+echo "With the TPM unlock, the computer starts without asking for the disk encryption passphrase,"
+echo "as long as Secure Boot stays on and its keys don't change. The passphrase keeps working."
+echo
+echo "The trade-off: anyone holding this computer can start it, and could read the disk by booting"
+echo "another Secure Boot signed system, such as an Ubuntu USB stick. Encryption then still protects"
+echo "the disk if it is taken out of the computer, but no longer if the whole computer is stolen."
+echo
+
+if ! gum confirm "Unlock the disk with the TPM at boot?"; then
+  echo "Nothing changed."
+  exit 0
+fi
+
+echo -e "\nType the disk encryption passphrase when Clevis asks for the existing LUKS password.\n"
+sudo clevis luks bind -y -d "$device" tpm2 "$PCR_CONFIG"
+
+# The initramfs gets clevis-initramfs's scripts when the package is installed; make sure the
+# running kernel's initramfs has them before relying on them at the next boot.
+if ! sudo lsinitramfs "/boot/initrd.img-$(uname -r)" | grep -q 'scripts/local-top/clevis'; then
+  echo "Adding Clevis to the initramfs..."
+  sudo update-initramfs -u -k all
+fi
+
+green "\nDone. The next boot unlocks the disk with the TPM."
+echo "If Secure Boot is turned off, or a firmware update changes its keys, the computer asks for the"
+echo "disk encryption passphrase again; run Setup > Security > TPM Unlock afterwards to bind it again."

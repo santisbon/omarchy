@@ -158,6 +158,11 @@ libpam-u2f
 pamu2fcfg
 fido2-tools
 libfido2-1
+# Added beyond Omarchy's list: Clevis, for Setup > Security > TPM Unlock (unlocking the
+# encrypted root disk with the TPM at boot); clevis-initramfs does nothing without a TPM key slot
+clevis-luks
+clevis-tpm2
+clevis-initramfs
 blueman
 # Added beyond Omarchy's list: omarchy-pkg-repo-add and the browser installers
 # fetch keys and debs with curl over https and convert armored keys with gpg;

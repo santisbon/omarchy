@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# omarchy:summary=Print the LUKS partition that holds the root filesystem; fails when the root filesystem is not encrypted
+# omarchy:hidden=true
+
+# lsblk -s walks from the root filesystem's device down to the disks it sits on (the opened
+# LUKS mapping, then its partition), reading udev's data, so this works without root.
+root_source=$(findmnt -no SOURCE /) || exit 1
+luks_partition=$(lsblk -nrps -o NAME,FSTYPE "$root_source" | awk '$2 == "crypto_LUKS" { print $1; exit }')
+[[ -n $luks_partition ]] || exit 1
+echo "$luks_partition"

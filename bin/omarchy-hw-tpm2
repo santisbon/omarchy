@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# omarchy:summary=Returns true when the computer has a TPM 2.0 chip
+# omarchy:hidden=true
+
+# The kernel's TPM driver exposes the chip's major version in sysfs, readable without root.
+[[ $(cat /sys/class/tpm/tpm0/tpm_version_major 2>/dev/null) == 2 ]]
