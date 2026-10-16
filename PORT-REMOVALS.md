@@ -1,6 +1,6 @@
 # Audit of what the port removed from Omarchy
 
-Written 2026-10-16, after three removals turned out to be wrong: the agent skills (deleted as Omarchy's contributing workflow, though seven of their nine files are help for users), the update snapshots (deleted with Limine, though only the boot menu needed Limine), and the launcher's handling of desktop ids that end in `.desktop`. This document lists everything the port removed from Omarchy v4.0.4, why, whether the reason holds, and what to restore. The [restore list](#restore-list) is for the distro's maintainer to choose from; restored so far: the firewall and Wi-Fi power save (2026-10-16).
+Written 2026-10-16, after three removals turned out to be wrong: the agent skills (deleted as Omarchy's contributing workflow, though seven of their nine files are help for users), the update snapshots (deleted with Limine, though only the boot menu needed Limine), and the launcher's handling of desktop ids that end in `.desktop`. This document lists everything the port removed from Omarchy v4.0.4, why, whether the reason holds, and what to restore. The [restore list](#restore-list) is for the distro's maintainer to choose from; restored so far: the firewall, Wi-Fi power save and the broken references (2026-10-16).
 
 The port follows the rule the distro's Ubuntu base follows: nothing is installed and then removed. The port starts from a minimal base, Ubuntu's own configuration plus the parts of Omarchy the desktop needs to run, and adds each further Omarchy feature by a recorded choice that gives the reason. Restoring an item below is such an addition: it is written for Ubuntu, recorded as a choice in the build repository's `docs/6 - omarchy-port.md`, and is not a revert of the commit that removed Omarchy's version.
 
@@ -50,7 +50,7 @@ Ranked by what a user meets first. Each item names its section below.
 
 1. Firewall, **restored 2026-10-16** (docs/6, choice 40): ufw shipped off (`ENABLED=no`), so nothing filtered inbound traffic, and Setup > Security > SSH's `ufw limit 22/tcp` did nothing. `install/config/firewall.sh` now allows LocalSend's port 53317 and turns ufw on for the next boot, with Ubuntu's policies (deny incoming) and without Omarchy's Docker rules. ([System files](#system-install-and-hardware-files))
 2. Wi-Fi power save, **restored 2026-10-16** (docs/6, choice 42): Ubuntu's `wifi.powersave = 3` was back on; Omarchy turned it off for link drops on Intel BE200/BE211 firmware, the Legion's card. ([System files](#system-install-and-hardware-files))
-3. Broken references: kept files that call a program the port dropped. Each is fixed by restoring the program, except where the port replaced it on purpose, in which case the reference moves to the replacement. ([Broken references](#broken-references-and-leftovers))
+3. Broken references, **restored 2026-10-16** (docs/6, choice 43): kept files that call a program the port dropped. Each is fixed by restoring the program, except where the port replaced it on purpose, in which case the reference moves to the replacement. ([Broken references](#broken-references-and-leftovers))
    - Screensaver, which never runs because `bin/omarchy-launch-screensaver` exits without `ttfx`: restore ttfx 0.5.0 (`omacom/ttfx`, MIT, Rust), built in the distro's apt repository as LocalSend is.
    - Debug report, which has no hardware section: restore `inxi` (stonking universe 3.3.41).
    - Shell prompt and the `ls`, `lt` and `cd` aliases, which `default/bash/init` and `default/bash/aliases` wire but which stay dormant: restore starship (universe 1.26.0) with Omarchy's `config/starship.toml`, eza (universe 0.23.5-5) and zoxide (universe 0.10.0).
@@ -59,7 +59,7 @@ Ranked by what a user meets first. Each item names its section below.
 4. Hyprland's reload guard ships but nothing pauses it during an upgrade; wire it into the config package's preinst and postinst. ([System files](#system-install-and-hardware-files))
 5. The out-of-memory killer can pick the compositor: Ubuntu's policy is on `user@.service`, the case Omarchy's `app.slice` drop-in avoided. ([System files](#system-install-and-hardware-files))
 6. SSH keepalive, which the kept `ssh-reconnect` needs. ([Kept files](#features-cut-inside-files-the-port-kept))
-7. Basic tools: `unzip`, a calculator (gnome-calculator, with the Calculator key), a system monitor (btop, with Super+Ctrl+T and theme sync), and Disks (`gnome-disk-utility`, today only Suggested, so never installed). ([Packages](#packages-dropped-from-the-base-list-and-their-configurations))
+7. Basic tools: `unzip`, a calculator (gnome-calculator, with the Calculator key), a system monitor (btop, with Super+Ctrl+T and theme sync; restored with item 3), and Disks (`gnome-disk-utility`, today only Suggested, so never installed). ([Packages](#packages-dropped-from-the-base-list-and-their-configurations))
 
 **2. Cheap restores**
 
@@ -96,7 +96,7 @@ A factory reset on Timeshift and `oem-config`; Omarchy's own MIT-licensed apps (
 | Helix | `bin/omarchy-install-editor-helix`; `install.editor.helix` | Helix linked to the theme | `PORT.md`: Install > Package, without Omarchy's setup | `hx` in universe; the branch still has `helix.toml.tpl` and `omarchy-restart-helix` | **Restore** |
 | Cursor | `install.editor.cursor` | Cursor editor | none recorded | Cursor's apt repository (`downloads.cursor.com/aptrepo`) has `cursor`; its signing key URL not verified | **Restore** through `omarchy-pkg-repo-add` |
 | Zed | `bin/omarchy-install-editor-zed`; `install.editor.zed` | Zed themed by Omarchy's `omazed` | `PORT.md` | Ubuntu's `zed` is another program; Flathub `dev.zed.Zed` (unverified); `omazed` is nowhere | **Partial**: Flathub, no theme sync |
-| btop and Obsidian theme sync | `bin/omarchy-restart-btop`, `-theme-set-obsidian` | reload btop's colors; copy the theme's `obsidian.css` into every vault | `c304e943` (the apps were no longer preinstalled) | the themes still render `btop.theme` and `obsidian.css` | **Restore** with the apps |
+| btop and Obsidian theme sync | `bin/omarchy-restart-btop`, `-theme-set-obsidian` | reload btop's colors; copy the theme's `obsidian.css` into every vault | `c304e943` (the apps were no longer preinstalled) | the themes still render `btop.theme` and `obsidian.css` | btop's part **restored** 2026-10-16 (docs/6, choice 43); Obsidian's **Restore** with the app |
 | OpenClaw | `bin/omarchy-install-ai-openclaw`, `-remove-ai-openclaw`, `-install-openclaw-cli`; `install.ai.openclaw`, `remove.ai.openclaw`, `setup.default.agent.openclaw`, `remove.ai` | the OpenClaw agent, its gateway and Control UI, and the default-agent choice | `PORT.md`: the snap is a third party's | Omarchy's package is the npm module; npm has `openclaw` 2026.10.4 from the project; the port installs other npm agents through mise; `omarchy-launch-openclaw` and `-openclaw-onboard` were kept | **Restore** through `mise use -g npm:openclaw` |
 | Heroic, Minecraft | `bin/omarchy-install-gaming-heroic`, `-remove-gaming-heroic`, `-remove-gaming-minecraft`; their menu entries | game launchers | `PORT.md`: Install > Flatpak | Flathub `com.heroicgameslauncher.hgl` (verified), `com.mojang.Minecraft` (unverified) | **Restore** Heroic as a Flathub entry; Minecraft **partial** |
 | NordVPN, Bitwarden | `bin/omarchy-install-service-nordvpn`; `install.service.nordvpn`, `install.service.bitwarden` | VPN client; password manager | `PORT.md`: Install > Snap | NordVPN's apt repository answers and its snap is the vendor's; Bitwarden's snap and Flatpak are verified | **Restore** (NordVPN like Mullvad; Bitwarden like Thunderbird) |
@@ -173,23 +173,23 @@ avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fci
 | Package | What it is | Facts (stonking, 2026-10-16) | How |
 |---|---|---|---|
 | unzip | extract .zip files | main 6.0-31; the image has no unzip, zip or 7zip | base list |
-| btop, with `config/btop/btop.conf` | system monitor (Super+Ctrl+T, theme sync) | universe 1.4.7-1; the image has no system monitor at all | base list, config, binding, theme hook |
-| starship, with `config/starship.toml` | shell prompt | universe 1.26.0; `default/bash/init` still starts it when present | base list, config |
-| zoxide | smarter `cd` | universe 0.10.0; `default/bash/aliases` still wires it | base list |
-| eza | modern `ls` | universe 0.23.5-5; the `ls`/`lt` aliases still call it | base list |
+| btop, with `config/btop/btop.conf` | system monitor (Super+Ctrl+T, theme sync) | universe 1.4.7-1; the image has no system monitor at all | **Restored** 2026-10-16 (docs/6, choice 43) |
+| starship, with `config/starship.toml` | shell prompt | universe 1.26.0; `default/bash/init` still starts it when present | **Restored** 2026-10-16 (docs/6, choice 43) |
+| zoxide | smarter `cd` | universe 0.10.0; `default/bash/aliases` still wires it | **Restored** 2026-10-16 (docs/6, choice 43) |
+| eza | modern `ls` | universe 0.23.5-5; the `ls`/`lt` aliases still call it | **Restored** 2026-10-16 (docs/6, choice 43) |
 | mise and usage | Omarchy's developer-tool manager, behind dev-env and the coding-agent launchers | not in stonking; mise's vendor apt repository (`mise.jdx.dev/deb`) is live, and the vendor publishes a classic snap | vendor apt repository (today a curl script installs it on demand) |
 | gnome-disk-utility | Disks: format, SMART, images | main 46.1; `oaxaca-desktop-apps` holds it but is only Suggested, so it is never installed and no menu entry installs it | Depends or Recommends |
 | a calculator | Calculator key, Super+Ctrl+Q | Omacalc is not in stonking; gnome-calculator 1:50.0 in main; the image has no calculator | preinstall gnome-calculator and bind the keys, or build Omacalc (MIT) |
-| inxi | hardware summary in `omarchy-debug` | universe 3.3.41; the debug report says "inxi is not installed" | base list |
+| inxi | hardware summary in `omarchy-debug` | universe 3.3.41; the debug report says "inxi is not installed" | **Restored** 2026-10-16 (docs/6, choice 43) |
 | dua-cli | disk usage TUI behind the "Disk Usage" launcher | universe 2.34.0-1 | base list, launcher |
-| lazygit, with its (empty) config | git TUI | universe 0.57.0 | base list |
+| lazygit, with its (empty) config | git TUI | universe 0.57.0 | **Restored** 2026-10-16 (docs/6, choice 43) |
 | Obsidian | notes (Super+Shift+O, theme sync) | the vendor's snap (`obsidianmd`, classic) and Flathub | snap, `omarchy-theme-set-obsidian`, binding |
 | whois, ruby | small tools Omarchy shipped on purpose (ruby: "Ensure the system always has a base ruby", upstream `b7989ac8`) | main | base list |
 | Docker (docker.io, docker-buildx, docker-compose-v2) | containers, enabled by Omarchy with sudoless access | main and universe | with Omarchy's deleted setup scripts; lazydocker would need a build of the distro's own |
 | xournalpp, obs-studio, kdenlive | Omarchy's preinstalled apps | universe | base list (kdenlive is large) |
 | Pinta, Moonlight | Omarchy's preinstalled apps | not in stonking; Flathub (Pinta's snap is a third party's) | Flathub |
 | LibreOffice | office suite | Install > Productivity installs Canonical's snap | preinstall the snap to match Omarchy |
-| Omarchy's own MIT apps: ttfx, herdr, cliamp, omawrite, omacut, try | screensaver effects, terminal multiplexer, music player, writing app, video trimmer, throwaway directories | not in stonking; licensed MIT or Apache-2.0 | build in the distro's apt repository, as LocalSend is |
+| Omarchy's own MIT apps: herdr, cliamp, omawrite, omacut, try | terminal multiplexer, music player, writing app, video trimmer, throwaway directories | not in stonking; licensed MIT or Apache-2.0 | build in the distro's apt repository, as LocalSend is (ttfx done: `packages/ttfx`, docs/6, choice 43) |
 | Omarchy's LazyVim configuration (omarchy-nvim), with lua5.1, luarocks, tree-sitter-cli and a C compiler | Neovim set up by Omarchy | the port dropped it because the package build cannot fetch plugins | ship the configuration in `/etc/skel` and let lazy.nvim fetch plugins on first launch |
 | libpq-dev, libmariadb-dev | headers for Rails' pg and mysql2 gems | main | add to `dev-env ruby` |
 
@@ -198,7 +198,7 @@ avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fci
 | Feature | Where | What it did | Removed because | Checked facts | Verdict |
 |---|---|---|---|---|---|
 | SSH client keepalive | `install/config/all.sh` ran `ssh-keepalive.sh` | wrote `/etc/ssh/ssh_config.d/20-omarchy-keepalive.conf`: `ServerAliveInterval 15`, `ServerAliveCountMax 3`, `ConnectTimeout 10` | docs/6, "Ubuntu's configuration, not Omarchy's" (stonking ships `ssh_config.d` empty) | the port kept `default/bash/fns/ssh-reconnect`, which Omarchy's script says the keepalive exists for; without it a dead connection hangs until TCP gives up | **Restore**: the three-line drop-in in the config package |
-| btop: Super+Ctrl+T "Activity", theme sync, restart on theme change | `default/hypr/bindings/utilities.lua`, `bin/omarchy-theme-set`, `install/user/theme.sh` | themed system monitor on a key | docs/6 choice 15 ("Command-line preferences") | btop 1.4.7-1 in universe; the plan (docs/0, line 380) said to keep btop and add GPU boxes | **Restore** with `config/btop`, the binding, the restart and the theme link |
+| btop: Super+Ctrl+T "Activity", theme sync, restart on theme change | `default/hypr/bindings/utilities.lua`, `bin/omarchy-theme-set`, `install/user/theme.sh` | themed system monitor on a key | docs/6 choice 15 ("Command-line preferences") | btop 1.4.7-1 in universe; the plan (docs/0, line 380) said to keep btop and add GPU boxes | **Restored** 2026-10-16 (docs/6, choice 43) |
 | Voxtype first-run invitation | `bin/omarchy-provision-first-run` | one-time "Install Dictation with Voxtype" notification | removed 2026-10-10 when Voxtype could not be installed (choice 5) | Voxtype is in the distro's apt repository since choice 30 (2026-10-14) | **Restore** `install/user/first-run/install-voxtype.hook` |
 | DNS for every network, present and future | `bin/omarchy-dns` | Cloudflare, Google or custom DNS for all connections, with a Quad9 fallback | docs/6: rewritten on nmcli as the user, no sudoers rule, no edit of `resolved.conf` | the port changes only the connection profiles that exist when it runs; a network joined later uses DHCP's DNS | **Partial**: NetworkManager's global DNS (a `global-dns` drop-in or the D-Bus `GlobalDnsConfiguration`) |
 | Edge, Brave, Zen | `bin/omarchy-install-browser`, `-remove-browser`, `-theme-set-browser`, `-theme-set-browser-policy`, `-install-chromium-copy-url` | install, remove and theme these browsers | docs/6: proprietary builds replaced by open counterparts | Chrome and VS Code came back since, so that rule no longer holds; Microsoft's Edge apt repository, Brave's repository (already added for Brave Origin) and Flathub's `app.zen_browser.zen` (verified) exist | **Restore** |
@@ -261,10 +261,10 @@ Test cases deleted from files that stay: Bluetooth's `bt-agent.service` (`4b680c
 
 Things in the port today that call something deleted, or ship without the feature they served:
 
-- `bin/omarchy-launch-screensaver` exits when `ttfx` is missing, so the screensaver never runs.
-- `bin/omarchy-clipboard-open` and imv's Ctrl+E (`config/imv/config`) call `tensaku-edit`, Omarchy's image editor, which is not installed; swappy is the port's editor.
-- `bin/omarchy-debug` prints "inxi is not installed".
-- `default/bash/init` and `default/bash/aliases` wire starship, eza and zoxide, none of which is installed.
-- The ported agent skill (`default/agents/skills/omarchy/SKILL.md`) points at the btop, lazygit and starship configuration files, which were deleted.
+- ~~`bin/omarchy-launch-screensaver` exits when `ttfx` is missing~~ fixed 2026-10-16: ttfx is packaged and preinstalled.
+- ~~`bin/omarchy-clipboard-open` and imv's Ctrl+E call `tensaku-edit`~~ fixed 2026-10-16: both call swappy.
+- ~~`bin/omarchy-debug` prints "inxi is not installed"~~ fixed 2026-10-16: inxi is preinstalled.
+- ~~`default/bash/init` and `default/bash/aliases` wire starship, eza and zoxide, none of which is installed~~ fixed 2026-10-16: all three are preinstalled.
+- ~~The ported agent skill points at the btop, lazygit and starship configuration files, which were deleted~~ fixed 2026-10-16: the files and the programs are back.
 - Scripts with nothing calling them: `omarchy-launch-terminal-herdr`, `-menu-herdr-keybindings`, `-refresh-herdr`, `-restart-herdr` and `config/herdr/`; `omarchy-launch-openclaw`, `-openclaw-onboard`; `omarchy-install-font` (with Arch package names); `omarchy-hw-dell-xps-haptic-touchpad`; `omarchy-theme-set-t3code`.
 - Comments and docs that are out of date: `omarchy-default-agent` names `omarchy-install-openclaw-cli`; `enable-services.sh` describes a wait-online mask that is gone; the package list says Chromium is a snap placeholder with snapd pinned out, and that "dev-env installs" lua51, luarocks and python-poetry-core through mise (it does not; and Omarchy shipped `dotnet-runtime` for Pinta); `PORT.md` says Omarchy's list does not install `try` (it has `tobi-try`); docs/6 says Chrome and VS Code were replaced (both are back); docs/0 and docs/1 give different reasons for leaving out hibernation.

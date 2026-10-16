@@ -173,7 +173,7 @@ The Omarchy shell (bar, notifications, plugins, idle) is configured in
 |-----|----------|
 | fastfetch | `/etc/fastfetch/config.jsonc` default; `~/.config/fastfetch/config.jsonc` user override |
 | git | `~/.config/git/config` |
-| btop, lazygit, starship (not preinstalled; `omarchy pkg add <pkg>`) | `~/.config/btop/btop.conf`, `~/.config/lazygit/config.yml`, `~/.config/starship.toml` |
+| btop, lazygit, starship | `~/.config/btop/btop.conf`, `~/.config/lazygit/config.yml`, `~/.config/starship.toml` |
 
 ## Safe Customization Patterns
 

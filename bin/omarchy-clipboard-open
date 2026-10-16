@@ -30,7 +30,13 @@ open_image() {
   local path="$1"
 
   [[ -r $path ]] || exit 1
-  exec tensaku-edit "$path"
+  # The screenshot editor, as omarchy-capture-screenshot opens it: swappy, in place of Omarchy's
+  # Tensaku, which has no Ubuntu build; swappy takes the image with -f.
+  local editor="${OMARCHY_SCREENSHOT_EDITOR:-swappy}"
+  if [[ $editor == swappy ]]; then
+    exec swappy -f "$path"
+  fi
+  exec "$editor" "$path"
 }
 
 open_text() {

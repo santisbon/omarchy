@@ -318,6 +318,7 @@ flock -u 9
 post_theme_commands=(
   omarchy-restart-terminal
   omarchy-restart-hyprctl
+  omarchy-restart-btop
   omarchy-restart-opencode
   omarchy-restart-helix
   omarchy-theme-set-foot

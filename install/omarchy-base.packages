@@ -116,6 +116,16 @@ swappy
 tealdeer
 # tmux: preinstalled again 2026-10-14, with Omarchy's config (config/tmux), theme sync and bindings
 tmux
+# Restored 2026-10-16 (the distro repository's docs/6, choice 43): kept files call them. btop is
+# the Activity binding (Super+Ctrl+T) and follows the theme; starship, eza and zoxide are what
+# default/bash/init and aliases start when present; inxi is the hardware section of
+# omarchy-debug; lazygit, btop and starship are the configs the agent skill points at.
+btop
+eza
+inxi
+lazygit
+starship
+zoxide
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)
 snapd
 socat
@@ -172,8 +182,9 @@ gpg
 ca-certificates
 
 # Dropped from Omarchy's Arch list, with the reason:
-# aether, cliamp, herdr, omacalc, omacut, omawrite, tensaku, tobi-try, ttfx:
+# aether, cliamp, herdr, omacalc, omacut, omawrite, tensaku, tobi-try:
 #   Omarchy's own OPR packages, no Ubuntu build
+# ttfx: separate package (not in stonking; the distro's apt repository builds it from source)
 # asdcontrol: separate package
 # chromium: Ubuntu's chromium is a snap placeholder and snapd is pinned out
 # dotnet-runtime, ruby, lua51, luarocks, python-poetry-core: dev-env installs them via mise
@@ -205,8 +216,8 @@ ca-certificates
 # Omarchy's taste; see the distro repository's docs/6, "Core and apps"):
 # libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
-# build-essential, lazygit, btop, tree-sitter-cli, dua-cli, inxi,
-#   starship, zoxide, eza: command-line preferences (yt-dlp, removed with them, came back on
-#   2026-10-14 for the Download Video extension); the shell rc guards starship, zoxide and eza
+# build-essential, tree-sitter-cli, dua-cli: command-line preferences (yt-dlp, removed with
+#   them, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
+#   starship, zoxide and eza came back on 2026-10-16, listed above)
 # whois, unzip, wf-recorder, libsecret-tools: nothing in the port calls them
 # gnome-disk-utility: the optional omarchy-desktop-apps package; evince: replaced by papers (above) (ffmpegthumbnailer is a dependency of omarchy-desktop)
