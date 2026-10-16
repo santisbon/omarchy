@@ -9,6 +9,9 @@ o.bind("SUPER + ESCAPE", "System menu", "omarchy-menu toggle system")
 o.bind("XF86PowerOff", "Power menu", "omarchy-menu toggle system", { locked = true })
 o.bind("SUPER + K", "Keybindings", "omarchy-menu-keybindings")
 o.bind("SUPER + ALT + K", "Tmux keybindings", "omarchy-menu-tmux-keybindings")
+-- GNOME Calculator in place of Omarchy's Omacalc, which has no Ubuntu build.
+o.bind("SUPER + CTRL + Q", "Calculator", "gnome-calculator")
+o.bind("XF86Calculator", "Calculator", "gnome-calculator")
 
 o.bind_toggle("SUPER + SHIFT + SPACE", "Toggle top bar", "bar")
 o.bind("SUPER + CTRL + SPACE", "Background switcher", "omarchy-menu toggle background")

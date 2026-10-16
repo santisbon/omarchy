@@ -32,6 +32,10 @@ o.window("org.omarchy.about", { size = { 920, 480 } })
 o.window("me.jtheoof.swappy", { float = true })
 o.window("me.jtheoof.swappy", { center = true })
 
+-- GNOME Calculator, in place of Omarchy's Omacalc (Super+Ctrl+Q), floats as Omacalc did; its
+-- window class is its application ID, org.gnome.Calculator.
+o.window("org.gnome.Calculator", { float = true })
+
 -- Fullscreen screensaver.
 o.window("org.omarchy.screensaver", { fullscreen = true })
 o.window("org.omarchy.screensaver", { float = true })

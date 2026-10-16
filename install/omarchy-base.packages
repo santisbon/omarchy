@@ -126,6 +126,13 @@ inxi
 lazygit
 starship
 zoxide
+# Restored 2026-10-16 (docs/6, choice 47), the basic tools Omarchy preinstalls: unzip; GNOME
+# Disks (gnome-disk-utility, until then in the optional desktop-apps package); and GNOME
+# Calculator in place of Omarchy's Omacalc (no Ubuntu build), on Super+Ctrl+Q and the
+# Calculator key.
+gnome-calculator
+gnome-disk-utility
+unzip
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)
 snapd
 socat
@@ -219,5 +226,5 @@ ca-certificates
 # build-essential, tree-sitter-cli, dua-cli: command-line preferences (yt-dlp, removed with
 #   them, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
 #   starship, zoxide and eza came back on 2026-10-16, listed above)
-# whois, unzip, wf-recorder, libsecret-tools: nothing in the port calls them
-# gnome-disk-utility: the optional omarchy-desktop-apps package; evince: replaced by papers (above) (ffmpegthumbnailer is a dependency of omarchy-desktop)
+# whois, wf-recorder, libsecret-tools: nothing in the port calls them (unzip came back 2026-10-16, listed above)
+# evince: replaced by papers (above) (gnome-disk-utility, in the optional omarchy-desktop-apps package until 2026-10-16, is listed above; ffmpegthumbnailer is a dependency of omarchy-desktop)
