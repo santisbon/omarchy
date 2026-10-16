@@ -84,7 +84,7 @@ Item {
     // Keep the .desktop suffix or ids like org.telegram.desktop won't resolve.
     // omarchy-launch-desktop runs that same uwsm-app -- gtk-launch, and on hybrid graphics sends
     // an application whose entry asks for the discrete GPU (or that the user lists) to NVIDIA.
-    Util.execDetached(Util.shellQuote(root.omarchyPath + "/bin/omarchy-launch-desktop") + " " + Util.shellQuote(id))
+    Util.execDetached(Util.shellQuote(root.omarchyPath + "/bin/omarchy-launch-desktop") + " " + Util.shellQuote(id + ".desktop"))
   }
 
   function remove(desktopId, name) {

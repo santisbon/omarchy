@@ -23,13 +23,23 @@
 print=0
 [[ ${1:-} == --print ]] && { print=1; shift; }
 id=${1:?Usage: omarchy-launch-desktop [--print] <desktop-id>}
-id=${id%.desktop}
 
-entry=""
 IFS=: read -ra dirs <<<"${XDG_DATA_HOME:-$HOME/.local/share}:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
-for dir in "${dirs[@]}"; do
-  [[ -f $dir/applications/$id.desktop ]] && { entry=$dir/applications/$id.desktop; break; }
-done
+find_entry() {
+  local dir
+  for dir in "${dirs[@]}"; do
+    [[ -f $dir/applications/$1.desktop ]] && { echo "$dir/applications/$1.desktop"; return; }
+  done
+}
+
+# A desktop id can itself end in ".desktop": Telegram's id org.telegram.desktop names the file
+# org.telegram.desktop.desktop. So the suffix is dropped only when no entry has the id as given,
+# which still lets a caller pass a file name such as steam.desktop.
+entry=$(find_entry "$id")
+if [[ -z $entry && $id == *.desktop ]] && stripped_entry=$(find_entry "${id%.desktop}") && [[ -n $stripped_entry ]]; then
+  id=${id%.desktop}
+  entry=$stripped_entry
+fi
 
 on_dgpu=0
 reason="the display GPU (not a hybrid-graphics session)"
@@ -47,10 +57,11 @@ if [[ -n $dgpu ]]; then
   for list in "$config/nvidia-apps" "$config/dgpu-apps"; do
     [[ -f $list ]] || continue
     while IFS= read -r line; do
-      line=${line%%#*}; line=${line//[[:space:]]/}; line=${line%.desktop}
+      line=${line%%#*}; line=${line//[[:space:]]/}
       [[ -z $line ]] && continue
-      if [[ $line == "$id" ]]; then on_dgpu=1; reason="$dgpu (listed in $list)"; fi
-      if [[ $line == "-$id" ]]; then on_dgpu=0; reason="the display GPU (kept there by $list)"; fi
+      # ".desktop" is optional in the list, and an id can end in ".desktop" itself, so compare both.
+      if [[ $line == "$id" || $line == "$id.desktop" ]]; then on_dgpu=1; reason="$dgpu (listed in $list)"; fi
+      if [[ $line == "-$id" || $line == "-$id.desktop" ]]; then on_dgpu=0; reason="the display GPU (kept there by $list)"; fi
     done <"$list"
   done
 fi

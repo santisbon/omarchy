@@ -106,9 +106,12 @@ assert(
   'app library remove runs the remover through the shell'
 )
 
+// The port routes launches through bin/omarchy-launch-desktop, which runs the same
+// "uwsm-app -- gtk-launch" and adds discrete-GPU offload on hybrid graphics (commit dfe338ce).
 assert(
-  /function launch\(desktopId, name\) \{[\s\S]*?uwsm-app[\s\S]*?\n  \}/.test(appLibraryQml) &&
-    appLibraryQml.includes('Util.execDetached("uwsm-app -- gtk-launch "'),
+  /function launch\(desktopId, name\) \{[\s\S]*?omarchy-launch-desktop[\s\S]*?\n  \}/.test(appLibraryQml) &&
+    appLibraryQml.includes('Util.execDetached(Util.shellQuote(root.omarchyPath + "/bin/omarchy-launch-desktop")') &&
+    fs.readFileSync(path.join(root, 'bin/omarchy-launch-desktop'), 'utf8').includes('cmd=(uwsm-app -- gtk-launch "$id.desktop")'),
   'app library launches desktop entries through gtk-launch in their own scope'
 )
 
