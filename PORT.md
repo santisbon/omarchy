@@ -54,34 +54,15 @@ A PPA (Personal Package Archive) is an apt repository that a person or team publ
 | **Not included, available elsewhere**<br>No entry of its own; the general entry named installs the app as its source publishes it, without Omarchy's setup (checked 2026-10-14) | **Ubuntu's archive, main component** (Install > Package): Docker, as docker.io, without Omarchy's Docker setup<br><br>**Ubuntu's archive, universe component** (Install > Package): Helix (hx), Lazygit, btop, zoxide, eza, Disk Usage (dua-cli), GitHub CLI (gh), Kdenlive, OBS Studio, Xournal++<br><br>**The Snap Store** (Install > Snap): Bitwarden (published by Bitwarden; also on Flathub), NordVPN (published by NordVPN), Obsidian (published as `obsidianmd`; also on Flathub), OpenClaw (published by a Snap Store developer, not by the OpenClaw project)<br><br>**Flathub** (Install > Flatpak): LM Studio, Heroic, Minecraft Launcher, the Sunshine streaming host, Moonlight, Pinta, Obsidian, Bitwarden |
 | **Not included**<br>No entry of its own, and not in Ubuntu's archive, the Snap Store or Flathub (checked 2026-10-14) | Omarchy's own apps (the `omacom-io` projects), shipped with Omarchy: Herdr, Omawrite, Omacalc, Omacut, and Tensaku, Omarchy's screenshot editor (swappy takes its place, above).<br><br>Other apps Omarchy shipped: Aether, Cliamp, Lazydocker. Also try, which Omarchy's shell sets up when it is present but which Omarchy 4.0.4's package list does not install either.<br><br>Shipped with Omarchy, removed with their setup: Omarchy's LazyVim configuration for Neovim; the Docker database installer and the Windows VM, which run on Docker, whose setup the port removed.<br><br>Menu installers dropped because they install Arch or AUR packages: the AI desktop apps ChatGPT (Omarchy installed OpenAI's Codex desktop app), Grok Bot, Hermes Desktop (the Snap Store has only the Hermes agent's command-line tool) and Perplexity (the Snap Store's Perplexity desktop app is a third party's, not matched to Omarchy's package); ONCE; Battle.net (Omarchy ran Blizzard's installer through umu-launcher).<br><br>Arch's package sources: the AUR and Arch packages (Install > AUR), replaced by Install > Package (Ubuntu's archive), Install > Snap (the Snap Store) and Install > Flatpak (Flathub). |
 
+## Removals
+
+`PORT-REMOVALS.md`, next to this file, lists everything the port removed from Omarchy v4.0.4 (files, menu entries, packages, features cut inside kept files, and tests), the reason recorded for each, whether that reason holds, and a ranked restore list (audit of 2026-10-16).
+
 ## Tests
 
 `./test/all` runs Omarchy's command-line and shell tests (`test/cli`, `test/shell.d/*-test.sh`); `AGENTS.md` describes them. On 2026-10-16 the 62 shell test files that failed on this branch were sorted: a test of something the port deleted was deleted, a test of Arch behavior in a script the port kept was rewritten for the port's behavior (apt, dpkg, Ubuntu's `sudo` group and unit names), and the failures that were real bugs were fixed in the scripts (`omarchy-launch-desktop` and the application library dropped the `.desktop` suffix that ids such as Telegram's `org.telegram.desktop` need).
 
-Deleted test files, each with what it tested and the port commit that deleted that (`provision-user-test.sh`, deleted the same day with the agent skills, came back with them):
-
-| Test file | What it tested | Deleted by |
-|---|---|---|
-| `battlenet-test.sh` | the Battle.net installer and launcher | `ef4c9211` (Port Omarchy v4.0.4 to Ubuntu) |
-| `copy-url-shortcut-migration-test.sh` | migration `1786643346` | `46dc3cdc` (Handle migrations) |
-| `hermes-cli-migration-test.sh` | migration `1787760281` | `46dc3cdc` |
-| `hermes-skills-migration-test.sh` | migration `1787843905` | `46dc3cdc` |
-| `hermes-skin-migration-test.sh` | migration `1788619462` | `46dc3cdc` |
-| `hw-hybrid-gpu-test.sh`, `hybrid-gpu-test.sh` | `omarchy-hw-hybrid-gpu` and `omarchy-toggle-hybrid-gpu`, the ASUS hybrid-GPU toggle | `ef4c9211` |
-| `legacy-power-udev-rules-migration-test.sh` | migration `1788102906` | `46dc3cdc` |
-| `limine-cmdline-migration-test.sh`, `limine-defaults-test.sh` | Limine's defaults (`etc/limine-entry-tool.d/`) and migration `1786482992` | `ef4c9211`, `46dc3cdc` |
-| `nvidia-kms-hook-test.sh` | the mkinitcpio hook file `etc/mkinitcpio.conf.d/omarchy_hooks.conf` | `ef4c9211` |
-| `retired-installer-artifacts-migration-test.sh` | migration `1788025225` | `46dc3cdc` |
-| `security-fido2-migration-test.sh` | migration `1787494718` | `46dc3cdc` |
-| `snapper-timeline-leak-test.sh` | migration `1784809452` (Snapper) | `46dc3cdc` |
-| `t2-hardware-test.sh` | the Apple T2 setup (`install/hardware/apple/fix-t2.sh`) and migrations `1785944594`, `1786137597` | `ef4c9211`, `46dc3cdc` |
-| `t3code-install-test.sh` | the T3 Code installer and remover | `ef4c9211` |
-| `terminal-keybinding-migration-test.sh` | migration `1780057136` (Shift+Enter in terminals; the shipped terminal configurations already have the bindings) | `46dc3cdc` |
-| `update-pacman-guard-test.sh` | `omarchy-update-pacman-guard` | `ef4c9211` |
-| `voxtype-invitation-test.sh` | the first-run Voxtype invitation hook | `ef4c9211` |
-| `zram-migration-test.sh` | migration `1785013000` | `46dc3cdc` |
-
-Test cases deleted from files that stay: Bluetooth's `bt-agent.service` (`4b680c26`); migrations `1787515927`, `1787815267`, `1788724825`, `1785617047`, `1788577553`, `1785846769` (`46dc3cdc`); `omarchy-remove-preinstalls` (`c304e943`); the OpenClaw installer, the Zed and Heroic installers, Omarchy's CUPS hardening, the update's file- and package-conflict handler and its keyring and AUR steps, the hibernation setup, Remove > AI, and the omarchy-dev package channel (all `ef4c9211`).
+The deleted test files and test cases are listed in `PORT-REMOVALS.md`, "Tests".
 
 What the tests need on the machine that runs them, beyond the build tools: `lua` (Ubuntu's `lua5.5`) for the Hyprland configuration tests, `rg` (`ripgrep`) for the plugin, power-profile and Codex usage tests, a UTF-8 locale that loads (a shell exporting `LOCPATH` breaks the locale test), and a checkout whose directories are not group-writable (a checkout made under umask 0002 fails the Plymouth publisher's ownership check, which guards the installed, root-owned tree).
 
