@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# omarchy:summary=Create or restore system snapshots with Timeshift (btrfs installs)
+# omarchy:args=<create|restore>
+# omarchy:requires-sudo=true
+
+set -e
+
+# Omarchy drives Snapper and restores from Limine's boot menu. This port uses Timeshift, which
+# takes snapshots of the @ subvolume on the btrfs layout the installer creates (@ and @home) and
+# restores them from the running system or from the installation USB stick; GRUB cannot list
+# snapshots of an encrypted root. Only btrfs installs have snapshots: the installer keeps Timeshift
+# and writes /etc/timeshift/timeshift.json there (the build repo's docs/7, choice 51).
+
+COMMAND="$1"
+# The update's snapshots carry this description prefix, so pruning never touches a snapshot the
+# user took in Timeshift.
+PREFIX="omarchy-update"
+KEEP="${OMARCHY_SNAPSHOT_KEEP:-5}"
+
+if [[ -z $COMMAND ]]; then
+  echo "Usage: omarchy-snapshot <create|restore>" >&2
+  exit 1
+fi
+
+# 127 tells omarchy-update that snapshots are deliberately absent (an ext4 or xfs install), as
+# Omarchy's Snapper version did when Snapper was missing.
+if omarchy-cmd-missing timeshift || [[ $(findmnt -no FSTYPE / 2>/dev/null) != "btrfs" ]]; then
+  exit 127
+fi
+
+case "$COMMAND" in
+create)
+  # The description is just a label, so never let it abort the snapshot.
+  DESC="$PREFIX $(omarchy-version 2>/dev/null || echo unknown)"
+
+  echo -e "\e[32mCreate system snapshot\e[0m"
+  sudo timeshift --create --scripted --tags O --comments "$DESC"
+
+  # Timeshift prunes only its scheduled snapshots, never on-demand ones (tag O). Keep the newest
+  # $KEEP of the update's own, as Omarchy's Snapper configuration keeps five (NUMBER_LIMIT=5).
+  # "timeshift --list" prints one row per snapshot, oldest first: "<num> > <name> <tags> <description>".
+  mapfile -t ours < <(sudo timeshift --list --scripted 2>/dev/null |
+    awk -v prefix="$PREFIX" '$2 == ">" && $4 == "O" && $5 == prefix { print $3 }')
+  if (( ${#ours[@]} > KEEP )); then
+    for name in "${ours[@]:0:${#ours[@]}-KEEP}"; do
+      sudo timeshift --delete --snapshot "$name" --scripted >/dev/null
+    done
+  fi
+
+  echo "Restore with omarchy-snapshot restore, or with Timeshift from the installation USB stick."
+  ;;
+restore)
+  # Timeshift's window lists the snapshots; a restore needs a reboot to finish.
+  timeshift-launcher
+  ;;
+*)
+  echo "Usage: omarchy-snapshot <create|restore>" >&2
+  exit 1
+  ;;
+esac
