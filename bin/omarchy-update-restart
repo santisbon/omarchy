@@ -8,10 +8,13 @@ confirm_reboot() {
   gum confirm "$1" && { omarchy-system-reboot; exit 0; }
 }
 
-# Ubuntu's kernel packages write /var/run/reboot-required only when
+# Ubuntu's kernel packages write /run/reboot-required only when
 # update-notifier-common is installed, and the distro leaves that package out.
 # The installed images are /boot/vmlinuz-<release>, so the newest release on
-# disk compared with the running one answers the same question. sort -V keeps
+# disk compared with the running one answers the same question. Other packages
+# follow Ubuntu's convention and write /run/reboot-required themselves (the
+# distro's config package does when a change only takes effect at boot), so
+# that file is checked as well; /run is a tmpfs, so a reboot clears it. sort -V keeps
 # 6.17.0-10 after 6.17.0-9, where a plain sort would not.
 running_kernel=$(uname -r)
 newest_kernel=$(
@@ -22,7 +25,7 @@ newest_kernel=$(
 
 if [[ -n $newest_kernel && $newest_kernel != "$running_kernel" ]]; then
   confirm_reboot "Linux kernel has been updated. Reboot?"
-elif [[ -f $HOME/.local/state/omarchy/reboot-required ]]; then
+elif [[ -f /run/reboot-required || -f $HOME/.local/state/omarchy/reboot-required ]]; then
   confirm_reboot "Updates require reboot. Ready?"
 fi
 
