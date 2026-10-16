@@ -38,7 +38,6 @@ Omarchy fires hooks at a handful of moments, and you can hang your own scripts o
 | ----- | ------------ |
 | `post-boot` | Right after the desktop has started |
 | `post-update` | During `omarchy update`, after packages and migrations |
-| `pre-refresh-pacman` | Before `omarchy refresh pacman` re-syncs the package config |
 | `theme-set` | After a theme change (theme name in `$1`) |
 | `font-set` | After a font change (font name in `$1`) |
 | `battery-low` | When the battery gets low (percentage in `$1`) |
