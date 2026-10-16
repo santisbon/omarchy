@@ -10,7 +10,9 @@
 #      alone (omarchy.org, the omacom/basecamp GitHub organisations, omarchy-pkgs, the
 #      Omarchy manual), because they still point at Omarchy; with DISTRO_BUG_URL and
 #      DISTRO_HOME_URL set, the support pointers (omarchy.org/discord, omarchy.org) in
-#      user-facing messages become the distro's;
+#      user-facing messages become the distro's; with DISTRO_FORK_REPO set (owner/name of
+#      this fork on GitHub, such as santisbon/omarchy), that repository's name is kept too,
+#      because the agent skills send bug reports there;
 #   3. renames every file and directory whose name contains "omarchy" or "Omarchy";
 #   4. renames the icon font's family inside default/fonts/<id>/<id>.ttf with fontTools,
 #      because the shell asks for that family by name.
@@ -54,13 +56,17 @@ find themes -path '*/backgrounds/*' -type f -iname '*omarchy*' -print -delete 2>
 #    omarchy.org and the names of Omarchy's other repositories.
 export RENAME_ID="$id" RENAME_NAME="$name" RENAME_UPPER="$upper"
 export RENAME_BUG_URL="${DISTRO_BUG_URL:-}" RENAME_HOME_URL="${DISTRO_HOME_URL:-}"
+export RENAME_FORK_REPO="${DISTRO_FORK_REPO:-}"
 grep -rIlZ --exclude-dir=.git -E 'omarchy|Omarchy|OMARCHY' . | xargs -0 -r perl -pi -e '
+  # The fork repository name stays as it is: hidden from the rules below, then put back.
+  if ($ENV{RENAME_FORK_REPO} ne q{}) { s#\Q$ENV{RENAME_FORK_REPO}\E#\x{1}FORK\x{1}#g; }
   # Support pointers in user-facing messages go to the distro, when the build says where.
   if ($ENV{RENAME_BUG_URL} ne q{}) { s#https://omarchy\.org/discord#$ENV{RENAME_BUG_URL}#g; }
   if ($ENV{RENAME_HOME_URL} ne q{}) { s#https://omarchy\.org(?![/\w])#$ENV{RENAME_HOME_URL}#g; }
   s/OMARCHY/$ENV{RENAME_UPPER}/g;
   s/Omarchy(?!\.org)/$ENV{RENAME_NAME}/g;
   s/(?<!omacom\/)(?<!basecamp\/)(?<!omacom-io\/)(?<!the-)omarchy(?!\.org)(?!-pkgs)(?!-mirror)(?!-site)(?!-audio-tuner)/$ENV{RENAME_ID}/g;
+  if ($ENV{RENAME_FORK_REPO} ne q{}) { s#\x{1}FORK\x{1}#$ENV{RENAME_FORK_REPO}#g; }
 '
 
 # 3. Paths, deepest first so a directory is renamed after its contents.

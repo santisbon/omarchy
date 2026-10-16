@@ -58,7 +58,7 @@ A PPA (Personal Package Archive) is an apt repository that a person or team publ
 
 `./test/all` runs Omarchy's command-line and shell tests (`test/cli`, `test/shell.d/*-test.sh`); `AGENTS.md` describes them. On 2026-10-16 the 62 shell test files that failed on this branch were sorted: a test of something the port deleted was deleted, a test of Arch behavior in a script the port kept was rewritten for the port's behavior (apt, dpkg, Ubuntu's `sudo` group and unit names), and the failures that were real bugs were fixed in the scripts (`omarchy-launch-desktop` and the application library dropped the `.desktop` suffix that ids such as Telegram's `org.telegram.desktop` need).
 
-Deleted test files, each with what it tested and the port commit that deleted that:
+Deleted test files, each with what it tested and the port commit that deleted that (`provision-user-test.sh`, deleted the same day with the agent skills, came back with them):
 
 | Test file | What it tested | Deleted by |
 |---|---|---|
@@ -71,7 +71,6 @@ Deleted test files, each with what it tested and the port commit that deleted th
 | `legacy-power-udev-rules-migration-test.sh` | migration `1788102906` | `46dc3cdc` |
 | `limine-cmdline-migration-test.sh`, `limine-defaults-test.sh` | Limine's defaults (`etc/limine-entry-tool.d/`) and migration `1786482992` | `ef4c9211`, `46dc3cdc` |
 | `nvidia-kms-hook-test.sh` | the mkinitcpio hook file `etc/mkinitcpio.conf.d/omarchy_hooks.conf` | `ef4c9211` |
-| `provision-user-test.sh` | the AI agents' skill links that `omarchy-provision-user` made (`default/agents/skills`) | `ef4c9211` |
 | `retired-installer-artifacts-migration-test.sh` | migration `1788025225` | `46dc3cdc` |
 | `security-fido2-migration-test.sh` | migration `1787494718` | `46dc3cdc` |
 | `snapper-timeline-leak-test.sh` | migration `1784809452` (Snapper) | `46dc3cdc` |
