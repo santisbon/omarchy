@@ -10,24 +10,27 @@ trap 'rm -rf "$test_tmp"' EXIT
 stub_bin="$test_tmp/bin"
 mkdir -p "$stub_bin"
 
-# The edge channel installs omarchy-dev. Older builds did not declare
-# provides=(omarchy), so a query for plain omarchy finds nothing there.
-cat >"$stub_bin/pacman" <<'STUB'
+# The port reads the version of omarchy-tools, the package that ships these
+# scripts, through dpkg-query -W -f='${Version}'. dpkg-query fails for a
+# package it has never heard of, and prints nothing for one that was removed
+# but left its configuration files behind.
+cat >"$stub_bin/dpkg-query" <<'STUB'
 #!/bin/bash
-[[ $1 == "-Q" ]] || exit 1
-shift
-for package in "$@"; do
-  case ",${OMARCHY_TEST_PACKAGES:-}," in
-    *",$package,"*)
-      echo "$package ${OMARCHY_TEST_VERSION:-4.0.0-1}"
-      exit 0
-      ;;
-  esac
-done
-echo "error: package '$1' was not found" >&2
+[[ $1 == "-W" && $2 == '-f=${Version}' ]] || exit 1
+package=$3
+case ",${OMARCHY_TEST_PACKAGES:-}," in
+  *",$package,"*)
+    printf '%s' "${OMARCHY_TEST_VERSION:-0.1.8}"
+    exit 0
+    ;;
+  *",$package:removed,"*)
+    exit 0
+    ;;
+esac
+echo "dpkg-query: no packages found matching $package" >&2
 exit 1
 STUB
-chmod +x "$stub_bin/pacman"
+chmod +x "$stub_bin/dpkg-query"
 
 version() {
   OMARCHY_TEST_PACKAGES="$1" \
@@ -36,11 +39,8 @@ version() {
     "$ROOT/bin/omarchy-version"
 }
 
-[[ $(version omarchy) == "4.0.0-1" ]] || fail "version reports the stable package"
-pass "version reports the stable package"
-
-[[ $(version omarchy-dev) == "4.0.0-1" ]] || fail "version reports the edge package"
-pass "version reports the edge package"
+[[ $(version omarchy-tools) == "0.1.8" ]] || fail "version reports the omarchy-tools package"
+pass "version reports the omarchy-tools package"
 
 # A checkout reports its hash instead, so packages are irrelevant there.
 [[ $(version "" "$test_tmp/checkout") == "dev" ]] || fail "version reports a dev checkout"
@@ -50,6 +50,11 @@ if version "" >/dev/null 2>&1; then
   fail "version fails when no Omarchy package is installed"
 fi
 pass "version fails when no Omarchy package is installed"
+
+if version "omarchy-tools:removed" >/dev/null 2>&1; then
+  fail "version fails when omarchy-tools was removed but left its configuration"
+fi
+pass "version fails when omarchy-tools was removed but left its configuration"
 
 # The snapshot description is only a label, so a failed lookup must not abort
 # the update under set -e.

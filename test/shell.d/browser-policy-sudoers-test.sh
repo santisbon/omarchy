@@ -7,7 +7,8 @@ source "$(dirname "$0")/base-test.sh"
 helper="$ROOT/bin/omarchy-theme-set-browser-policy"
 setter="$ROOT/bin/omarchy-theme-set-browser"
 sudoers_file="$ROOT/etc/sudoers.d/omarchy-theme-browser"
-rule='%wheel ALL=(root) NOPASSWD: /usr/bin/omarchy-theme-set-browser-policy [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]'
+# Ubuntu's administrators are the sudo group, not Arch's wheel (PORT.md, "What the branch holds").
+rule='%sudo ALL=(root) NOPASSWD: /usr/bin/omarchy-theme-set-browser-policy [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]'
 
 # Exactly one rule, matched whole. Dropping the argument -- which sudoers reads
 # as "any arguments" -- or widening the glob to `*` would let the grant carry
@@ -34,15 +35,17 @@ gated=$(grep -A1 -E '^if \(\( EUID == 0 \)\); then$' "$helper" || true)
 
 pass "browser policy sudoers rule is scoped to a single color argument"
 
+# The port's browser installer offers no Edge (docs/6, choice 16), so its policy
+# directory left the list (commit e64cf328).
 for dir in /etc/chromium/policies/managed /etc/opt/chrome/policies/managed \
-  /etc/opt/edge/policies/managed /etc/brave/policies/managed; do
+  /etc/brave/policies/managed; do
   grep -Fx "  $dir" "$helper" >/dev/null ||
     fail "omarchy-theme-set-browser-policy names $dir in its fixed policy directory list"
 done
 
 policy_dir_count=$(sed -n '/^POLICY_DIRS=(/,/^)/p' "$helper" | grep -c '^  /')
-((policy_dir_count == 4)) ||
-  fail "omarchy-theme-set-browser-policy writes only the four known policy directories" \
+((policy_dir_count == 3)) ||
+  fail "omarchy-theme-set-browser-policy writes only the three known policy directories" \
     "got: $policy_dir_count"
 
 grep -F 'install -m 0644 -o root -g root -T' "$helper" >/dev/null ||

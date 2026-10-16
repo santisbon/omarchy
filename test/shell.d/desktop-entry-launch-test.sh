@@ -22,12 +22,19 @@ cat >"$mock_bin/omarchy-font-set" <<'SH'
 printf 'font:%s\n' "$*" >>"$OMARCHY_TEST_LOG"
 SH
 
-for command in omarchy-pkg-aur-add omarchy-install-emacs omazed omarchy-theme-set-vscode omarchy-install-gaming-gpu-lib32; do
+for command in omarchy-pkg-flatpak-add omarchy-theme-set-vscode omarchy-install-32bit-graphics; do
   cat >"$mock_bin/$command" <<'SH'
 #!/bin/bash
 exit 0
 SH
 done
+
+# omarchy-install-gaming-steam adds the i386 architecture unless dpkg already has it.
+cat >"$mock_bin/dpkg" <<'SH'
+#!/bin/bash
+[[ $1 == --print-foreign-architectures ]] && echo i386
+exit 0
+SH
 
 cat >"$mock_bin/setsid" <<'SH'
 #!/bin/bash
@@ -57,32 +64,36 @@ wait_for_launch() {
   return 1
 }
 
+# The port's installers start the app through one of three scoped launches:
+# "uwsm-app -- gtk-launch <id>" as upstream, omarchy-launch-desktop (which runs
+# that same gtk-launch and adds discrete-GPU offload, commit dfe338ce), or, for
+# a Flatpak, "uwsm-app -- flatpak run <app id>".
 assert_detached_installer_launch() {
   local script="$1"
-  local desktop_id="$2"
+  local launch="$2"
 
   : >"$OMARCHY_TEST_LOG"
   bash "$ROOT/bin/$script"
 
-  wait_for_launch "launch:uwsm-app -- gtk-launch $desktop_id" ||
-    fail "$script launches its desktop entry through gtk-launch in a UWSM scope"
-  grep -Fqx "setsid uwsm-app -- gtk-launch $desktop_id >/dev/null 2>&1 &" "$ROOT/bin/$script" ||
-    fail "$script detaches its scoped desktop-entry launch"
-  pass "$script detaches its scoped desktop-entry launch"
+  wait_for_launch "launch:$launch" ||
+    fail "$script launches its app in a UWSM scope" "$(<"$OMARCHY_TEST_LOG")"
+  grep -Fqx "setsid $launch >/dev/null 2>&1 &" "$ROOT/bin/$script" ||
+    fail "$script detaches its scoped launch"
+  pass "$script detaches its scoped launch"
 }
 
-assert_detached_installer_launch omarchy-install-editor-emacs emacsclient
-assert_detached_installer_launch omarchy-install-editor-vscodium codium
-assert_detached_installer_launch omarchy-install-editor-zed dev.zed.Zed
-assert_detached_installer_launch omarchy-install-gaming-heroic heroic
-assert_detached_installer_launch omarchy-install-gaming-steam steam
+# Ubuntu's emacs package has no Omarchy daemon unit, so the installer opens
+# Emacs itself rather than emacsclient.
+assert_detached_installer_launch omarchy-install-editor-emacs "uwsm-app -- gtk-launch emacs"
+assert_detached_installer_launch omarchy-install-editor-vscodium "uwsm-app -- flatpak run com.vscodium.codium"
+assert_detached_installer_launch omarchy-install-gaming-steam "omarchy-launch-desktop steam"
 
 bash "$ROOT/bin/omarchy-install-and-launch" "Example App" "alpha beta" "Disk Usage"
 presentation_command=$(<"$OMARCHY_TEST_PRESENTATION")
 
 [[ $presentation_command == *'echo Installing\ Example\ App...;'* ]] ||
   fail "generic installer shell-quotes the display name" "$presentation_command"
-[[ $presentation_command == *'omarchy-pkg-add alpha beta && (setsid uwsm-app -- gtk-launch Disk\ Usage >/dev/null 2>&1 &)'* ]] ||
+[[ $presentation_command == *'omarchy-pkg-add alpha beta && (setsid omarchy-launch-desktop Disk\ Usage >/dev/null 2>&1 &)'* ]] ||
   fail "generic installer waits for packages and detaches only the scoped launch" "$presentation_command"
 pass "generic installer waits for packages and detaches only the scoped launch"
 
@@ -90,7 +101,7 @@ pass "generic installer waits for packages and detaches only the scoped launch"
 bash -c "$presentation_command"
 grep -Fxq 'pkg:alpha beta' "$OMARCHY_TEST_LOG" ||
   fail "generic installer passes every package to the package helper"
-wait_for_launch 'launch:uwsm-app -- gtk-launch Disk Usage' ||
+wait_for_launch 'launch:omarchy-launch-desktop Disk Usage' ||
   fail "generic installer preserves a desktop ID containing spaces"
 pass "generic installer preserves a desktop ID containing spaces"
 

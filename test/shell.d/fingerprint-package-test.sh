@@ -1,9 +1,11 @@
 #!/bin/bash
 #
-# The fingerprint setup installs libfprint-git in place of stock libfprint. The
-# two conflict, so the swap has to happen inside one --ask 4 transaction, and a
-# rerun with everything installed must not touch pacman at all. The real
-# omarchy-pkg-missing runs; pacman and the privileged calls are stubbed.
+# The fingerprint setup installs nothing: fprintd, libpam-fprintd and usbutils
+# are in the distro's base install (see the comment in
+# bin/omarchy-setup-security-fingerprint). Whatever happens, no package manager
+# may run; a missing reader or a missing fprintd-enroll stops before
+# enrollment, and a failed enrollment must not change PAM. The package
+# managers and the privileged calls are stubbed.
 
 set -euo pipefail
 
@@ -19,75 +21,94 @@ cat > "$scratch/bin/omarchy-hw-fingerprint" <<'STUB'
 #!/bin/bash
 exit "${HARDWARE_STATUS:-0}"
 STUB
+# FPRINTD_MISSING=1 simulates an image without fprintd-enroll; this
+# workstation may have the real one in /usr/bin.
+cat > "$scratch/bin/omarchy-cmd-missing" <<STUB
+#!/bin/bash
+[[ \${FPRINTD_MISSING:-0} == 1 && " \$* " == *" fprintd-enroll "* ]] && exit 0
+exec "$ROOT/bin/omarchy-cmd-missing" "\$@"
+STUB
+# PAM changes are recorded, never applied: pam-auth-update and the tee into
+# /etc/pam.d are what setup does once enrollment and verification pass.
 cat > "$scratch/bin/sudo" <<'STUB'
 #!/bin/bash
 case "$1" in
-  pacman | fprintd-enroll) exec "$@" ;;
+  fprintd-enroll) exec "$@" ;;
+  pam-auth-update) printf 'pam %s\n' "$*" >> "$CALL_LOG" ;;
+  tee) cat > /dev/null; printf 'pam %s\n' "$*" >> "$CALL_LOG" ;;
   *) echo "Unexpected privileged call: $*" >> "$CALL_LOG"; exit 99 ;;
 esac
 STUB
-# INSTALLED lists the installed package names, one per line.
-cat > "$scratch/bin/pacman" <<'STUB'
+for manager in apt apt-get dpkg pacman snap flatpak; do
+  cat > "$scratch/bin/$manager" <<'STUB'
 #!/bin/bash
-case "$1" in
-  -Q) grep -qx "$2" <<< "${INSTALLED:-}" ;;
-  -S)
-    printf 'pacman %s\n' "$*" >> "$CALL_LOG"
-    exit "${INSTALL_STATUS:-0}"
-    ;;
-  *) printf 'pacman %s\n' "$*" >> "$CALL_LOG"; exit 99 ;;
-esac
+printf 'package %s %s\n' "$(basename "$0")" "$*" >> "$CALL_LOG"
+exit 99
 STUB
+done
 cat > "$scratch/bin/fprintd-enroll" <<'STUB'
 #!/bin/bash
-# Stop before verification/PAM; no host authentication files may be changed.
 echo enroll >> "$CALL_LOG"
-exit 1
+exit "${ENROLL_STATUS:-1}"
 STUB
 cat > "$scratch/bin/fprintd-verify" <<'STUB'
 #!/bin/bash
 echo verify >> "$CALL_LOG"
-exit 1
+exit "${VERIFY_STATUS:-1}"
 STUB
 chmod +x "$scratch/bin/"*
 
 run_setup() {
   : > "$CALL_LOG"
-  if "$ROOT/bin/omarchy-setup-security-fingerprint" > "$scratch/output" 2>&1; then
-    fail "setup stops on the simulated enrollment or installation failure"
+  "$ROOT/bin/omarchy-setup-security-fingerprint" > "$scratch/output" 2>&1
+}
+
+assert_no_packages() {
+  if grep -q '^package ' "$CALL_LOG"; then
+    fail "$1: no package manager runs" "$(cat "$CALL_LOG")"
   fi
   if grep -q 'Unexpected privileged call' "$CALL_LOG"; then
-    fail "setup does not change PAM after failed enrollment"
+    fail "$1: no unexpected privileged call" "$(cat "$CALL_LOG")"
   fi
 }
 
-assert_installs() {
-  grep -qx 'pacman -S --needed --noconfirm --ask 4 libfprint-git fprintd usbutils' "$CALL_LOG" || fail "$1"
-  (( $(grep -c '^pacman ' "$CALL_LOG") == 1 )) || fail "$1: one pacman transaction"
-}
-
-run_setup
-assert_installs "a fresh machine installs libfprint-git, fprintd and usbutils"
-grep -qx enroll "$CALL_LOG" || fail "installation is followed by enrollment"
-pass "a fresh machine installs libfprint-git and reaches enrollment"
-
-INSTALLED=$'libfprint\nfprintd\nusbutils' run_setup
-assert_installs "installed stock libfprint is replaced in the same transaction"
-pass "installed stock libfprint is replaced without a removal step"
-
-INSTALLED=$'libfprint-git\nfprintd\nusbutils' run_setup
-if grep -q '^pacman' "$CALL_LOG"; then
-  fail "a rerun with everything installed does not touch pacman"
+if run_setup; then
+  fail "setup stops on the simulated enrollment failure"
 fi
-grep -qx enroll "$CALL_LOG" || fail "a rerun with everything installed reaches enrollment"
-pass "a rerun with everything installed goes straight to enrollment"
+assert_no_packages "a failed enrollment"
+grep -qx enroll "$CALL_LOG" || fail "setup reaches enrollment without installing anything"
+if grep -q '^pam ' "$CALL_LOG"; then
+  fail "setup does not change PAM after failed enrollment" "$(cat "$CALL_LOG")"
+fi
+pass "a failed enrollment installs nothing and leaves PAM alone"
 
-INSTALL_STATUS=1 run_setup
+ENROLL_STATUS=0 run_setup || fail "setup succeeds when verification fails after enrollment"
+assert_no_packages "a failed verification"
+grep -qx verify "$CALL_LOG" || fail "enrollment is followed by verification"
+if grep -q '^pam ' "$CALL_LOG"; then
+  fail "setup does not change PAM after failed verification" "$(cat "$CALL_LOG")"
+fi
+pass "a failed verification leaves PAM alone"
+
+ENROLL_STATUS=0 VERIFY_STATUS=0 run_setup || fail "setup succeeds after enrollment and verification" "$(cat "$scratch/output")"
+assert_no_packages "a successful setup"
+grep -qx 'pam pam-auth-update --package --enable fprintd' "$CALL_LOG" ||
+  fail "a verified print enables Ubuntu's fprintd PAM profile" "$(cat "$CALL_LOG")"
+grep -qx 'pam tee /etc/pam.d/omarchy-lock-fingerprint' "$CALL_LOG" ||
+  fail "a verified print writes the lock screen's PAM file" "$(cat "$CALL_LOG")"
+pass "a verified print enables PAM without installing anything"
+
+if FPRINTD_MISSING=1 run_setup; then
+  fail "setup stops when fprintd-enroll is missing"
+fi
+assert_no_packages "a missing fprintd-enroll"
 if grep -qx enroll "$CALL_LOG"; then
-  fail "a failed package transaction prevents enrollment"
+  fail "a missing fprintd-enroll stops before enrollment"
 fi
-pass "a failed installation stops before enrollment"
+pass "a missing fprintd-enroll stops without installing it"
 
-HARDWARE_STATUS=1 run_setup
-[[ ! -s $CALL_LOG ]] || fail "missing hardware stops before package operations"
-pass "missing hardware performs no package operations"
+if HARDWARE_STATUS=1 run_setup; then
+  fail "setup stops when no reader is detected"
+fi
+[[ ! -s $CALL_LOG ]] || fail "missing hardware stops before any operation" "$(cat "$CALL_LOG")"
+pass "missing hardware performs no operations"

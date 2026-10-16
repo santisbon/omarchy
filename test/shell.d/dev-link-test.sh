@@ -79,8 +79,9 @@ run_link "$checkout" --no-reboot >"$test_tmp/link.out"
 pass "dev link points OMARCHY_PATH at the checkout"
 
 # sudo reads secure_path, not the caller's PATH, so the checkout has to come
-# first there too or `sudo omarchy-*` runs the packaged copy.
-[[ $(<"$sudoers_file") == "Defaults secure_path=\"$checkout/bin:/usr/local/sbin:/usr/local/bin:/usr/bin\"" ]] ||
+# first there too or `sudo omarchy-*` runs the packaged copy. The rest is
+# Ubuntu's secure_path from sudo-common's /etc/sudoers (bin/omarchy-dev-link).
+[[ $(<"$sudoers_file") == "Defaults secure_path=\"$checkout/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin\"" ]] ||
   fail "dev link prepends the checkout to sudo's secure_path" "$(<"$sudoers_file")"
 pass "dev link prepends the checkout to sudo's secure_path"
 

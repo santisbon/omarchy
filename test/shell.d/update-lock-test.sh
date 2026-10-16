@@ -37,10 +37,8 @@ for command in \
   systemd-inhibit \
   omarchy-update-pkg-prune \
   omarchy-update-dev \
-  omarchy-update-keyring \
   omarchy-update-system-pkgs \
   omarchy-migrate \
-  omarchy-update-aur-pkgs \
   omarchy-update-mise \
   omarchy-update-orphan-pkgs \
   omarchy-hook \
@@ -83,17 +81,19 @@ pass "omarchy-update prevents overlapping top-level updates"
 # would otherwise leave the inhibitor holding the flock forever, blocking every
 # later update and silencing omarchy-migrate-notify, which reads the same lock.
 inhibit_pid_file="$test_tmp/inhibit-pid"
-keyring_marker="$test_tmp/keyring-started"
+# The port has no keyring step (apt has no pacman keyring to refresh), so the
+# step held open here is omarchy-update-dev, the first one after the inhibitor starts.
+dev_marker="$test_tmp/dev-started"
 write_stub omarchy-snapshot 'exit 0'
 write_stub systemd-inhibit 'echo "$$" >"$INHIBIT_PID_FILE"; exec sleep 30'
-write_stub omarchy-update-keyring 'echo started >"$TEST_MARKER"; sleep 3; exit 0'
+write_stub omarchy-update-dev 'echo started >"$TEST_MARKER"; sleep 3; exit 0'
 
-OMARCHY_UPDATE_LOGGED=1 TEST_MARKER="$keyring_marker" INHIBIT_PID_FILE="$inhibit_pid_file" \
+OMARCHY_UPDATE_LOGGED=1 TEST_MARKER="$dev_marker" INHIBIT_PID_FILE="$inhibit_pid_file" \
   run_with_lock_env "$ROOT/bin/omarchy-update" -y >"$test_tmp/update-inhibit.out" 2>&1 &
 inhibit_update_pid=$!
 
 for _ in {1..100}; do
-  [[ -s $inhibit_pid_file && -f $keyring_marker ]] && break
+  [[ -s $inhibit_pid_file && -f $dev_marker ]] && break
   sleep 0.05
 done
 [[ -s $inhibit_pid_file ]] || fail "update starts its sleep inhibitor"
@@ -156,7 +156,7 @@ fi
 # Update-owned Stay Awake state must be cleared before the restart helper can
 # reboot the machine, rather than relying on an EXIT trap during shutdown.
 write_stub omarchy-snapshot 'exit 0'
-write_stub omarchy-update-keyring 'exit 0'
+write_stub omarchy-update-dev 'exit 0'
 write_stub omarchy-toggle-idle '
 state_file="$HOME/.local/state/omarchy/indicators/stay-awake"
 case "$1" in

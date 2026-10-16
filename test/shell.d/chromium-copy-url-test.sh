@@ -77,13 +77,34 @@ pass "copy-url native host installer registers the stable extension id"
 grep -q 'user/chromium.sh' "$ROOT/install/user/all.sh" ||
   fail "user install runs the Chromium native messaging host setup"
 
+# The port's install/user/chromium.sh skips the hosts when no chromium command
+# is present (Remove > Browser can take Chromium off), so a stub stands in for
+# the browser, and a run without one must register nothing.
+fake_chromium_bin="$TMPDIR/fake-chromium-bin"
+mkdir -p "$fake_chromium_bin"
+printf '#!/bin/bash\nexit 0\n' >"$fake_chromium_bin/chromium"
+chmod +x "$fake_chromium_bin/chromium"
+
 fresh_home="$TMPDIR/fresh-install"
-HOME="$fresh_home" OMARCHY_PATH="$ROOT" PATH="$ROOT/bin:$PATH" \
+HOME="$fresh_home" OMARCHY_PATH="$ROOT" PATH="$fake_chromium_bin:$ROOT/bin:$PATH" \
   bash -euo pipefail -c 'source "$ROOT/install/user/chromium.sh"'
 
 [[ -f $fresh_home/.config/chromium/NativeMessagingHosts/com.omarchy.copy_url.json ]] ||
   fail "fresh install registers the copy-url native messaging host"
 pass "fresh install registers the copy-url native messaging host"
+
+no_chromium_bin="$TMPDIR/no-chromium-bin"
+mkdir -p "$no_chromium_bin"
+for tool in bash sed mkdir; do
+  ln -s "$(command -v "$tool")" "$no_chromium_bin/$tool"
+done
+no_chromium_home="$TMPDIR/no-chromium"
+HOME="$no_chromium_home" OMARCHY_PATH="$ROOT" PATH="$ROOT/bin:$no_chromium_bin" \
+  "$no_chromium_bin/bash" -euo pipefail -c 'source "$ROOT/install/user/chromium.sh"' ||
+  fail "user install without Chromium exits cleanly"
+[[ ! -e $no_chromium_home/.config/chromium ]] ||
+  fail "user install without Chromium registers no native messaging host"
+pass "user install without Chromium registers no native messaging host"
 
 copied_url=$(bash -c '
   source "$1"

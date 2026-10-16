@@ -25,39 +25,35 @@ run_pkg_prune() {
   PATH="$stub_bin:$PATH" "$ROOT/bin/omarchy-update-pkg-prune"
 }
 
-# Pin the keep count above one.
-write_stub sudo 'printf "%s\n" "$*" >"$PACCACHE_LOG"; exit 0'
+# The port prunes with apt's autoclean, which drops only the .deb files no
+# configured source still offers, so the installed version's file stays.
+write_stub sudo 'printf "%s\n" "$*" >"$SUDO_LOG"; exit 0'
 
-PACCACHE_LOG="$test_tmp/args" run_pkg_prune >"$test_tmp/prune.out" 2>&1
-grep -q 'paccache' "$test_tmp/args" || fail "cache prune runs paccache"
-grep -qE 'paccache .*-rk2' "$test_tmp/args" ||
-  fail "cache prune keeps more than one version" "$(cat "$test_tmp/args")"
-pass "cache prune leaves a rollback version to spare"
+SUDO_LOG="$test_tmp/args" run_pkg_prune >"$test_tmp/prune.out" 2>&1
+grep -qx 'apt-get autoclean' "$test_tmp/args" ||
+  fail "cache prune runs apt-get autoclean" "$(cat "$test_tmp/args")"
+pass "cache prune keeps every version the archive still offers"
 
 # Housekeeping failure must not abort the update.
 write_stub sudo 'exit 1'
 run_pkg_prune >"$test_tmp/fail.out" 2>&1 ||
-  fail "cache prune survives paccache failure"
+  fail "cache prune survives apt-get autoclean failure"
 grep -q 'Could not prune the package cache' "$test_tmp/fail.out" ||
   fail "cache prune warns when it fails" "$(cat "$test_tmp/fail.out")"
 pass "cache prune warns but does not abort the update"
 
-# Ordering is the whole guarantee: rollback before the packages update, space
-# before the snapshot.
+# The port runs the prune after the packages update (bin/omarchy-update says
+# why): autoclean only drops files the archive no longer offers, and the
+# upgrade is what makes the old ones obsolete.
 line_of() {
   grep -n "^[[:space:]]*$1\b" "$ROOT/bin/omarchy-update" | head -1 | cut -d: -f1
 }
 
 prune_line=$(line_of omarchy-update-pkg-prune)
-snapshot_line=$(line_of omarchy-snapshot)
 pkgs_line=$(line_of omarchy-update-system-pkgs)
-[[ -n $prune_line && -n $snapshot_line && -n $pkgs_line ]] ||
-  fail "omarchy-update runs the cache prune, the snapshot, and the packages update"
+[[ -n $prune_line && -n $pkgs_line ]] ||
+  fail "omarchy-update runs the cache prune and the packages update"
 
-(( prune_line < pkgs_line )) ||
-  fail "cache prune runs before the packages update" "prune: $prune_line, packages: $pkgs_line"
-pass "cache prune runs before the packages update"
-
-(( prune_line < snapshot_line )) ||
-  fail "cache prune runs before the snapshot" "prune: $prune_line, snapshot: $snapshot_line"
-pass "cache prune runs before the snapshot pins what it removes"
+(( prune_line > pkgs_line )) ||
+  fail "cache prune runs after the packages update" "prune: $prune_line, packages: $pkgs_line"
+pass "cache prune runs after the packages update"

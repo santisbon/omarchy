@@ -84,7 +84,11 @@ output=$(run_setup success)
 config="$test_dir/success/root/etc/ssh/sshd_config.d/10-omarchy-hardening.conf"
 grep -qxF "PasswordAuthentication no" "$config" || fail "SSH setup disables password authentication"
 grep -qxF "KbdInteractiveAuthentication no" "$config" || fail "SSH setup disables keyboard-interactive authentication"
-grep -qxF "systemctl reload sshd.service" "$test_dir/success.calls" || fail "SSH setup reloads the validated config"
+# Ubuntu's server package is openssh-server and its unit is ssh.service
+# (bin/omarchy-setup-security-sshd, setup_sshd); Arch's is sshd.service.
+grep -qxF "pkg openssh-server" "$test_dir/success.calls" || fail "SSH setup installs Ubuntu's openssh-server"
+grep -qxF "systemctl enable --now ssh.service" "$test_dir/success.calls" || fail "SSH setup enables Ubuntu's ssh.service"
+grep -qxF "systemctl reload ssh.service" "$test_dir/success.calls" || fail "SSH setup reloads the validated config"
 grep -q "Password logins are off" <<<"$output" || fail "SSH setup reports hardening after it succeeds"
 pass "SSH setup authorizes a key and disables password logins"
 
@@ -99,7 +103,7 @@ if SSHD_PASSWORD_AUTH=yes run_setup ineffective >"$test_dir/ineffective.output" 
 fi
 [[ ! -e $test_dir/ineffective/root/etc/ssh/sshd_config.d/10-omarchy-hardening.conf ]] ||
   fail "SSH setup removes an ineffective hardening config"
-! grep -qF "systemctl reload sshd.service" "$test_dir/ineffective.calls" ||
+! grep -qF "systemctl reload ssh.service" "$test_dir/ineffective.calls" ||
   fail "SSH setup must not reload ineffective hardening"
 ! grep -q "Password logins are off" "$test_dir/ineffective.output" ||
   fail "SSH setup must not claim ineffective hardening succeeded"
@@ -110,7 +114,7 @@ if SSHD_SYNTAX_VALID=0 run_setup invalid >"$test_dir/invalid.output" 2>&1; then
 fi
 [[ ! -e $test_dir/invalid/root/etc/ssh/sshd_config.d/10-omarchy-hardening.conf ]] ||
   fail "SSH setup removes a rejected hardening config"
-! grep -qF "systemctl reload sshd.service" "$test_dir/invalid.calls" ||
+! grep -qF "systemctl reload ssh.service" "$test_dir/invalid.calls" ||
   fail "SSH setup must not reload a rejected config"
 ! grep -q "Password logins are off" "$test_dir/invalid.output" ||
   fail "SSH setup must not claim rejected hardening succeeded"

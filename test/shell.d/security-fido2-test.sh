@@ -143,8 +143,6 @@ case "${1:-}" in
   tee)
     if (( $# == 2 )) && recorded_stage "$2"; then
       exec /usr/bin/tee "$2"
-    elif (( $# == 2 )) && [[ $2 == "/etc/pam.d/polkit-1" ]]; then
-      /usr/bin/cat >/dev/null
     else
       reject "$@"
     fi
@@ -179,16 +177,11 @@ case "${1:-}" in
     fi
     exec /usr/bin/rm -f -- "$4"
     ;;
-  sed)
-    if (( $# != 4 )) || [[ $2 != "-i" ]]; then
-      reject "$@"
-    fi
-
-    if [[ $3 == "1i auth    sufficient pam_u2f.so cue authfile=/etc/fido2/fido2" && $4 == "/etc/pam.d/sudo" ]]; then
-      exit 0
-    elif [[ $3 == "1i auth      sufficient pam_u2f.so cue authfile=/etc/fido2/fido2" && $4 == "/etc/pam.d/polkit-1" ]]; then
-      exit 0
-    else
+  pam-auth-update)
+    # The port enables its pam-auth-update profile instead of editing
+    # /etc/pam.d/sudo and polkit-1 (bin/omarchy-setup-security-fido2,
+    # setup_pam_config).
+    if (( $# != 4 )) || [[ $2 != "--package" || $3 != "--enable" || $4 != "omarchy-u2f" ]]; then
       reject "$@"
     fi
     ;;
@@ -207,10 +200,6 @@ cat >"$stub_bin/fido2-token" <<'SH'
 #!/bin/bash
 
 echo '/dev/hidraw0: vendor=0x1050, product=0x0407 (Yubico YubiKey)'
-SH
-
-cat >"$stub_bin/omarchy-pkg-add" <<'SH'
-#!/bin/bash
 SH
 
 # Record what pamu2fcfg's stdout actually targets. The fixed implementation
@@ -243,7 +232,7 @@ esac
 SH
 
 chmod +x "$stub_bin/mktemp" "$stub_bin/sudo" "$stub_bin/fido2-token" \
-  "$stub_bin/omarchy-pkg-add" "$stub_bin/pamu2fcfg"
+  "$stub_bin/pamu2fcfg"
 
 reset_run() {
   : >"$calls"
@@ -325,6 +314,8 @@ run_setup
   fail "FIDO2 setup stages nothing when a registration already exists"
 ! grep -Fq $'sudo\tmktemp\t' "$calls" ||
   fail "FIDO2 setup creates no stage over an existing registration" "$(cat "$calls")"
+grep -Fxq $'sudo\tpam-auth-update\t--package\t--enable\tomarchy-u2f' "$calls" ||
+  fail "FIDO2 setup enables the PAM profile for an existing registration" "$(cat "$calls")"
 pass "FIDO2 setup leaves an existing registration alone"
 
 reset_run
@@ -383,6 +374,8 @@ grep -Fxq $'sudo\tmv\t-Tf\t'"$stage_path"$'\t'"$authfile" "$calls" ||
   fail "FIDO2 setup atomically publishes the exact privileged stage" "$(cat "$calls")"
 ! grep -Fq $'sudo\trm\t' "$calls" ||
   fail "successful setup leaves its cleanup trap inert" "$(cat "$calls")"
+grep -Fxq $'sudo\tpam-auth-update\t--package\t--enable\tomarchy-u2f' "$calls" ||
+  fail "FIDO2 setup enables the omarchy-u2f PAM profile after registering" "$(cat "$calls")"
 
 [[ ! -e $stage_path && ! -L $stage_path ]] ||
   fail "the privileged stage path is gone after publication" "left behind: $stage_path"

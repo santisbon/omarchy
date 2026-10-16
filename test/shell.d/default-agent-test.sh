@@ -126,6 +126,14 @@ assert_lazy_stub() {
   "$test_home/.local/bin/$command" --version
   mapfile -t mise_calls <"$mise_history"
 
+  # The port's wrapper first adds mise's LTS Node for an npm: package, since
+  # Ubuntu's base install has no Node (bin/omarchy-mise-install, "node_line").
+  if [[ $package == npm:* ]]; then
+    [[ ${mise_calls[0]} == "use -g --quiet node@lts" ]] ||
+      fail "$command lazy stub installs Node before its npm package"
+    mise_calls=("${mise_calls[@]:1}")
+  fi
+
   [[ ${mise_calls[0]} == "use -g --quiet $package" && ${mise_calls[1]} == "x $package -- $command --version" ]] ||
     fail "$command lazy stub preserves its mise package"
 }
@@ -152,93 +160,12 @@ grep -Fx "$cursor_agent_package" "$stub_log" >/dev/null && fail "user setup repl
 pass "user setup keeps an existing Cursor CLI install"
 grep -Fx "$muse_package muse" "$stub_log" >/dev/null && fail "user setup replaces an existing Muse command"
 
-: >"$stub_log"
-OMARCHY_TEST_MISSING_COMMAND=muse source "$ROOT/migrations/1788724825.sh" >/dev/null
-grep -Fx "$muse_package muse" "$stub_log" >/dev/null || fail "Muse migration creates its lazy stub"
-: >"$stub_log"
-source "$ROOT/migrations/1788724825.sh" >/dev/null
-[[ ! -s $stub_log ]] || fail "Muse migration replaces an existing command"
-mkdir -p "$test_home/.local/state/omarchy"
-touch "$test_home/.local/state/omarchy/preinstalls-removed"
-OMARCHY_TEST_MISSING_COMMAND=muse source "$ROOT/migrations/1788724825.sh" >/dev/null
-[[ ! -s $stub_log ]] || fail "Muse migration ignores the preinstall opt-out"
-rm "$test_home/.local/state/omarchy/preinstalls-removed"
-pass "Muse migration preserves existing installs and the preinstall opt-out"
-
-
-: >"$stub_log"
-source "$ROOT/migrations/1785617047.sh" >/dev/null
-grep -Fx "$omp_package omp" "$stub_log" >/dev/null || fail "Oh My Pi migration creates a working lazy stub"
-
-: >"$stub_log"
-export OMARCHY_TEST_MISSING_COMMAND=cursor-agent
-source "$ROOT/migrations/1788577553.sh" >/dev/null
-unset OMARCHY_TEST_MISSING_COMMAND
-grep -Fx "$cursor_agent_package" "$stub_log" >/dev/null || fail "Cursor CLI migration creates a working lazy stub"
-
-: >"$stub_log"
-source "$ROOT/migrations/1788577553.sh" >/dev/null
-[[ ! -s $stub_log ]] || fail "Cursor CLI migration reinstalls an existing cursor-agent command"
-pass "Cursor CLI migration preserves an existing Cursor CLI install"
-
-: >"$stub_log"
-source "$ROOT/migrations/1785846769.sh" >/dev/null
-grep -Fx "$omp_package omp" "$stub_log" >/dev/null || fail "agent migration repairs the Oh My Pi lazy stub"
-grep -Fx "$grok_package grok" "$stub_log" >/dev/null || fail "agent migration creates the Grok lazy stub"
-grep -Fx "$crush_package" "$stub_log" >/dev/null || fail "agent migration creates the Crush lazy stub"
-
-mkdir -p "$test_home/.local/state/omarchy"
-touch "$test_home/.local/state/omarchy/preinstalls-removed"
-"$ROOT/bin/omarchy-mise-install" oh-my-pi omp
-: >"$stub_log"
-source "$ROOT/migrations/1785617047.sh" >/dev/null
-source "$ROOT/migrations/1785846769.sh" >/dev/null
-OMARCHY_TEST_MISSING_COMMAND=cursor-agent source "$ROOT/migrations/1788577553.sh" >/dev/null
-[[ ! -s $stub_log ]] || fail "agent migrations respect the preinstall opt-out"
-[[ ! -e $test_home/.local/bin/omp ]] || fail "agent migration removes the obsolete Oh My Pi wrapper after opt-out"
-
-# The matcher has to catch a bare oh-my-pi wrapper from either generation of the
-# installer, and leave a wrapper built on the fully qualified package alone.
-for obsolete_form in 'mise use -g "oh-my-pi"' 'mise use -g --quiet "oh-my-pi"'; do
-  printf '#!/bin/bash\n%s || exit 1\n' "$obsolete_form" >"$test_home/.local/bin/omp"
-  chmod +x "$test_home/.local/bin/omp"
-  source "$ROOT/migrations/1785846769.sh" >/dev/null
-  [[ ! -e $test_home/.local/bin/omp ]] ||
-    fail "agent migration removes a wrapper built on [$obsolete_form]"
-done
-
-printf '#!/bin/bash\nmise use -g --quiet "%s" || exit 1\n' "$omp_package" >"$test_home/.local/bin/omp"
-chmod +x "$test_home/.local/bin/omp"
-source "$ROOT/migrations/1785846769.sh" >/dev/null
-[[ -e $test_home/.local/bin/omp ]] ||
-  fail "agent migration keeps a wrapper built on $omp_package"
-rm -f "$test_home/.local/bin/omp"
-
-rm "$test_home/.local/state/omarchy/preinstalls-removed"
-pass "agent migrations install working wrappers without overriding the preinstall opt-out"
-
-"$ROOT/bin/omarchy-mise-install" "$muse_package" muse
-omarchy-remove-preinstalls >/dev/null
+# Upstream's Remove Preinstalls step cleared these lazy stubs here; the port
+# deleted omarchy-remove-preinstalls (commit c304e943), so the test clears them
+# itself before the checks below, which expect no agent installed.
 for command in omp grok crush cursor-agent muse; do
-  [[ ! -e $test_home/.local/bin/$command ]] || fail "Remove Preinstalls deletes the $command lazy stub"
+  rm -f "$test_home/.local/bin/$command"
 done
-pass "Remove Preinstalls deletes every optional agent lazy stub"
-
-# Cursor's installer links the same path, so anything but the mise wrapper is
-# the user's own install.
-touch "$test_home/.local/bin/cursor-agent.official"
-ln -s cursor-agent.official "$test_home/.local/bin/cursor-agent"
-omarchy-remove-preinstalls >/dev/null
-[[ -L $test_home/.local/bin/cursor-agent ]] || fail "Remove Preinstalls keeps an official Cursor CLI install"
-rm -f "$test_home/.local/bin/cursor-agent" "$test_home/.local/bin/cursor-agent.official"
-pass "Remove Preinstalls keeps an official Cursor CLI install"
-printf '#!/bin/bash\necho user-muse\n' >"$test_home/.local/bin/muse"
-chmod +x "$test_home/.local/bin/muse"
-omarchy-remove-preinstalls >/dev/null
-[[ $("$test_home/.local/bin/muse") == "user-muse" ]] || fail "Remove Preinstalls deletes a user-managed Muse"
-rm "$test_home/.local/bin/muse"
-pass "Remove Preinstalls keeps a user-managed Muse install"
-
 
 [[ -z $(omarchy-default-agent) ]] || fail "default agent is unset until one is chosen"
 pass "default agent is unset until one is chosen"
@@ -656,16 +583,9 @@ grep -F "missing is not installed" "$test_tmp/missing-output" >/dev/null ||
   fail "agent launcher explains when the default command is missing"
 pass "agent launcher reports a missing default command"
 
-# OpenClaw comes from its pacman package, not mise: choosing it must route
-# through omarchy-install-openclaw-cli and never touch a mise environment.
-cat >"$mock_bin/omarchy-pkg-present" <<'SH'
-#!/bin/bash
-[[ $1 == openclaw && ${OMARCHY_TEST_OPENCLAW_INSTALLED:-false} == "true" ]]
-SH
-cat >"$mock_bin/omarchy-pkg-add" <<'SH'
-#!/bin/bash
-printf '%s\n' "pkg-add $*" >>"$OMARCHY_TEST_STUB_LOG"
-SH
+# The port deleted omarchy-install-openclaw-cli and dropped OpenClaw from
+# omarchy-default-agent's choices (commit ef4c9211), but omarchy-agent still
+# launches an OpenClaw the user installed and set as the default.
 cat >"$mock_bin/omarchy-launch-openclaw" <<'SH'
 #!/bin/bash
 printf '%s\0' omarchy-launch-openclaw "$@" >"$OMARCHY_TEST_AGENT_INLINE_LOG"
@@ -674,38 +594,14 @@ cat >"$mock_bin/openclaw" <<'SH'
 #!/bin/bash
 exit 0
 SH
-chmod +x "$mock_bin/omarchy-pkg-present" "$mock_bin/omarchy-pkg-add" \
-  "$mock_bin/omarchy-launch-openclaw" "$mock_bin/openclaw"
+chmod +x "$mock_bin/omarchy-launch-openclaw" "$mock_bin/openclaw"
 
-: >"$launch_log"
-: >"$terminal_log"
-: >"$mise_history"
-OMARCHY_TEST_OPENCLAW_INSTALLED=true omarchy-default-agent openclaw
-read -r chosen <"$agent_file"
-[[ $chosen == openclaw ]] || fail "choosing OpenClaw records it as the default agent"
-mapfile -d '' -t launch_args <"$launch_log"
-[[ ${launch_args[*]} == "--app-id=org.omarchy.agent omarchy-launch-openclaw --tui" ]] ||
-  fail "choosing OpenClaw launches its terminal UI"
-[[ ! -s $terminal_log ]] || fail "an installed OpenClaw needs no install terminal"
-! grep -q 'use -g openclaw' "$mise_history" || fail "OpenClaw never installs through mise"
-pass "choosing OpenClaw uses the package and launches its terminal UI"
+if omarchy-default-agent openclaw >/dev/null 2>&1; then
+  fail "omarchy-default-agent no longer offers OpenClaw"
+fi
+pass "omarchy-default-agent no longer offers OpenClaw"
 
-: >"$terminal_log"
-OMARCHY_TEST_OPENCLAW_INSTALLED=false omarchy-default-agent openclaw
-mapfile -d '' -t terminal_args <"$terminal_log"
-[[ ${terminal_args[*]} == "omarchy-default-agent --install openclaw" ]] ||
-  fail "a missing OpenClaw routes through the install terminal"
-pass "a missing OpenClaw routes through the install terminal"
-
-: >"$stub_log"
-: >"$inline_log"
-OMARCHY_TEST_OPENCLAW_INSTALLED=false omarchy-default-agent --install openclaw >/dev/null
-grep -Fx "pkg-add openclaw" "$stub_log" >/dev/null ||
-  fail "installing OpenClaw as default agent adds its package"
-mapfile -d '' -t inline_args <"$inline_log"
-[[ ${inline_args[*]} == "omarchy-launch-openclaw --tui" ]] ||
-  fail "installing OpenClaw as default agent hands over to its terminal UI"
-pass "installing OpenClaw as default agent adds its package"
+printf '%s\n' openclaw >"$agent_file"
 
 : >"$launch_log"
 omarchy agent prompt "Review this project"

@@ -50,6 +50,14 @@ fi
 [[ $1 != "where" ]]
 SH
 
+# The port's stub calls omarchy-mise-ensure first, because Ubuntu has no mise
+# package (bin/omarchy-install-hermes-cli). The mock mise above stands in for
+# an installed one, so ensuring it never reaches the network here.
+cat >"$mock_bin/omarchy-mise-ensure" <<'SH'
+#!/bin/bash
+exit 0
+SH
+
 chmod +x "$mock_bin"/*
 
 run_installer() {

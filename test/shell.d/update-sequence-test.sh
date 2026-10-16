@@ -16,17 +16,15 @@ steps=(
   omarchy-update-lock
   omarchy-update-requires-free-space
   omarchy-update-confirm
-  omarchy-update-pkg-prune
   omarchy-snapshot
   omarchy-update-stay-awake
   omarchy-update-dev
-  omarchy-update-keyring
   omarchy-update-system-pkgs
   omarchy-migrate
   omarchy-hook
-  omarchy-update-aur-pkgs
   omarchy-update-mise
   omarchy-update-orphan-pkgs
+  omarchy-update-pkg-prune
   omarchy-update-analyze-logs
   omarchy-update-status
   omarchy-update-restart
@@ -36,7 +34,7 @@ for step in "${steps[@]}"; do
   cat >"$stub_bin/$step" <<'STUB'
 #!/bin/bash
 printf '%s unattended=%s\n' "${0##*/}" "${OMARCHY_UPDATE_UNATTENDED:-}" >>"$STEP_LOG"
-[[ ${FAILING_STEP:-} != "${0##*/}" ]] || exit 1
+[[ ${FAILING_STEP:-} != "${0##*/}" ]] || exit "${FAILING_STATUS:-1}"
 STUB
   chmod +x "$stub_bin/$step"
 done
@@ -47,6 +45,7 @@ run_update() {
   : >"$test_tmp/steps"
   STEP_LOG="$test_tmp/steps" \
     FAILING_STEP="${FAILING_STEP:-}" \
+    FAILING_STATUS="${FAILING_STATUS:-1}" \
     OMARCHY_UPDATE_LOGGED=1 \
     PATH="$stub_bin:$PATH" \
     bash "$ROOT/bin/omarchy-update" "$@" >"$test_tmp/out" 2>"$test_tmp/err"
@@ -57,23 +56,23 @@ steps_run() {
 }
 
 # Every step of a whole update, in order. $1 asks for the one a person confirms.
-# Stay Awake bookends the work, so it is here twice.
+# Stay Awake bookends the work, so it is here twice. The port has no keyring or
+# AUR step (apt has neither), and prunes the package cache after the upgrade
+# rather than before the snapshot (bin/omarchy-update says why).
 expected_steps() {
   printf '%s\n' \
     omarchy-update-lock \
     omarchy-update-requires-free-space \
     ${1:+omarchy-update-confirm} \
-    omarchy-update-pkg-prune \
     omarchy-snapshot \
     omarchy-update-stay-awake \
     omarchy-update-dev \
-    omarchy-update-keyring \
     omarchy-update-system-pkgs \
     omarchy-migrate \
     omarchy-hook \
-    omarchy-update-aur-pkgs \
     omarchy-update-mise \
     omarchy-update-orphan-pkgs \
+    omarchy-update-pkg-prune \
     omarchy-update-analyze-logs \
     omarchy-update-status \
     omarchy-update-stay-awake \
@@ -100,9 +99,28 @@ pass "-y is what marks an update unattended, not the update itself"
 if FAILING_STEP=omarchy-update-system-pkgs run_update -y; then
   fail "an update whose packages did not upgrade passes for a whole one"
 fi
-for step in omarchy-migrate omarchy-hook omarchy-update-aur-pkgs omarchy-update-restart; do
+for step in omarchy-migrate omarchy-hook omarchy-update-mise omarchy-update-restart; do
   if grep -q "^$step " "$test_tmp/steps"; then
     fail "a blocked package upgrade still runs $step"
   fi
 done
 pass "a blocked package upgrade stops the update before it migrates"
+
+# omarchy-snapshot exits 127 where snapshots are deliberately absent (no btrfs
+# root or no Timeshift); that is not worth a word. Any other failure is not
+# worth blocking the update over, but must not pass for a snapshot either.
+FAILING_STEP=omarchy-snapshot FAILING_STATUS=127 run_update -y ||
+  fail "an update without snapshot support reports a failure"
+diff <(expected_steps) <(steps_run) >"$test_tmp/order" ||
+  fail "an update without snapshot support skips steps" "$(cat "$test_tmp/order")"
+! grep -q 'without a snapshot' "$test_tmp/err" ||
+  fail "an update without snapshot support warns about the missing snapshot"
+pass "an update without snapshot support continues quietly"
+
+FAILING_STEP=omarchy-snapshot FAILING_STATUS=1 run_update -y ||
+  fail "a failed snapshot fails the update"
+diff <(expected_steps) <(steps_run) >"$test_tmp/order" ||
+  fail "a failed snapshot skips update steps" "$(cat "$test_tmp/order")"
+grep -q 'Continuing the update without a snapshot' "$test_tmp/err" ||
+  fail "a failed snapshot passes silently" "$(cat "$test_tmp/err")"
+pass "a failed snapshot warns and the update continues"

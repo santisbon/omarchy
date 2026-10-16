@@ -11,47 +11,26 @@ stub_bin="$test_tmp/bin"
 git_log="$test_tmp/git.log"
 mkdir -p "$stub_bin"
 
-cat >"$stub_bin/checkupdates" <<'SH'
+# omarchy-update-available reads apt's package lists through apt list
+# --upgradable (no apt-get update, so no sudo); the stub prints that command's
+# "name/suite new-version arch [upgradable from: old-version]" lines.
+cat >"$stub_bin/apt" <<'SH'
 #!/bin/bash
-case "${TEST_CHECKUPDATES:-updates}" in
+[[ $1 == "list" && $2 == "--upgradable" ]] || exit 1
+echo "Listing..."
+case "${TEST_APT_UPGRADABLE:-updates}" in
   updates)
-    printf 'linux 6.1-1 -> 6.1-2\nomarchy 4.0.0-1 -> 4.0.1-1\nomarchy-settings 4.0.0-1 -> 4.0.1-1\nomarchy-dev 4.1.0-1 -> 4.1.1-1\nomarchy-settings-dev 4.1.0-1 -> 4.1.1-1\n'
-    exit 0
+    printf 'linux-image-generic/stonking 6.1-2 amd64 [upgradable from: 6.1-1]\n'
+    printf 'omarchy-config/oaxaca 0.1.9 all [upgradable from: 0.1.8]\n'
+    printf 'omarchy-shell/oaxaca 0.2.1 amd64 [upgradable from: 0.2.0]\n'
+    printf 'libomarchy-unrelated/stonking 1.1 amd64 [upgradable from: 1.0]\n'
     ;;
   none)
-    exit 2
-    ;;
-  fail)
-    echo "check failed" >&2
-    exit 1
-    ;;
-esac
-SH
-chmod +x "$stub_bin/checkupdates"
-
-cat >"$stub_bin/pacman" <<'SH'
-#!/bin/bash
-case "$1" in
-  -Qq)
-    case "${TEST_INSTALLED_PACKAGE:-omarchy}" in
-      omarchy)
-        [[ $2 == "omarchy" ]]; exit $?
-        ;;
-      omarchy-dev)
-        [[ $2 == "omarchy-dev" ]]; exit $?
-        ;;
-      both)
-        [[ $2 == "omarchy" || $2 == "omarchy-dev" ]]; exit $?
-        ;;
-      none)
-        exit 1
-        ;;
-    esac
     ;;
 esac
 exit 0
 SH
-chmod +x "$stub_bin/pacman"
+chmod +x "$stub_bin/apt"
 
 cat >"$stub_bin/git" <<'SH'
 #!/bin/bash
@@ -115,68 +94,40 @@ capture_checker() {
 stdout="$test_tmp/stdout"
 stderr="$test_tmp/stderr"
 
-if capture_checker "$stdout" "$stderr" TEST_CHECKUPDATES=updates TEST_INSTALLED_PACKAGE=omarchy; then
+if capture_checker "$stdout" "$stderr" TEST_APT_UPGRADABLE=updates; then
   status=0
 else
   status=$?
 fi
-[[ $status -eq 0 ]] || fail "update checker exits successfully when omarchy update is available"
-grep -q '^omarchy ' "$stdout" || fail "update checker prints omarchy updates"
-! grep -q '^omarchy-settings ' "$stdout" || fail "update checker ignores omarchy-settings updates"
-! grep -q '^linux ' "$stdout" || fail "update checker ignores non-Omarchy package updates"
-! grep -q '^omarchy-dev ' "$stdout" || fail "update checker ignores omarchy-dev when omarchy is installed"
-pass "update checker detects installed omarchy package updates"
+(( status == 0 )) || fail "update checker exits successfully when an Omarchy package update is available"
+grep -Fx 'omarchy-config 0.1.8 -> 0.1.9' "$stdout" >/dev/null ||
+  fail "update checker prints omarchy-config's update as name old -> new" "$(cat "$stdout")"
+grep -Fx 'omarchy-shell 0.2.0 -> 0.2.1' "$stdout" >/dev/null ||
+  fail "update checker prints every omarchy- package's update" "$(cat "$stdout")"
+! grep -q '^linux-image-generic ' "$stdout" || fail "update checker ignores non-Omarchy package updates"
+! grep -q '^libomarchy-unrelated ' "$stdout" || fail "update checker matches the omarchy- prefix only"
+! grep -q '^Listing' "$stdout" || fail "update checker drops apt's Listing header"
+pass "update checker detects Omarchy package updates"
 
-if capture_checker "$stdout" "$stderr" TEST_CHECKUPDATES=updates TEST_INSTALLED_PACKAGE=omarchy-dev; then
+if capture_checker "$stdout" "$stderr" TEST_APT_UPGRADABLE=none; then
   status=0
 else
   status=$?
 fi
-[[ $status -eq 0 ]] || fail "update checker exits successfully when omarchy-dev update is available"
-grep -q '^omarchy-dev ' "$stdout" || fail "update checker prints omarchy-dev updates"
-! grep -q '^omarchy-settings-dev ' "$stdout" || fail "update checker ignores omarchy-settings-dev updates"
-! grep -q '^omarchy ' "$stdout" || fail "update checker ignores omarchy when omarchy-dev is installed"
-pass "update checker detects installed omarchy-dev package updates"
-
-if capture_checker "$stdout" "$stderr" TEST_CHECKUPDATES=updates TEST_INSTALLED_PACKAGE=both; then
-  status=0
-else
-  status=$?
-fi
-[[ $status -eq 0 ]] || fail "update checker prefers omarchy-dev when both packages are installed"
-grep -q '^omarchy-dev ' "$stdout" || fail "update checker prints omarchy-dev when both packages are installed"
-! grep -q '^omarchy ' "$stdout" || fail "update checker ignores omarchy when omarchy-dev is installed"
-pass "update checker prefers omarchy-dev over omarchy"
-
-if capture_checker "$stdout" "$stderr" TEST_CHECKUPDATES=updates TEST_INSTALLED_PACKAGE=none; then
-  status=0
-else
-  status=$?
-fi
-[[ $status -eq 1 ]] || fail "update checker exits non-zero when no Omarchy package is installed"
-[[ ! -s $stderr ]] || fail "update checker is quiet when no Omarchy package is installed"
-pass "update checker ignores systems without omarchy or omarchy-dev installed"
-
-if capture_checker "$stdout" "$stderr" TEST_CHECKUPDATES=none TEST_INSTALLED_PACKAGE=omarchy; then
-  status=0
-else
-  status=$?
-fi
-[[ $status -eq 1 ]] || fail "update checker exits non-zero when no updates are available"
+(( status == 1 )) || fail "update checker exits non-zero when no updates are available"
 grep -q '^Omarchy is up to date$' "$stdout" || fail "update checker prints up-to-date message"
 pass "update checker reports up-to-date Omarchy packages"
 
 : >"$git_log"
 if capture_checker "$stdout" "$stderr" \
-  TEST_CHECKUPDATES=none \
-  TEST_INSTALLED_PACKAGE=none \
+  TEST_APT_UPGRADABLE=none \
   TEST_OMARCHY_PATH="$test_tmp/checkout" \
   TEST_GIT_BEHIND=2; then
   status=0
 else
   status=$?
 fi
-[[ $status -eq 0 ]] || fail "update checker exits successfully when dev commits are available"
+(( status == 0 )) || fail "update checker exits successfully when dev commits are available"
 grep -Fx 'omarchy-dev-checkout 2 new commits on origin/quattro' "$stdout" >/dev/null ||
   fail "update checker reports available dev commits" "$(cat "$stdout")"
 grep -Fx -- "-C $test_tmp/checkout fetch --quiet" "$git_log" >/dev/null ||
@@ -184,21 +135,19 @@ grep -Fx -- "-C $test_tmp/checkout fetch --quiet" "$git_log" >/dev/null ||
 pass "update checker detects new commits in the dev checkout"
 
 if capture_checker "$stdout" "$stderr" \
-  TEST_CHECKUPDATES=none \
-  TEST_INSTALLED_PACKAGE=none \
+  TEST_APT_UPGRADABLE=none \
   TEST_OMARCHY_PATH="$test_tmp/checkout" \
   TEST_GIT_BEHIND=0; then
   status=0
 else
   status=$?
 fi
-[[ $status -eq 1 ]] || fail "update checker exits non-zero when the dev checkout is current"
+(( status == 1 )) || fail "update checker exits non-zero when the dev checkout is current"
 grep -q '^Omarchy is up to date$' "$stdout" || fail "update checker reports a current dev checkout"
 pass "update checker ignores a current dev checkout"
 
 if capture_checker "$stdout" "$stderr" \
-  TEST_CHECKUPDATES=none \
-  TEST_INSTALLED_PACKAGE=none \
+  TEST_APT_UPGRADABLE=none \
   TEST_OMARCHY_PATH="$test_tmp/checkout" \
   TEST_GIT_BEHIND=1 \
   TEST_GIT_FETCH=fail; then
@@ -206,7 +155,7 @@ if capture_checker "$stdout" "$stderr" \
 else
   status=$?
 fi
-[[ $status -eq 0 ]] || fail "update checker uses cached upstream state when fetch fails"
+(( status == 0 )) || fail "update checker uses cached upstream state when fetch fails"
 grep -Fx 'omarchy-dev-checkout 1 new commit on origin/quattro' "$stdout" >/dev/null ||
   fail "update checker reports cached dev commits after a fetch failure" "$(cat "$stdout")"
 [[ ! -s $stderr ]] || fail "update checker keeps dev fetch failures quiet" "$(cat "$stderr")"

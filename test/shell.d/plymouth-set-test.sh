@@ -224,7 +224,7 @@ case "$1" in
   PATH="$TEST_ROOT_TOOLS:/usr/bin:/bin" \
     /bin/bash -c "$code" "$shell_name" "$@"
   ;;
-plymouth-set-default-theme | limine-mkinitcpio | mkinitcpio)
+update-alternatives | update-initramfs)
   printf 'command %s\n' "$*" >>"$TEST_SUDO_LOG"
   exit 0
   ;;
@@ -295,11 +295,6 @@ cat >"$root_tools/magick" <<'SH'
 source=$1
 destination=${@: -1}
 [[ $source == "$destination" ]] || /usr/bin/cp -- "$source" "$destination"
-SH
-
-cat >"$fake_bin/omarchy-cmd-present" <<'SH'
-#!/bin/bash
-exit 1
 SH
 
 chmod +x "$fake_bin"/* "$root_tools"/*
@@ -461,8 +456,8 @@ for requested_umask in 022 027 077; do
   cmp -s "$ROOT/default/sddm/omarchy/theme.conf" "$sddm/theme.conf" || fail "theme set leaves packaged SDDM configuration unchanged"
   [[ ! -s $leak_log ]] || fail "no privileged command receives a user-writable staged pathname" "$(cat "$leak_log")"
   [[ $(stat -c %a "$theme") == 755 && $(stat -c %a "$sddm") == 755 && $(stat -c %a "$theme/logos") == 755 ]] || fail "publication preserves destination directory modes under umask $requested_umask"
-  grep -Fq 'command plymouth-set-default-theme omarchy' "$sudo_log" || fail "theme set activates the published Plymouth theme"
-  grep -Fq 'command mkinitcpio -P' "$sudo_log" || fail "theme set rebuilds the initramfs"
+  grep -Fq 'command update-alternatives --set default.plymouth /usr/share/plymouth/themes/omarchy/omarchy.plymouth' "$sudo_log" || fail "theme set activates the published Plymouth theme"
+  grep -Fq 'command update-initramfs -u' "$sudo_log" || fail "theme set rebuilds the initramfs"
   assert_no_temporary_files "$fake_root"
 done
 
@@ -858,8 +853,8 @@ assert_packaged_assets "Plymouth refresh" "$ROOT/default/plymouth" "$theme" "${p
 [[ -L $sddm/Main.qml && $(cat "$sddm_victim") == 'SDDM VICTIM' ]] || fail "Plymouth refresh leaves SDDM unchanged"
 ! grep -Fq 'transaction /usr/share/sddm/' "$sudo_log" || fail "Plymouth refresh does not publish SDDM assets"
 [[ ! -s $leak_log ]] || fail "refresh never gives root a user-writable source pathname" "$(cat "$leak_log")"
-grep -Fq 'command plymouth-set-default-theme omarchy' "$sudo_log" || fail "Plymouth refresh activates the restored theme"
-grep -Fq 'command mkinitcpio -P' "$sudo_log" || fail "Plymouth refresh rebuilds the initramfs"
+grep -Fq 'command update-alternatives --set default.plymouth /usr/share/plymouth/themes/omarchy/omarchy.plymouth' "$sudo_log" || fail "Plymouth refresh activates the restored theme"
+grep -Fq 'command update-initramfs -u' "$sudo_log" || fail "Plymouth refresh rebuilds the initramfs"
 
 pass "refresh safely publishes its complete fixed asset set, including logos/oma.png"
 
@@ -876,8 +871,8 @@ assert_packaged_assets "SDDM refresh" "$ROOT/default/sddm/omarchy" "$sddm" "${sd
 [[ $(cat "$sddm_victim") == 'SDDM VICTIM' && $(stat -c %a "$sddm_victim") == 600 ]] || fail "SDDM refresh never changes a destination symlink victim"
 [[ $(cat "$legacy_victim") == 'LEGACY VICTIM' && $(stat -c %a "$legacy_victim") == 600 ]] || fail "SDDM refresh never changes the legacy logo victim"
 [[ ! -e $sddm/logo.svg && ! -L $sddm/logo.svg ]] || fail "SDDM refresh removes the legacy logo.svg"
-! grep -Fq 'command plymouth-set-default-theme' "$sudo_log" || fail "SDDM refresh does not activate Plymouth"
-! grep -Fq 'command mkinitcpio' "$sudo_log" || fail "SDDM refresh does not rebuild the initramfs"
+! grep -Fq 'command update-alternatives' "$sudo_log" || fail "SDDM refresh does not activate Plymouth"
+! grep -Fq 'command update-initramfs' "$sudo_log" || fail "SDDM refresh does not rebuild the initramfs"
 [[ ! -s $leak_log ]] || fail "SDDM refresh never gives root a user-writable source pathname" "$(cat "$leak_log")"
 
 pass "SDDM refresh safely restores its complete packaged asset set without rebuilding Plymouth"
@@ -891,8 +886,8 @@ status=$?
 
 assert_packaged_assets "fresh reset Plymouth" "$ROOT/default/plymouth" "$theme" "${plymouth_default_assets[@]}"
 assert_packaged_assets "fresh reset SDDM" "$ROOT/default/sddm/omarchy" "$sddm" "${sddm_default_assets[@]}"
-grep -Fq 'command plymouth-set-default-theme omarchy' "$sudo_log" || fail "fresh reset activates the packaged Plymouth theme"
-grep -Fq 'command mkinitcpio -P' "$sudo_log" || fail "fresh reset rebuilds the initramfs"
+grep -Fq 'command update-alternatives --set default.plymouth /usr/share/plymouth/themes/omarchy/omarchy.plymouth' "$sudo_log" || fail "fresh reset activates the packaged Plymouth theme"
+grep -Fq 'command update-initramfs -u' "$sudo_log" || fail "fresh reset rebuilds the initramfs"
 assert_no_temporary_files "$fake_root"
 
 pass "reset is safe and idempotent on a fresh package installation"
@@ -911,8 +906,8 @@ assert_packaged_assets "migrated reset SDDM" "$ROOT/default/sddm/omarchy" "$sddm
 [[ $(cat "$sddm_victim") == 'SDDM VICTIM' && $(stat -c %a "$sddm_victim") == 600 ]] || fail "reset never changes an SDDM destination symlink victim"
 [[ $(cat "$legacy_victim") == 'LEGACY VICTIM' && $(stat -c %a "$legacy_victim") == 600 ]] || fail "reset never changes the legacy logo victim"
 [[ ! -e $sddm/logo.svg && ! -L $sddm/logo.svg ]] || fail "reset removes the legacy logo.svg"
-grep -Fq 'command plymouth-set-default-theme omarchy' "$sudo_log" || fail "reset activates the restored Plymouth theme"
-grep -Fq 'command mkinitcpio -P' "$sudo_log" || fail "reset rebuilds the initramfs"
+grep -Fq 'command update-alternatives --set default.plymouth /usr/share/plymouth/themes/omarchy/omarchy.plymouth' "$sudo_log" || fail "reset activates the restored Plymouth theme"
+grep -Fq 'command update-initramfs -u' "$sudo_log" || fail "reset rebuilds the initramfs"
 [[ ! -s $leak_log ]] || fail "reset never gives root a user-writable source pathname" "$(cat "$leak_log")"
 
 pass "reset safely repairs a migrated Plymouth and SDDM installation"
