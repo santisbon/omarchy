@@ -2,50 +2,14 @@
 
 # omarchy:summary=Install a supported development environment
 # omarchy:name=dev-env
-# omarchy:args=<ruby|node|bun|deno|go|laravel|php|python|elixir|phoenix|rust|java|zig|ocaml|dotnet|clojure|scala>
+# omarchy:args=<ruby|node|bun|deno|go|python|elixir|phoenix|rust|java|zig|ocaml|dotnet|clojure|scala>
 # omarchy:examples=omarchy install dev-env ruby | omarchy install dev-env node
 # omarchy:requires-sudo=true
 
 if [[ -z $1 ]]; then
-  echo "Usage: omarchy-install-dev-env <ruby|node|bun|deno|go|laravel|php|python|elixir|phoenix|rust|java|zig|ocaml|dotnet|clojure|scala>" >&2
+  echo "Usage: omarchy-install-dev-env <ruby|node|bun|deno|go|python|elixir|phoenix|rust|java|zig|ocaml|dotnet|clojure|scala>" >&2
   exit 1
 fi
-
-install_php() {
-  # Ubuntu splits PHP into one package per extension (php-bcmath, php-intl,
-  # php-mysql for mysqli and pdo_mysql, php-sqlite3 for pdo_sqlite; iconv and
-  # openssl are built into php8.5-common). The four composer Recommends are
-  # named too because omarchy-pkg-add skips Recommends. All checked in the
-  # stonking index.
-  omarchy-pkg-add php composer php-sqlite3 php-xdebug php-bcmath php-intl php-mysql \
-    php-curl php-mbstring php-xml php-zip
-
-  # Install Path for Composer
-  if [[ :$PATH: != *:$HOME/.config/composer/vendor/bin:* ]]; then
-    echo 'export PATH="$HOME/.config/composer/vendor/bin:$PATH"' >>"$HOME/.bashrc"
-    source "$HOME/.bashrc"
-    echo "Added Composer global bin directory to PATH."
-  else
-    echo "Composer global bin directory already in PATH."
-  fi
-
-  # There is no single php.ini to edit for extensions here: each extension
-  # package drops an ini into /etc/php/<version>/mods-available and phpenmod
-  # (from php-common, in /usr/sbin) links it into every SAPI's conf.d. The
-  # package postinsts already do this; running phpenmod again only matters for
-  # a module someone disabled earlier, and it is harmless otherwise.
-  sudo phpenmod bcmath intl pdo_sqlite pdo_mysql xdebug
-
-  # Enable Xdebug's debugger. Ubuntu's xdebug.ini holds only the
-  # zend_extension line, so the mode is appended once rather than uncommented.
-  local xdebug_ini
-  for xdebug_ini in /etc/php/*/mods-available/xdebug.ini; do
-    [[ -f $xdebug_ini ]] || continue
-    if ! grep -q '^xdebug.mode=' "$xdebug_ini"; then
-      echo 'xdebug.mode=debug' | sudo tee -a "$xdebug_ini" >/dev/null
-    fi
-  done
-}
 
 install_node() {
   echo -e "Installing Node.js...\n"
@@ -91,17 +55,6 @@ deno)
 go)
   echo -e "Installing Go...\n"
   mise use --global go@latest
-  ;;
-php)
-  echo -e "Installing PHP...\n"
-  install_php
-  ;;
-laravel)
-  echo -e "Installing PHP and Laravel...\n"
-  install_php
-  install_node
-  composer global require laravel/installer
-  echo -e "\nYou can now run: laravel new myproject"
   ;;
 python)
   echo -e "Installing Python...\n"
