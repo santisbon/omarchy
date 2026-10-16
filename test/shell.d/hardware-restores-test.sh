@@ -60,26 +60,23 @@ grep -qx 'options iwlwifi disable_11be=Y' "$work/root/etc/modprobe.d/iwlwifi-dis
 run_hook() { sed "s#/usr/share/initramfs-tools/hook-functions#$work/hook-functions#" "$1" | sh; }
 echo 'force_load() { echo "force_load $1"; }' >"$work/hook-functions"
 
-rm -rf "$work/root/etc"; mkdir -p "$work/root/etc"
-ln -s /usr/share/zoneinfo/America/Mexico_City "$work/root/etc/localtime"
-run set-wireless-regdom.sh
-grep -qx 'options cfg80211 ieee80211_regdom=MX' "$work/root/etc/modprobe.d/omarchy-wireless-regdom.conf" || fail "the timezone's country becomes cfg80211's regulatory domain"
-
+rm -rf "$work/root/etc"
 stub omarchy-hw-surface 'exit 0'
-stub lsmod 'printf "Module Size Used by\npinctrl_tigerlake 32768 1\n"'
 run fix-surface-keyboard.sh >/dev/null
 hook="$work/root/etc/initramfs-tools/hooks/omarchy-surface-keyboard"
 [[ -x $hook ]] || fail "a Surface gets an executable initramfs hook"
-loads=$(run_hook "$hook" | paste -sd' ')
-[[ $loads == "force_load pinctrl_tigerlake force_load surface_aggregator force_load surface_aggregator_registry force_load surface_aggregator_hub force_load surface_hid_core force_load surface_hid force_load surface_kbd force_load intel_lpss_pci force_load 8250_dw" ]] ||
-  fail "the Surface hook force-loads the pinctrl and keyboard modules" "$loads"
+[[ $(run_hook "$hook") == "force_load surface_aggregator_hub" ]] ||
+  fail "the Surface hook loads the one keyboard module Ubuntu's initramfs lacks" "$(run_hook "$hook")"
 
 mkdir -p "$work/dmi"; echo "MacBook8,1" >"$work/dmi/product_name"
 run_dmi() { sed "s#/sys/class/dmi/id/#$work/dmi/#g; s#/etc/#$work/root/etc/#g" "$ROOT/install/hardware/$1" | PATH="$work/bin:$PATH" bash; }
 run_dmi apple/fix-spi-keyboard.sh >/dev/null
-loads=$(run_hook "$work/root/etc/initramfs-tools/hooks/omarchy-macbook-spi-keyboard" | paste -sd' ')
-[[ $loads == "force_load applespi force_load spi_pxa2xx_platform force_load spi_pxa2xx_pci" ]] || fail "a MacBook8,1 force-loads its SPI keyboard modules" "$loads"
-! grep -q dkms "$TEST_LOG" || fail "the SPI keyboard needs no DKMS package"
+[[ $(run_hook "$work/root/etc/initramfs-tools/hooks/omarchy-macbook-spi-keyboard") == "force_load spi_pxa2xx_pci" ]] ||
+  fail "a MacBook8,1 loads spi_pxa2xx_pci, the module Ubuntu's initramfs lacks"
+rm -f "$work/root/etc/initramfs-tools/hooks/omarchy-macbook-spi-keyboard"
+echo "MacBookPro13,1" >"$work/dmi/product_name"
+run_dmi apple/fix-spi-keyboard.sh >/dev/null
+[[ ! -e $work/root/etc/initramfs-tools/hooks/omarchy-macbook-spi-keyboard ]] || fail "other MacBooks need no hook"
 
 : >"$TEST_LOG"
 mkdir -p "$work/acpi/INT3472:00"; echo OVTI08F4 >"$work/acpi/INT3472:00/hid"
@@ -94,6 +91,14 @@ grep -qx 'pkg-add dell-xps-touchpad-haptics' "$TEST_LOG" || fail "an XPS with th
 stub omarchy-hw-dell-xps-haptic-touchpad 'exit 1'
 run dell-xps-touchpad-haptics.sh
 [[ ! -s $TEST_LOG ]] || fail "other machines do not get the haptics package"
+
+for case in "asus-rog.sh omarchy-hw-asus-rog asusctl" "framework16.sh omarchy-hw-framework16 qmk-hid"; do
+  read -r script detector package <<<"$case"
+  : >"$TEST_LOG"; stub "$detector" 'exit 0'; run "$script"
+  grep -qx "pkg-add $package" "$TEST_LOG" || fail "$script installs $package on its machine"
+  : >"$TEST_LOG"; stub "$detector" 'exit 1'; run "$script"
+  [[ ! -s $TEST_LOG ]] || fail "$script installs nothing elsewhere"
+done
 
 grep -qx 'fs.inotify.max_user_watches=524288' "$ROOT/etc/sysctl.d/90-omarchy-file-watchers.conf" || fail "the inotify limit ships"
 

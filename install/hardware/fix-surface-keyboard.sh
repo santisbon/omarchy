@@ -3,35 +3,24 @@
 # https://chrismcleod.dev/blog/installing-arch-linux-with-secure-boot-on-a-microsoft-surface-laptop-studio/
 #
 # The keyboard has to work at the disk encryption passphrase prompt, which runs
-# from the initramfs. Omarchy lists the modules in a mkinitcpio drop-in; Ubuntu
-# builds the initramfs with initramfs-tools, so the list goes into a hook in
-# /etc/initramfs-tools/hooks that force-loads each module at boot. The
-# installer rebuilds the initramfs after this step.
+# from the initramfs. Omarchy lists ten modules in a mkinitcpio drop-in because
+# mkinitcpio leaves out what it is not told to include. Ubuntu builds the
+# initramfs with initramfs-tools and MODULES=most, which already carries nine
+# of them (surface_aggregator, its registry, surface_hid_core, surface_hid,
+# surface_kbd, intel_lpss_pci, 8250_dw and the pinctrl modules; read from the
+# image's initramfs on 2026-10-16) and loads them through udev. The one it
+# lacks is surface_aggregator_hub, so a hook in /etc/initramfs-tools/hooks
+# adds that module and loads it at boot. The installer rebuilds the initramfs
+# after this step.
 if omarchy-hw-surface; then
-  product_name="$(cat /sys/class/dmi/id/product_name 2>/dev/null)"
   echo "Detected Surface Device"
-
-  # Modules already exist in the rootfs for the default kernel.
-  if [[ $product_name != "Surface Laptop 3" ]]; then
-    echo "Untested Surface Device: $product_name, additional modules may be required for your device."
-  fi
-
-  echo "Attempting to autodetect required pinctrl module"
-  pinctrl_module=$(lsmod | grep pinctrl_ | cut -f 1 -d" " || true)
-  if [[ -z $pinctrl_module ]]; then
-    echo "Failed to autodetect pinctrl module."
-  else
-    echo "Detected pinctrl module: $pinctrl_module"
-    mkdir -p /etc/initramfs-tools/hooks
-    cat > /etc/initramfs-tools/hooks/omarchy-surface-keyboard <<HOOK
+  mkdir -p /etc/initramfs-tools/hooks
+  cat > /etc/initramfs-tools/hooks/omarchy-surface-keyboard <<'HOOK'
 #!/bin/sh
-# Surface keyboard modules for the disk encryption passphrase prompt (install/hardware/fix-surface-keyboard.sh)
-case "\$1" in prereqs) exit 0 ;; esac
+# Surface keyboard module for the disk encryption passphrase prompt (install/hardware/fix-surface-keyboard.sh)
+case "$1" in prereqs) exit 0 ;; esac
 . /usr/share/initramfs-tools/hook-functions
-for module in $(echo $pinctrl_module) surface_aggregator surface_aggregator_registry surface_aggregator_hub surface_hid_core surface_hid surface_kbd intel_lpss_pci 8250_dw; do
-  force_load "\$module"
-done
+force_load surface_aggregator_hub
 HOOK
-    chmod 0755 /etc/initramfs-tools/hooks/omarchy-surface-keyboard
-  fi
+  chmod 0755 /etc/initramfs-tools/hooks/omarchy-surface-keyboard
 fi

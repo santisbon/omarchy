@@ -1,6 +1,7 @@
 run_logged "$OMARCHY_INSTALL/hardware/fix-synaptic-touchpad.sh"
+run_logged "$OMARCHY_INSTALL/hardware/asus-rog.sh"
+run_logged "$OMARCHY_INSTALL/hardware/framework16.sh"
 run_logged "$OMARCHY_INSTALL/hardware/dell-xps-touchpad-haptics.sh"
-run_logged "$OMARCHY_INSTALL/hardware/set-wireless-regdom.sh"
 run_logged "$OMARCHY_INSTALL/hardware/bluetooth.sh"
 
 run_logged "$OMARCHY_INSTALL/hardware/intel/video-acceleration.sh"
