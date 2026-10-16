@@ -92,8 +92,8 @@ pass "a failed verification leaves PAM alone"
 
 ENROLL_STATUS=0 VERIFY_STATUS=0 run_setup || fail "setup succeeds after enrollment and verification" "$(cat "$scratch/output")"
 assert_no_packages "a successful setup"
-grep -qx 'pam pam-auth-update --package --enable fprintd' "$CALL_LOG" ||
-  fail "a verified print enables Ubuntu's fprintd PAM profile" "$(cat "$CALL_LOG")"
+grep -qx 'pam pam-auth-update --package --enable omarchy-fprintd' "$CALL_LOG" ||
+  fail "a verified print enables the desktop's lid-gated fprintd PAM profile" "$(cat "$CALL_LOG")"
 grep -qx 'pam tee /etc/pam.d/omarchy-lock-fingerprint' "$CALL_LOG" ||
   fail "a verified print writes the lock screen's PAM file" "$(cat "$CALL_LOG")"
 pass "a verified print enables PAM without installing anything"

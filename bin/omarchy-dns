@@ -4,14 +4,25 @@
 # omarchy:examples=omarchy dns | omarchy dns Cloudflare | omarchy dns Custom
 set -euo pipefail
 
-# Ubuntu's way to set DNS is per connection, in NetworkManager. This script only
-# runs nmcli, as the calling user: network-manager's polkit rule
+# Ubuntu's way to set DNS is per connection, in NetworkManager, and a choice
+# made here also has to reach networks joined later. So the servers go two
+# places: every existing Wi-Fi and Ethernet profile (with DNS over TLS through the
+# profile's dns-over-tls property, which NetworkManager hands to resolved), and
+# NetworkManager's global DNS configuration, which overrides the DNS of every
+# connection, present and future. The profiles are changed with nmcli as the
+# calling user: network-manager's polkit rule
 # (/usr/share/polkit-1/rules.d/org.freedesktop.NetworkManager.rules) lets a local,
 # active member of the sudo or netdev group modify system connections without a
-# password, so there is no sudoers rule and no root half. Omarchy on Arch also
-# wrote a NetworkManager global-dns drop-in and overwrote systemd-resolved's
-# resolved.conf; neither is done here, and DNS over TLS is asked for through the
-# connection's own dns-over-tls property, which NetworkManager hands to resolved.
+# password. The global configuration is NetworkManager's GlobalDnsConfiguration
+# D-Bus property (kept in /var/lib/NetworkManager/NetworkManager-intern.conf),
+# set with busctl; its polkit action (settings.modify.global-dns,
+# auth_admin_keep) asks once, through the desktop's polkit agent. So there is
+# no sudoers rule and no root half. Omarchy on Arch wrote a global-dns drop-in
+# in /etc/NetworkManager/conf.d and overwrote systemd-resolved's resolved.conf;
+# neither is done here. A network joined later gets the servers but not DNS
+# over TLS, which global DNS cannot carry.
+
+NM_BUS=(org.freedesktop.NetworkManager /org/freedesktop/NetworkManager org.freedesktop.NetworkManager)
 
 provider_from_arg() {
   case "${1:-}" in
@@ -30,10 +41,35 @@ dns_connection() {
   esac
 }
 
-# The DNS servers of the first active Wi-Fi or Ethernet connection, as nmcli
-# prints ipv4.dns and ipv6.dns (comma separated), empty when DHCP's are in use.
+# The servers of NetworkManager's global DNS configuration, comma separated,
+# empty when there is none. busctl prints the property as
+# a{sv} 1 "domains" a{sv} 1 "*" a{sv} 1 "servers" as 2 "1.1.1.1" "1.0.0.1".
+global_dns() {
+  busctl get-property "${NM_BUS[@]}" GlobalDnsConfiguration 2>/dev/null |
+    sed -n 's/.*"servers" as [0-9]* //p' | tr -d '"' | tr ' ' ','
+}
+
+# set_global_dns <server>...: the global DNS servers for every domain; no
+# servers clears the global configuration, so each profile's own DNS applies.
+set_global_dns() {
+  if (( $# == 0 )); then
+    busctl --allow-interactive-authorization=yes set-property "${NM_BUS[@]}" GlobalDnsConfiguration 'a{sv}' 0
+  else
+    busctl --allow-interactive-authorization=yes set-property "${NM_BUS[@]}" GlobalDnsConfiguration \
+      'a{sv}' 1 domains 'a{sv}' 1 '*' 'a{sv}' 1 servers as $# "$@"
+  fi
+}
+
+# The DNS servers in use: the global configuration's, else those of the first
+# active Wi-Fi or Ethernet connection, as nmcli prints ipv4.dns and ipv6.dns
+# (comma separated); empty when DHCP's are in use.
 current_dns() {
-  local uuid type
+  local uuid type global
+  global=$(global_dns)
+  if [[ -n $global ]]; then
+    echo "$global"
+    return 0
+  fi
   while IFS=: read -r uuid type; do
     [[ -n $uuid ]] || continue
     dns_connection "$type" || continue
@@ -117,12 +153,15 @@ fi
 
 case "$provider" in
 Cloudflare)
+  set_global_dns 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
   set_connection_dns "1.1.1.1 1.0.0.1" "2606:4700:4700::1111 2606:4700:4700::1001" opportunistic
   ;;
 Google)
+  set_global_dns 8.8.8.8 8.8.4.4 2001:4860:4860::8888 2001:4860:4860::8844
   set_connection_dns "8.8.8.8 8.8.4.4" "2001:4860:4860::8888 2001:4860:4860::8844" opportunistic
   ;;
 DHCP)
+  set_global_dns
   set_connection_dns "" "" default
   ;;
 Custom)
@@ -134,6 +173,8 @@ Custom)
     exit 1
   fi
   split_dns_servers "$dns_servers"
+  # shellcheck disable=SC2086 # one argument per server
+  set_global_dns ${dns_servers//,/ }
   set_connection_dns "$ipv4_dns" "$ipv6_dns" default
   ;;
 esac

@@ -5,17 +5,20 @@
 
 set -e
 
-# Ubuntu manages the common-* PAM stacks with pam-auth-update, and libpam-fprintd
-# ships the profile for it (/usr/share/pam-configs/fprintd, "Fingerprint
-# authentication", off by default). Enabling that profile puts pam_fprintd into
-# common-auth, which sudo, polkit, SDDM and this desktop's lock screen all
-# include, so no PAM file is edited by hand here. Omarchy on Arch inserted the
-# module into /etc/pam.d/sudo and polkit-1 itself, behind a clamshell gate that
-# skipped the reader with the lid shut; Ubuntu's profile has no such gate, and
-# pam_fprintd's own max-tries=1 timeout=10 is the fallback to the password.
+# Ubuntu manages the common-* PAM stacks with pam-auth-update, which sudo,
+# polkit, SDDM and this desktop's lock screen all include, so no PAM file is
+# edited by hand here. The profile enabled is the desktop's own
+# (/usr/share/pam-configs/omarchy-fprintd, from default/pam-configs/): Ubuntu's
+# fprintd profile (pam_fprintd.so max-tries=1 timeout=10) with Omarchy's
+# clamshell gate in front of it, a pam_exec of omarchy-hw-laptop-closed that
+# skips the reader (success=1) when the lid is shut, so a docked, closed laptop
+# goes straight to the password instead of waiting 10 seconds on a reader
+# nobody can touch. The two profiles conflict, so Ubuntu's is disabled first
+# (systems set up before the gate came back have it enabled).
 setup_pam_config() {
-  echo "Enabling Ubuntu's fingerprint PAM profile (pam-auth-update --enable fprintd)..."
-  sudo pam-auth-update --package --enable fprintd
+  echo "Enabling the fingerprint PAM profile (pam-auth-update --enable omarchy-fprintd)..."
+  sudo pam-auth-update --package --disable fprintd
+  sudo pam-auth-update --package --enable omarchy-fprintd
 }
 setup_lock_fingerprint_pam() {
   echo "Configuring lock screen for fingerprint authentication..."
