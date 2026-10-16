@@ -15,9 +15,11 @@ set -euo pipefail
 # active member of the sudo or netdev group modify system connections without a
 # password. The global configuration is NetworkManager's GlobalDnsConfiguration
 # D-Bus property (kept in /var/lib/NetworkManager/NetworkManager-intern.conf),
-# set with busctl; its polkit action (settings.modify.global-dns,
-# auth_admin_keep) asks once, through the desktop's polkit agent. So there is
-# no sudoers rule and no root half. Omarchy on Arch wrote a global-dns drop-in
+# set with busctl; its polkit action (settings.modify.global-dns) is granted
+# to the same users by the desktop's rule
+# (/usr/share/polkit-1/rules.d/50-omarchy-global-dns.rules), so there is no
+# prompt, no sudoers rule and no root half. Anyone else gets polkit's prompt;
+# if the global change is refused, the profiles are still changed. Omarchy on Arch wrote a global-dns drop-in
 # in /etc/NetworkManager/conf.d and overwrote systemd-resolved's resolved.conf;
 # neither is done here. A network joined later gets the servers but not DNS
 # over TLS, which global DNS cannot carry.
@@ -58,6 +60,10 @@ set_global_dns() {
     busctl --allow-interactive-authorization=yes set-property "${NM_BUS[@]}" GlobalDnsConfiguration \
       'a{sv}' 1 domains 'a{sv}' 1 '*' 'a{sv}' 1 servers as $# "$@"
   fi
+}
+
+global_refused() {
+  echo "Warning: NetworkManager refused the global DNS change; only the existing connections were changed." >&2
 }
 
 # The DNS servers in use: the global configuration's, else those of the first
@@ -153,15 +159,15 @@ fi
 
 case "$provider" in
 Cloudflare)
-  set_global_dns 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
+  set_global_dns 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001 || global_refused
   set_connection_dns "1.1.1.1 1.0.0.1" "2606:4700:4700::1111 2606:4700:4700::1001" opportunistic
   ;;
 Google)
-  set_global_dns 8.8.8.8 8.8.4.4 2001:4860:4860::8888 2001:4860:4860::8844
+  set_global_dns 8.8.8.8 8.8.4.4 2001:4860:4860::8888 2001:4860:4860::8844 || global_refused
   set_connection_dns "8.8.8.8 8.8.4.4" "2001:4860:4860::8888 2001:4860:4860::8844" opportunistic
   ;;
 DHCP)
-  set_global_dns
+  set_global_dns || global_refused
   set_connection_dns "" "" default
   ;;
 Custom)
@@ -174,7 +180,7 @@ Custom)
   fi
   split_dns_servers "$dns_servers"
   # shellcheck disable=SC2086 # one argument per server
-  set_global_dns ${dns_servers//,/ }
+  set_global_dns ${dns_servers//,/ } || global_refused
   set_connection_dns "$ipv4_dns" "$ipv6_dns" default
   ;;
 esac

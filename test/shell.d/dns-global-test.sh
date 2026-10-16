@@ -42,4 +42,11 @@ dns DHCP
 grep -qF 'GlobalDnsConfiguration a{sv} 0' "$TEST_LOG" || fail "DHCP clears the global configuration"
 [[ $(dns) == DHCP ]] || fail "after DHCP, the provider reads DHCP"
 
+# A user polkit refuses still gets the profiles changed, and the command succeeds.
+: >"$TEST_LOG"
+printf '#!/bin/bash\nprintf "busctl %%s\\n" "$*" >>"$TEST_LOG"\ncase $* in *set-property*) exit 1 ;; *) echo "a{sv} 0" ;; esac\n' >"$stub_dir/busctl"
+dns Google 2>"$stub_dir/err" || fail "a refused global change does not fail the command"
+grep -q '^nmcli connection modify u1 .*8.8.8.8 8.8.4.4' "$TEST_LOG" || fail "a refused global change still changes the profiles"
+grep -q 'refused the global DNS change' "$stub_dir/err" || fail "a refused global change is reported"
+
 pass "DNS choices reach networks joined later through NetworkManager's global DNS"

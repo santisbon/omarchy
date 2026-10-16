@@ -1,0 +1,13 @@
+// Setup > DNS (omarchy-dns) also sets NetworkManager's global DNS, so networks joined later use
+// the chosen servers (the distro's docs/6, choice 54). network-manager's own rule
+// (/usr/share/polkit-1/rules.d/org.freedesktop.NetworkManager.rules) lets a local, active member
+// of the sudo or netdev group change system connections without a password; this rule gives the
+// same users the same grant for the global DNS configuration, whose action otherwise asks for an
+// administrator's password (auth_admin_keep).
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.NetworkManager.settings.modify.global-dns" &&
+        subject.local && subject.active &&
+        (subject.isInGroup("sudo") || subject.isInGroup("netdev"))) {
+        return polkit.Result.YES;
+    }
+});
