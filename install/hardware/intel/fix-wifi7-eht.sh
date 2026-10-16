@@ -4,8 +4,13 @@
 # when EHT is negotiated, making WiFi unusable. Disabling EHT falls
 # back to WiFi 6 (HE/802.11ax) which works at full speed.
 # This should be removed when Intel fixes the firmware/driver.
+#
+# Omarchy matches the card alone, which turns Wi-Fi 7 off on every machine with
+# a BE200 or BE211. The port also requires the machines the fix is for, a Dell
+# XPS on Panther Lake (docs/6, choice 60): other BE200 machines, such as the
+# Lenovo Legion Pro 7, keep Wi-Fi 7.
 
-if lspci -nn | grep -qE '\[8086:(e440|272b)\]'; then
+if omarchy-hw-match "XPS" && omarchy-hw-intel-ptl && lspci -nn | grep -qE '\[8086:(e440|272b)\]'; then
   mkdir -p /etc/modprobe.d
   cat > /etc/modprobe.d/iwlwifi-disable-eht.conf <<'EOF'
 # Temporary fix Dell XPS 14/16 on Panther lake
