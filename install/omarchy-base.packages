@@ -124,7 +124,7 @@ system-config-printer
 tesseract-ocr
 tesseract-ocr-eng
 udiskie
-# ufw: Ubuntu's default firewall tool, left exactly as Ubuntu ships it (installed, disabled)
+# ufw: Ubuntu's default firewall tool; install/config/firewall.sh turns it on with LocalSend's port
 ufw
 # unattended-upgrades: Ubuntu desktops get daily security updates through it (it reaches a
 # stock desktop as a Recommends of python3-software-properties, which Install-Recommends off
@@ -195,7 +195,7 @@ ca-certificates
 # tldr: tealdeer ships /usr/bin/tldr (listed above)
 # ttf-ia-writer, ttf-jetbrains-mono-nerd-basic: separate fonts package
 # tzupdate: not in stonking
-# ufw-docker: not in stonking, and no longer needed: the port applies no ufw rules
+# ufw-docker: not in stonking; Docker is not preinstalled, so firewall.sh has no Docker rules
 # usage: mise installs it on demand
 # zram-generator (systemd-zram-generator): not in Ubuntu's desktop seeds, and stonking's package
 # creates a zram0 swap device from its own default config just by being installed; swap is the

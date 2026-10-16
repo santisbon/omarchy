@@ -29,6 +29,10 @@ a change is being developed).
   the rename script does the rest at build time.
 - Keep Omarchy's script conventions (`# omarchy:summary=` headers, `omarchy-cmd-present`,
   `omarchy-notification-send`, `gum`).
+- Start minimal and add, never install and remove: the branch carries Ubuntu's configuration plus
+  the parts of Omarchy the desktop needs to run. An Omarchy feature beyond that comes back as a
+  change written for Ubuntu, with its reason recorded as a choice in the build repository's
+  `docs/6 - omarchy-port.md`; `PORT-REMOVALS.md` lists the candidates.
 - Delete rather than stub: a script the distro cannot support is removed together with its menu
   entries and bindings, so that the menu never shows an entry that fails.
 - Ubuntu facts in comments: when a package name, unit name or path differs from Arch, the comment

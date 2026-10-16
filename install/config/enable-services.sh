@@ -1,7 +1,6 @@
 # Enable services only. Installs are followed by reboot, so don't start/reload
 # daemons mid-install. Hardware-gated services stay in their own scripts. ufw is
-# not touched: it stays as Ubuntu ships it, installed and disabled (Omarchy's
-# firewall.sh, which enabled it with Omarchy's rules, is gone from this port).
+# turned on by firewall.sh, which runs after this script.
 #
 # Ubuntu enables a package's units when the package is installed, so most of
 # these are already on. The repeats are harmless and keep the list explicit.
