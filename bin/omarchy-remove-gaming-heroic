@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# omarchy:summary=Remove the Heroic Games Launcher and its data.
+# omarchy:requires-sudo=true
+
+set -e
+
+# As Omarchy's remover does: the app, its settings and cache (~/.var/app/<id> for the Flatpak),
+# and the games it installed in ~/Games/Heroic.
+omarchy-pkg-flatpak-drop com.heroicgameslauncher.hgl
+rm -rf "$HOME/Games/Heroic"
+
+echo ""
+echo "Heroic and its data have been removed."

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# omarchy:summary=Install and launch the Heroic Games Launcher (Epic Games, GOG, Amazon Games).
+# omarchy:requires-sudo=true
+
+set -e
+
+# Omarchy installs Heroic from its own repository (heroic-games-launcher-bin, rebuilt from the
+# AUR). Ubuntu's archive has no Heroic; Flathub's com.heroicgameslauncher.hgl is published by
+# Heroic's developers and verified (checked 2026-10-16). The Flatpak runtime brings its own
+# 32-bit graphics libraries, so Omarchy's 32-bit GPU step is not needed.
+echo "Installing Heroic Games Launcher..."
+omarchy-pkg-add flatpak
+omarchy-pkg-flatpak-add com.heroicgameslauncher.hgl
+setsid uwsm-app -- flatpak run com.heroicgameslauncher.hgl >/dev/null 2>&1 &
