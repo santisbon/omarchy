@@ -276,7 +276,6 @@ Test cases deleted from files that stay: the OpenClaw cases in `default-agent-te
 Things in the port today that call something deleted, or ship without the feature they served (fixed ones are in [Restored](#restored)):
 
 - Scripts with nothing calling them: `omarchy-theme-set-t3code`; `install/omarchy-other.packages` (Arch package names, read by nothing).
-- Comments and docs that are out of date: `enable-services.sh` describes a wait-online mask that is gone; the package list says Chromium is a snap placeholder with snapd pinned out, and that "dev-env installs" lua51, luarocks and python-poetry-core through mise (it does not; and Omarchy shipped `dotnet-runtime` for Pinta); `PORT.md` says Omarchy's list does not install `try` (it has `tobi-try`); docs/6 says Chrome and VS Code were replaced (both are back); docs/0 and docs/1 give different reasons for leaving out hibernation; `docs/file-layout.md` mentions `keyboard-backlight` and `limine-entry-tool`.
 
 ## Restored
 

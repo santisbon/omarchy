@@ -3,6 +3,20 @@
 How `omarchy/` is organized and where everything ends up on an installed
 system.
 
+> **On this branch (the Ubuntu port):** this page is Omarchy's map for its two
+> Arch packages, kept as the reference the port follows. The port builds four
+> Debian packages instead (`oaxaca-tools`, `oaxaca-shell`, `oaxaca-themes`,
+> `oaxaca-config`), laid out by `packages/desktop/debian/install-tree.sh.in` in
+> the distro's build repository, which follows Omarchy's two recipes file for
+> file and lists its differences in its header comment. These paths named below
+> are not on this branch, because the port has no Limine, mkinitcpio, Snapper,
+> pacman or etc-overrides: `etc/mkinitcpio.conf.d/`, `etc/limine-entry-tool.d/`,
+> `default/limine/`, `default/snapper/`, `default/libalpm/`,
+> `default/security/`, `default/sddm/hyprland.lua`,
+> `default/applications/battlenet.desktop`,
+> `default/systemd/system/plocate-updatedb.service.d/` and the
+> `keyboard-backlight` sleep hook.
+
 ## Mental model
 
 Two Arch packages are built from this one repo (PKGBUILDs live in
@@ -124,7 +138,7 @@ logo.{txt,svg}, icon.{txt,png}  ──► omarchy-settings    /usr/share/omarchy
                                                         /etc/skel/.config/omarchy/branding/{about,screensaver}.txt
 ```
 
-The hardware-conditional `force-igpu` and `keyboard-backlight` sources also live under `default/systemd/system-sleep/`, but their setup commands publish root-owned copies only on machines that need them; they are not installed by `omarchy-settings`.
+The hardware-conditional `force-igpu` source also lives under `default/systemd/system-sleep/`, but its setup command (`omarchy-toggle-hybrid-gpu`) publishes a root-owned copy only on machines that need it; it is not installed by `omarchy-settings`. Omarchy's `keyboard-backlight` hook is not on this branch.
 
 ### Why `etc-overrides/` exists
 

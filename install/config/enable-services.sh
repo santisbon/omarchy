@@ -12,9 +12,9 @@
 # (network-manager).
 systemctl enable cups.service
 systemctl enable avahi-daemon.service
-# Don't let network-online.target hold up graphical.target waiting for
-# DHCP/Wi-Fi association. Nothing in the session needs to block on the network.
-# Mirrors the systemd-networkd-wait-online mask in install/hardware/network.sh.
+# Omarchy masks NetworkManager-wait-online.service here, so network-online.target
+# does not hold up boot. The port keeps Ubuntu's setup instead: network-manager's
+# postinst enables the unit (the distro's docs/6, "Ubuntu's configuration").
 systemctl enable power-profiles-daemon.service
 systemctl enable sddm.service
 systemctl enable bluetooth.service

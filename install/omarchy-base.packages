@@ -200,8 +200,12 @@ ca-certificates
 #   Install > Development > Herdr; the distro's docs/6, choice 80)
 # ttfx: separate package (not in stonking; the distro's apt repository builds it from source)
 # asdcontrol: separate package
-# chromium: Ubuntu's chromium is a snap placeholder and snapd is pinned out
-# dotnet-runtime, ruby, lua51, luarocks, python-poetry-core: dev-env installs them via mise
+# chromium: Ubuntu's chromium-browser is a placeholder that installs the snap; the image build
+#   installs Chromium from the xtradeb PPA instead (the distro's docs/6, choice 16)
+# dotnet-runtime: Omarchy ships it for Pinta, which is not preinstalled (Flathub's Pinta bundles .NET)
+# ruby: Omarchy's base Ruby; left out by the distro's maintainer (docs/6, choice 71)
+# lua51, luarocks: for Omarchy's LazyVim configuration, which stays out (docs/6, choice 71)
+# python-poetry-core: nothing uses it
 # expac, fakeroot, pacman-contrib, yay: pacman tooling
 # hyprland: the session layer packages it separately
 # hyprland-preview-share-picker: separate package
