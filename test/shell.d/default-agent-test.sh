@@ -583,36 +583,9 @@ grep -F "missing is not installed" "$test_tmp/missing-output" >/dev/null ||
   fail "agent launcher explains when the default command is missing"
 pass "agent launcher reports a missing default command"
 
-# The port deleted omarchy-install-openclaw-cli and dropped OpenClaw from
-# omarchy-default-agent's choices (commit ef4c9211), but omarchy-agent still
-# launches an OpenClaw the user installed and set as the default.
-cat >"$mock_bin/omarchy-launch-openclaw" <<'SH'
-#!/bin/bash
-printf '%s\0' omarchy-launch-openclaw "$@" >"$OMARCHY_TEST_AGENT_INLINE_LOG"
-SH
-cat >"$mock_bin/openclaw" <<'SH'
-#!/bin/bash
-exit 0
-SH
-chmod +x "$mock_bin/omarchy-launch-openclaw" "$mock_bin/openclaw"
-
+# OpenClaw is not part of the port (the distro's docs/6, choice 73): the default
+# agent does not offer it.
 if omarchy-default-agent openclaw >/dev/null 2>&1; then
-  fail "omarchy-default-agent no longer offers OpenClaw"
+  fail "omarchy-default-agent does not offer OpenClaw"
 fi
-pass "omarchy-default-agent no longer offers OpenClaw"
-
-printf '%s\n' openclaw >"$agent_file"
-
-: >"$launch_log"
-omarchy agent prompt "Review this project"
-mapfile -d '' -t launch_args <"$launch_log"
-# Element-wise: the prompt must travel as one argv entry, which a space-joined
-# comparison could not tell apart from a prompt split into words.
-[[ ${#launch_args[@]} == 5 &&
-  ${launch_args[0]} == "--app-id=org.omarchy.agent" &&
-  ${launch_args[1]} == "omarchy-launch-openclaw" &&
-  ${launch_args[2]} == "--tui" &&
-  ${launch_args[3]} == "--message" &&
-  ${launch_args[4]} == "Review this project" ]] ||
-  fail "OpenClaw receives prompts through --message" "argv: ${launch_args[*]}"
-pass "OpenClaw receives prompts through --message"
+pass "omarchy-default-agent does not offer OpenClaw"
