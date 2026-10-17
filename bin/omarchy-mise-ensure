@@ -1,14 +1,19 @@
 #!/bin/bash
 
-# omarchy:summary=Install mise into ~/.local/bin when it is not installed yet.
+# omarchy:summary=Install mise from mise's apt repository when it is not installed yet.
 # omarchy:hidden=true
+# omarchy:requires-sudo=true
 
-# Omarchy's agents and tool wrappers run mise, which Arch packages; Ubuntu's archive has no mise
-# (stonking, checked 2026-10-11), so this port installs it on demand with the vendor's script,
-# the same command as the menu's Install > Development > mise, into ~/.local/bin. The commands
-# that run mise call this first; "Setting up default agent" failed with "mise: command not
-# found" on a fresh install before it existed (2026-10-12).
+# Omarchy preinstalls mise as a system package; Ubuntu's archive has none (stonking, checked
+# 2026-10-11). The distro's image installs it from mise's own apt repository
+# (https://mise.jdx.dev/deb, suite stable, the source Debian's extrepo names; signing key
+# 24853EC9F655CE80B48E6C3A8B81C9D17413A06D), so apt updates it with the rest of the system.
+# This adds the same source and installs mise on a system that lacks it; the commands that run
+# mise call this first. Systems installed before 2026-10-16 may have mise in ~/.local/bin from
+# the vendor's script instead; that copy counts as installed, and omarchy-update-mise keeps it
+# current with "mise self-update".
 command -v mise >/dev/null && exit 0
 [[ -x $HOME/.local/bin/mise ]] && exit 0
-echo "Installing mise (https://mise.run) into ~/.local/bin..."
-curl -fsSL https://mise.run | sh || { echo "Could not install mise" >&2; exit 1; }
+echo "Installing mise from its apt repository (https://mise.jdx.dev/deb)..."
+omarchy-pkg-repo-add mise https://mise.jdx.dev/gpg-key.pub https://mise.jdx.dev/deb stable main amd64 &&
+  omarchy-pkg-add mise || { echo "Could not install mise" >&2; exit 1; }

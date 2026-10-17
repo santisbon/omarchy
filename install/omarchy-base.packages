@@ -207,7 +207,8 @@ ca-certificates
 # libyaml: runtime library comes in through its users' Depends
 # localsend: separate package (not in stonking; the distro's apt repository builds it from LocalSend's release)
 # mariadb-libs, postgresql-libs: come in through their users' Depends
-# mise-bin: not in stonking; Install > Development > mise runs the vendor script
+# mise-bin: not in stonking; the image build installs mise from mise's own apt repository, as it
+#   does Chromium from its PPA (scripts/rootfs-create.sh in the build repository; docs/6, choice 69)
 # moonlight-qt: not in stonking
 # obsidian, pinta: not in stonking
 # omarchy-nvim (nvim config): separate package
@@ -217,7 +218,7 @@ ca-certificates
 # ttf-ia-writer, ttf-jetbrains-mono-nerd-basic: separate fonts package
 # tzupdate: not in stonking
 # ufw-docker: not in stonking; Docker is not preinstalled, so firewall.sh has no Docker rules
-# usage: mise installs it on demand
+# usage: mise fetches it on demand
 # zram-generator (systemd-zram-generator): not in Ubuntu's desktop seeds, and stonking's package
 # creates a zram0 swap device from its own default config just by being installed; swap is the
 # installer's (step 7), with Ubuntu's defaults

@@ -3,8 +3,14 @@
 # omarchy:summary=Update mise-managed tools
 
 if omarchy-cmd-present mise; then
-  echo -e "\e[32m\nUpdate mise tools\e[0m"
+  # apt updates the mise the image installs from mise's repository. A mise the vendor's script
+  # put in ~/.local/bin (systems installed before 2026-10-16) is updated by mise itself.
+  if [[ $(command -v mise) == "$HOME"/* ]]; then
+    echo -e "\e[32m\nUpdate mise\e[0m"
+    mise self-update --yes || true
+  fi
 
+  echo -e "\e[32m\nUpdate mise tools\e[0m"
   # mise withholds releases younger than its cooldown, so tools stay behind for
   # days after they ship. Running omarchy update is the user asking for current
   # versions now, which is the same call the mup alias makes by hand.
