@@ -49,7 +49,7 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 The candidates left, in the order to take them. Each names its section below; the sections give the facts.
 
-1. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat, and Learn > Herdr.
+1. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat.
 2. **Waiting for evidence on Ubuntu**: the wireless regulatory domain from the timezone (verdict Unclear). ([System files](#system-install-and-hardware-files))
 
 ## Open questions
@@ -72,7 +72,6 @@ Checks that came up while restoring, not yet done:
 |---|---|---|---|---|---|
 | Factory reset | `bin/omarchy-system-factory-reset`, `-factory-reset-finish`, `-provision-owner`; `setup.reset` | on btrfs, swapped `@` for the installer's factory snapshot, re-keyed the disk encryption and recreated the owner at first boot | docs/6: among "programs the distro cannot install"; docs/1: scripts tied to Limine and Snapper | the same mistake as snapshots: only the Limine and mkinitcpio steps were Arch-specific; btrfs installs have Timeshift; `oem-config` (universe) creates a user at first boot | **Partial**: a factory Timeshift snapshot at install, restored by the reset, then `oem-config-prepare`; the re-keying needs rewriting |
 | Learn > Omarchy | `learn.omarchy` | Omarchy's manual | none recorded | parts of the manual do not apply (the firewall's Docker rules, pacman, Limine), most does | **Partial**: with a caveat, or a page of the port's own |
-| Learn > Herdr | `learn.herdr` | herdr's documentation | Herdr was not available | herdr is installable again (Install > Development > Herdr, docs/6 choice 80) | **Restore**: one menu line |
 
 ### Replaced
 
@@ -326,3 +325,4 @@ Every feature added back since the audit, with its tier and item, the date, and 
 | 4 | NordVPN and Bitwarden | Install > Service > NordVPN and > Bitwarden, Omarchy's menu lines, from the vendors' own snaps (`nordvpn`, publisher NordVPN; `bitwarden`, publisher 8bit Solutions LLC, Bitwarden's company; both verified on the Snap Store; Omarchy's Bitwarden CLI is left out) instead of the AUR; Remove > Snap removes them, as Omarchy's general remove does | 77 |
 | sysctl | `tcp_mtu_probing=1` | Omarchy's `etc/sysctl.d/99-omarchy-sysctl.conf` with only its MTU probing line, so connections recover on networks that drop path-MTU messages | 79 |
 | 5 | herdr and cliamp | Install and Remove > Development > Herdr and > Service > cliamp, installed per user through mise (`mise use -g`, both in mise's registry, from their own release binaries); Omarchy's bindings (Super+Ctrl+Return, Super+Ctrl+K, Super+Shift+Alt+M) and the `h` alias, and the kept herdr helpers are used again | 80 |
+| 5 | Learn > Herdr | Omarchy's menu line, which lists herdr's key bindings (`omarchy-menu-herdr-keybindings`), shown only when herdr is installed | 80 |
