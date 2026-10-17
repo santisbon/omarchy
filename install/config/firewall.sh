@@ -16,3 +16,9 @@ ufw allow 53317/tcp comment 'localsend'
 # is already enabled by the package's postinst; ufw-init loads the rules when ENABLED=yes.
 sed -i 's/^ENABLED=.*/ENABLED=yes/' /etc/ufw/ufw.conf
 systemctl enable ufw
+
+# Marks the firewall as set up. The config package's postinst turns ufw on once for systems
+# installed before this script existed, and skips any system with this marker, so a user who
+# later turns ufw off keeps it off.
+mkdir -p /var/lib/omarchy
+touch /var/lib/omarchy/firewall-on

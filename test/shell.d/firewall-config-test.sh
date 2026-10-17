@@ -7,7 +7,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/base-test.sh"
 stub_dir=$(mktemp -d)
 trap 'rm -rf "$stub_dir"' EXIT
 
-for cmd in ufw sed systemctl; do
+for cmd in ufw sed systemctl mkdir touch; do
   cat >"$stub_dir/$cmd" <<STUB
 #!/bin/bash
 printf '$cmd %s\n' "\$*" >>"\$TEST_LOG"
@@ -22,6 +22,7 @@ grep -qx "ufw allow 53317/udp comment localsend" "$TEST_LOG" || fail "LocalSend'
 grep -qx "ufw allow 53317/tcp comment localsend" "$TEST_LOG" || fail "LocalSend's tcp port is allowed"
 grep -qx "sed -i s/^ENABLED=.*/ENABLED=yes/ /etc/ufw/ufw.conf" "$TEST_LOG" || fail "ufw is turned on for the next boot"
 grep -qx "systemctl enable ufw" "$TEST_LOG" || fail "ufw.service is enabled"
+grep -qx "touch /var/lib/omarchy/firewall-on" "$TEST_LOG" || fail "the firewall's set-up marker is written"
 ! grep -qE '^ufw (enable|default)' "$TEST_LOG" || fail "the live firewall and Ubuntu's policies are left alone"
 ! grep -q 'docker' "$TEST_LOG" || fail "no Docker rules"
 

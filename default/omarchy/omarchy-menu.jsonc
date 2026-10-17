@@ -234,6 +234,7 @@
   "install.gaming.heroic": {"icon":"󱓟","label":"Heroic (Epic Games)","when":"! omarchy-pkg-flatpak-present com.heroicgameslauncher.hgl","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-gaming-heroic"},
   "install.gaming.minecraft": {"icon":"󰍳","label":"Minecraft","when":"! omarchy-pkg-present minecraft-launcher","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-gaming-minecraft"},
   "install.gaming.retro-launcher": {"icon":"󰯉","label":"RetroArch Game Launcher","action":"omarchy-games-retro-install"},
+  "install.development.docker-desktop": {"icon":"󰡨","label":"Docker Desktop","when":"! omarchy-pkg-present docker-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-dev-docker-desktop"},
   "install.development.rails": {"icon":"󰫏","label":"Ruby on Rails","when":"omarchy-cmd-present mise && [[ ! -d $HOME/.local/share/mise/installs/ruby ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env ruby'"},
   "install.development.javascript": {"icon":"","label":"JavaScript"},
   "install.development.go": {"icon":"","label":"Go","when":"omarchy-cmd-present mise && [[ ! -d $HOME/.local/share/mise/installs/go ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env go'"},
@@ -252,7 +253,6 @@
   "install.development.elixir.elixir": {"icon":"","label":"Elixir","when":"omarchy-cmd-present mise && [[ ! -d $HOME/.local/share/mise/installs/elixir ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env elixir'"},
   "install.development.elixir.phoenix": {"icon":"","label":"Phoenix","when":"omarchy-cmd-present mise && ! compgen -G \"$HOME/.mix/archives/phx_new*\"","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env phoenix'"},
   "install.development.herdr": {"icon":"","label":"Herdr","when":"! omarchy-cmd-present herdr","action":"omarchy-launch-floating-terminal-with-presentation 'mise use -g herdr && { [[ -f ~/.config/herdr/config.toml ]] || omarchy-refresh-herdr; }'"},
-  "install.development.docker-desktop": {"icon":"󰡨","label":"Docker Desktop","when":"! omarchy-pkg-present docker-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-dev-docker-desktop"},
 
   // Remove
   "remove.package": {"icon":"","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-remove"},
