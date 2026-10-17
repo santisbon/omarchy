@@ -87,7 +87,7 @@ It's not part of the base install: install it from _Install > Productivity > OBS
 
 [Kdenlive](https://kdenlive.org/) is an excellent video editor. Perfect for working on video that comes out of OBS Studio before sharing it.
 
-You start Kdenlive via the application launcher (`Super + Space`).
+It's not part of the base install: install it from _Install > Productivity > Kdenlive_ in the Omarchy menu (`Super + Space`), which installs KDE's Flatpak from Flathub. Then start it via the application launcher (`Super + Space`).
 
 ## Omacut
 

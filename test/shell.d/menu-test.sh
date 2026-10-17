@@ -189,6 +189,12 @@ assert(
     && defaultById['remove.productivity.obs'].action.includes('omarchy-pkg-flatpak-drop com.obsproject.Studio'),
   'menu installs and removes OBS Studio from Flathub under Productivity'
 )
+assert(
+  [['xournalpp', 'com.github.xournalpp.xournalpp'], ['kdenlive', 'org.kde.kdenlive']].every(([key, id]) =>
+    defaultById[`install.productivity.${key}`].action.includes(`omarchy-pkg-flatpak-add ${id}`)
+      && defaultById[`remove.productivity.${key}`].action.includes(`omarchy-pkg-flatpak-drop ${id}`)),
+  'menu installs and removes Xournal++ and Kdenlive from Flathub under Productivity'
+)
 const expectedAgents = {
   pi: { icon: '\ue901', iconFont: 'omarchy', label: 'Pi' },
   omp: { icon: '\ue903', iconFont: 'omarchy', label: 'omp' },

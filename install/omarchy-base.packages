@@ -229,7 +229,8 @@ ca-certificates
 #
 # Removed 2026-10-10 (the distro's split of the list into what the desktop needs and what was
 # Omarchy's taste; see the distro repository's docs/6, "Core and apps"):
-# libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls
+# libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls (each is in the
+#   menu instead: LibreOffice from the Snap Store, the others from Flathub; Install > Productivity)
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
 # build-essential, tree-sitter-cli: command-line preferences (dua-cli came back on 2026-10-16; yt-dlp, removed with
 #   them, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
