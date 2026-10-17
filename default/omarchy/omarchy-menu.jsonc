@@ -188,7 +188,6 @@
   "install.service": {"icon":"","label":"Service"},
   "install.productivity": {"icon":"󰃖","label":"Productivity"},
   "install.development": {"icon":"󰵮","label":"Development"},
-  "install.development.mise": {"icon":"󱌣","label":"mise","when":"! omarchy-cmd-present mise","action":"omarchy-launch-floating-terminal-with-presentation omarchy-mise-ensure"},
   "install.editor": {"icon":"","label":"Editor"},
   "install.terminal": {"icon":"","label":"Terminal"},
   "install.browser": {"icon":"","label":"Browser"},

@@ -71,7 +71,7 @@ else
   # An npm: agent (Grok) needs Node.js to run, which mise never adds by itself (mise's npm
   # backend page), and the base install has none.
   node_first() { [[ $agent_package != npm:* ]] || mise use -g node@lts; }
-  agent_install() { user_install || { omarchy-mise-ensure && PATH="$HOME/.local/bin:$PATH" node_first && PATH="$HOME/.local/bin:$PATH" mise use -g "$agent_package"; }; }
+  agent_install() { user_install || { node_first && mise use -g "$agent_package"; }; }
 fi
 
 if [[ $installing == "false" ]] && ! agent_present; then
