@@ -9,6 +9,7 @@ o.bind("SUPER + ESCAPE", "System menu", "omarchy-menu toggle system")
 o.bind("XF86PowerOff", "Power menu", "omarchy-menu toggle system", { locked = true })
 o.bind("SUPER + K", "Keybindings", "omarchy-menu-keybindings")
 o.bind("SUPER + ALT + K", "Tmux keybindings", "omarchy-menu-tmux-keybindings")
+o.bind("SUPER + CTRL + K", "Herdr keybindings", "omarchy-menu-herdr-keybindings")
 -- GNOME Calculator in place of Omarchy's Omacalc, which has no Ubuntu build.
 o.bind("SUPER + CTRL + Q", "Calculator", "gnome-calculator")
 o.bind("XF86Calculator", "Calculator", "gnome-calculator")

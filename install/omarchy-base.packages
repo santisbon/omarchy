@@ -195,8 +195,9 @@ gpg
 ca-certificates
 
 # Dropped from Omarchy's Arch list, with the reason:
-# aether, cliamp, herdr, omacalc, omacut, omawrite, tensaku, tobi-try:
-#   Omarchy's own OPR packages, no Ubuntu build
+# aether, omacalc, omacut, omawrite, tensaku, tobi-try: Omarchy's own OPR packages, no Ubuntu build
+# cliamp, herdr: installed per user through mise from the menu (Install > Service > cliamp,
+#   Install > Development > Herdr; the distro's docs/6, choice 80)
 # ttfx: separate package (not in stonking; the distro's apt repository builds it from source)
 # asdcontrol: separate package
 # chromium: Ubuntu's chromium is a snap placeholder and snapd is pinned out

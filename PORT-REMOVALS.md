@@ -49,7 +49,7 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 The candidates left, in the order to take them. Each names its section below; the sections give the facts.
 
-1. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Omarchy's own MIT-licensed apps (herdr, cliamp, omawrite, omacut, omacalc, try) built in the distro's apt repository as LocalSend is; Learn > Omarchy with a caveat.
+1. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat, and Learn > Herdr.
 2. **Waiting for evidence on Ubuntu**: the wireless regulatory domain from the timezone (verdict Unclear). ([System files](#system-install-and-hardware-files))
 
 ## Open questions
@@ -72,14 +72,44 @@ Checks that came up while restoring, not yet done:
 |---|---|---|---|---|---|
 | Factory reset | `bin/omarchy-system-factory-reset`, `-factory-reset-finish`, `-provision-owner`; `setup.reset` | on btrfs, swapped `@` for the installer's factory snapshot, re-keyed the disk encryption and recreated the owner at first boot | docs/6: among "programs the distro cannot install"; docs/1: scripts tied to Limine and Snapper | the same mistake as snapshots: only the Limine and mkinitcpio steps were Arch-specific; btrfs installs have Timeshift; `oem-config` (universe) creates a user at first boot | **Partial**: a factory Timeshift snapshot at install, restored by the reset, then `oem-config-prepare`; the re-keying needs rewriting |
 | Learn > Omarchy | `learn.omarchy` | Omarchy's manual | none recorded | parts of the manual do not apply (the firewall's Docker rules, pacman, Limine), most does | **Partial**: with a caveat, or a page of the port's own |
+| Learn > Herdr | `learn.herdr` | herdr's documentation | Herdr was not available | herdr is installable again (Install > Development > Herdr, docs/6 choice 80) | **Restore**: one menu line |
 
 ### Replaced
 
-the AUR commands (Install > Package, Snap and Flatpak); pacman upkeep (`omarchy-update-system-pkgs` with apt); the 32-bit GPU libraries (`omarchy-install-32bit-graphics`); the local package test (`UPSTREAM_DIR=… scripts/build.sh`); Learn > Arch (Learn > Ubuntu); the preinstalled web-app launchers and HEY's mailto handler (Install > Web App; Omarchy's set could come back as presets); LM Studio (Install > Flatpak).
+| Feature | What does the job instead |
+|---|---|
+| The AUR commands | Install > Package, Snap and Flatpak |
+| pacman upkeep | `omarchy-update-system-pkgs` with apt |
+| The 32-bit GPU libraries | `omarchy-install-32bit-graphics` |
+| The local package test | `UPSTREAM_DIR=… scripts/build.sh` in the build repository |
+| Learn > Arch | Learn > Ubuntu |
+| The preinstalled web-app launchers and HEY's mailto handler | Install > Web App (Omarchy's set could come back as presets) |
+| LM Studio | Install > Flatpak |
 
 ### Justified
 
-Battle.net (umu-launcher not in stonking); ONCE (a GitHub binary, needs Docker); ChatGPT desktop, Grok Bot, Hermes Desktop, Perplexity (only third parties' snaps or nothing; web apps and the agents cover them); T3 Code (a GitHub release only); hibernation (out of the first release; docs/0 and docs/1 give different reasons, Secure Boot lockdown versus scope); direct boot of a UKI and Limine's refresh (GRUB only); package channels (the apt repository has none); upgrade to Quattro (Omarchy's own migration path); log upload and the Omarchy Discord (Omarchy's services); Learn > Herdr (Herdr is not available); the preinstalls toggle (nothing removable is preinstalled); Docker with sudoless Docker, the Docker databases and the Docker TUI, and Obsidian's theme sync (Omarchy's preinstalled Docker and Obsidian are not restored: the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71)); the Windows VM (it runs in a Docker container, so it stays out with Docker); Install > Browser > Brave, Edge and Zen, and Install > Editor > Helix, Cursor and Zed, with their remove and default-browser entries (the distro's maintainer chose not to restore them, 2026-10-16, docs/6 choice 74; the menu keeps Chromium, Chrome, Brave Origin and Firefox, and VS Code, VSCodium, Sublime Text, Vim and Emacs, among others; the browser-detection lists and Helix's theme template stay, so a browser or Helix installed another way is still recognized and themed); Sunshine, the game-streaming host, with its installer and remover (the distro's maintainer chose not to restore it, 2026-10-16, docs/6 choice 78; Flathub's `dev.lizardbyte.app.Sunshine` stays installable through Install > Flatpak); the six Nerd Font installers under Install > Style > Font (Cascadia Mono, Meslo, Fira Code, Victor Mono, Bitstream Vera Mono, Iosevka) and `omarchy-install-font` (nothing in Omarchy uses these fonts by name; they are extra choices in Style > Font, which already offers the image's monospace fonts, and the image's one Nerd Font, JetBrains Mono, carries the icon glyphs: the distro's maintainer chose not to restore them, 2026-10-16, docs/6 choice 72); OpenClaw, its installer, remover, CLI installer, default-agent choice, launcher and onboarding (the distro's maintainer chose not to restore it, 2026-10-16, docs/6 choice 73; Omarchy installs it from its own npm-based package, which would need a package of the distro's own against Ubuntu's Node.js 24); the PHP development environment, Install and Remove > Development > PHP with its PHP, Laravel and Symfony entries (nothing in the desktop uses PHP; Symfony was removed with the port, PHP and Laravel on 2026-10-16 by the distro's maintainer, docs/6 choice 41).
+| Feature | Why it stays out |
+|---|---|
+| Battle.net | umu-launcher is not in stonking |
+| ONCE | a GitHub binary, and it needs Docker |
+| ChatGPT desktop, Grok Bot, Hermes Desktop, Perplexity | only third parties' snaps or nothing; web apps and the agents cover them |
+| T3 Code | a GitHub release only |
+| Hibernation | out of the first release (docs/0 and docs/1 give different reasons: Secure Boot lockdown versus scope) |
+| Direct boot of a UKI, Limine's refresh | the distro boots with GRUB only |
+| Package channels | the distro's apt repository has none |
+| Upgrade to Quattro | Omarchy's own migration path |
+| Log upload, the Omarchy Discord | Omarchy's own services |
+| The preinstalls toggle | nothing removable is preinstalled |
+| Docker: sudoless Docker, the Docker databases, the Docker TUI | Docker is not preinstalled: the distro's maintainer's decision (2026-10-16, docs/6 choice 71) |
+| Obsidian's theme sync | Obsidian is not preinstalled: the distro's maintainer's decision (2026-10-16, docs/6 choice 71) |
+| Windows VM | it runs in a Docker container, so it stays out with Docker |
+| Brave, Edge and Zen (Install > Browser, with their remove and default-browser entries) | the distro's maintainer's decision (2026-10-16, docs/6 choice 74); the menu keeps Chromium, Chrome, Brave Origin and Firefox, and the browser-detection lists still recognize these if installed another way |
+| Helix, Cursor and Zed (Install > Editor) | the distro's maintainer's decision (2026-10-16, docs/6 choice 74); the menu keeps VS Code, VSCodium, Sublime Text, Vim and Emacs, and Helix's theme template still themes a Helix installed another way |
+| Sunshine, the game-streaming host, with its installer and remover | the distro's maintainer's decision (2026-10-16, docs/6 choice 78); Flathub's `dev.lizardbyte.app.Sunshine` stays installable through Install > Flatpak |
+| Omarchy's own apps try, omawrite, omacut and omacalc | the distro's maintainer's decision (2026-10-16, docs/6 choice 80): none has a release build to install without a package of the distro's own (try needs Ruby, which choice 71 keeps out), and GNOME Calculator replaced omacalc (choice 47) |
+| The six Nerd Font installers (Install > Style > Font) and `omarchy-install-font` | the distro's maintainer's decision (2026-10-16, docs/6 choice 72): nothing in Omarchy uses these fonts by name; Style > Font already offers the image's monospace fonts, and its one Nerd Font, JetBrains Mono, carries the icon glyphs |
+| OpenClaw: installer, remover, CLI installer, default-agent choice, launcher, onboarding | the distro's maintainer's decision (2026-10-16, docs/6 choice 73); Omarchy installs it from its own npm-based package |
+| The PHP development environment (Install and Remove > Development > PHP, with PHP, Laravel and Symfony) | nothing in the desktop uses PHP; Symfony was removed with the port, PHP and Laravel by the distro's maintainer's decision (2026-10-16, docs/6 choice 41) |
 
 ## System, install and hardware files
 
@@ -93,11 +123,48 @@ The 92 files deleted under `install/`, `etc/` and `default/` went in four port c
 
 ### Replaced
 
-mkinitcpio files (initramfs-tools, `oaxaca-nvidia`'s hook, `oaxaca-base`'s Thunderbolt option); Snapper (Timeshift, choice 38); SDDM's Wayland greeter (`oaxaca-session`); the passwordless keyring (keyring unlocked by the login password, docs/4 choice 14); Plymouth's theme file (the distro's plymouth package); `nsswitch.conf` (Ubuntu's, with mDNS); the DNS and timezone sudoers rules (`omarchy-dns` on nmcli and D-Bus; `omarchy-timezone`); the icon links and Chromium first-run preferences; the Bluetooth pairing agent (blueman's applet; see [Open questions](#open-questions)); CUPS hardening (Ubuntu's `cups-browsed` runs as its own user, browses only DNS-SD and has an AppArmor profile; `CreateRemoteCUPSPrinterQueues No` is the one setting missing); NVIDIA (`nvidia.sh`: `oaxaca-drivers-install` with Canonical's signed modules, including the 580 branch for GPUs before Turing); Vulkan drivers (`vulkan.sh`: `mesa-vulkan-drivers` in the image); Motorcomm YT6801 Ethernet (`fix-yt6801-ethernet-adapter.sh`: the in-kernel `dwmac-motorcomm`); the Surface's Marvell Wi-Fi firmware (`surface.sh`: `linux-firmware-marvell-wireless` is in the image); most of the Surface and MacBook SPI keyboard modules (Ubuntu's initramfs already holds them; the one each lacks came back, see [Restored](#restored)).
+| Feature | What does the job instead |
+|---|---|
+| mkinitcpio files | initramfs-tools, `oaxaca-nvidia`'s hook, `oaxaca-base`'s Thunderbolt option |
+| Snapper | Timeshift (docs/6 choice 38) |
+| SDDM's Wayland greeter | `oaxaca-session` |
+| The passwordless keyring | the keyring unlocked by the login password (docs/4 choice 14) |
+| Plymouth's theme file | the distro's plymouth package |
+| `nsswitch.conf` | Ubuntu's, with mDNS |
+| The DNS and timezone sudoers rules | `omarchy-dns` on nmcli and D-Bus; `omarchy-timezone` |
+| The icon links, Chromium's first-run preferences | the distro's own setup |
+| The Bluetooth pairing agent | blueman's applet (see [Open questions](#open-questions)) |
+| CUPS hardening | Ubuntu's `cups-browsed` runs as its own user, browses only DNS-SD and has an AppArmor profile; `CreateRemoteCUPSPrinterQueues No` is the one setting missing |
+| NVIDIA drivers (`nvidia.sh`) | `oaxaca-drivers-install` with Canonical's signed modules, including the 580 branch for GPUs before Turing |
+| Vulkan drivers (`vulkan.sh`) | `mesa-vulkan-drivers`, in the image |
+| Motorcomm YT6801 Ethernet (`fix-yt6801-ethernet-adapter.sh`) | the in-kernel `dwmac-motorcomm` |
+| The Surface's Marvell Wi-Fi firmware (`surface.sh`) | `linux-firmware-marvell-wireless`, in the image |
+| Most of the Surface and MacBook SPI keyboard modules | Ubuntu's initramfs already holds them; the one each lacks came back (see [Restored](#restored)) |
 
 ### Justified
 
-pacman's update guard, configuration and mirrors; Limine (docs/1 section 6); Battle.net (umu-launcher not in stonking); the hibernate branch of the ASUS sleep hook (hibernation is out); shutdown timeouts and open-file limits (taste; Ubuntu's user manager already stops in 5 s); plocate tuning; zram and zswap; Docker's daemon setup (Docker is not preinstalled); resolved's multicast setting (a no-op); dirmngr keyservers; faillock (Ubuntu's stack has no `pam_faillock`); sudo's password tries; the powerprofilesctl shebang (Ubuntu's is already `/usr/bin/python3`); Omarchy's ISO provisioning and factory reset (Calamares installs; the reset relied on Limine and mkinitcpio); network cleanup (archinstall leftovers); the PATH for `ssh host command` (`install/config/ssh-command-path.sh` added mise's shims and `~/.local/bin` to `/etc/security/pam_env.conf`, so tools installed there are found by commands run over SSH without a login shell; the distro's maintainer chose not to restore it, 2026-10-16, docs/6 choice 79); the zram tuning in `99-omarchy-sysctl.conf` (swap on zram is not used); the BCM4360's Wi-Fi driver (`broadcom-sta-dkms` only, so a MOK); TUXEDO and Slimbook keyboard backlight (`tuxedo-drivers` is DKMS, not in stonking); Apple T2 (an out-of-tree kernel and a pacman repository); FRED on Panther Lake (`intel/fred.sh`: `CONFIG_X86_FRED=y` and mainline's default is on, so `fred=on` is a no-op); MacBook SPI keyboard DKMS (`macbook12-spi-driver-dkms`: Ubuntu's kernel has the driver as signed modules); Apple-style F-keys (`fix-fkeys.sh` sets `hid_apple fnmode=2`, which makes the top row of keys send F1 to F12, with the printed functions such as brightness and volume only while Fn is held. The `hid_apple` driver applies that setting to every keyboard it drives, so genuine Apple keyboards would also lose one-press brightness and volume; Omarchy wants it for third-party keyboards that use Apple's layout, such as Lofree's, and the kernel already sends F1 to F12 first on the clones it recognizes (Keychron, Epomaker and others). A preference, not a fix for a device).
+| Feature | Why it stays out |
+|---|---|
+| pacman's update guard, configuration and mirrors | Ubuntu uses apt |
+| Limine | the distro boots with GRUB (docs/1 section 6) |
+| Battle.net | umu-launcher is not in stonking |
+| The hibernate branch of the ASUS sleep hook | hibernation is out |
+| Shutdown timeouts and open-file limits | taste; Ubuntu's user manager already stops in 5 s |
+| plocate tuning, dirmngr keyservers, sudo's password tries | Ubuntu's defaults |
+| zram and zswap, and the zram tuning in `99-omarchy-sysctl.conf` | swap on zram is not used |
+| Docker's daemon setup | Docker is not preinstalled |
+| resolved's multicast setting | a no-op on Ubuntu |
+| faillock | Ubuntu's PAM stack has no `pam_faillock` |
+| The powerprofilesctl shebang | Ubuntu's is already `/usr/bin/python3` |
+| Omarchy's ISO provisioning and factory reset | Calamares installs; the reset relied on Limine and mkinitcpio |
+| Network cleanup | archinstall leftovers |
+| The PATH for `ssh host command` (`ssh-command-path.sh` added mise's shims and `~/.local/bin` to `/etc/security/pam_env.conf`) | the distro's maintainer's decision (2026-10-16, docs/6 choice 79) |
+| The BCM4360's Wi-Fi driver | `broadcom-sta-dkms` only, so it needs a MOK |
+| TUXEDO and Slimbook keyboard backlight | `tuxedo-drivers` is DKMS and not in stonking |
+| Apple T2 | an out-of-tree kernel and a pacman repository |
+| FRED on Panther Lake (`intel/fred.sh`) | `CONFIG_X86_FRED=y` and mainline's default is on, so `fred=on` changes nothing |
+| MacBook SPI keyboard DKMS (`macbook12-spi-driver-dkms`) | Ubuntu's kernel has the driver as signed modules |
+| Apple-style F-keys (`fix-fkeys.sh`, `hid_apple fnmode=2`) | a preference, not a fix for a device: it makes the top row send F1 to F12 (brightness and volume only with Fn) on every keyboard the driver handles, genuine Apple keyboards included; Omarchy wants it for Apple-layout keyboards such as Lofree's, and the kernel already sends F1 to F12 first on the clones it recognizes (Keychron, Epomaker and others) |
 
 ## Packages dropped from the base list
 
@@ -105,7 +172,35 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 
 ### Renamed for Ubuntu or provided another way (no loss)
 
-avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fcitx5-qt (`fcitx5-frontend-gtk3`, `-gtk4`, `-qt6`); fd (`fd-find`); gpu-screen-recorder (`gpu-screen-recorder-cli`); gvfs-mtp, gvfs-nfs, gvfs-smb (`gvfs-backends`); libvips (`libvips-tools`); nautilus-python (`python3-nautilus`); networkmanager (`network-manager`); noto-fonts, -cjk, -emoji (`fonts-noto-core`, `-cjk`, `-color-emoji`); nss-mdns (`libnss-mdns`); nvim (`neovim`); python-gobject (`python3-gi`); qt6-imageformats (`qt6-image-formats-plugins`); sushi (`gnome-sushi`); tesseract and tesseract-data-eng (`tesseract-ocr`, `tesseract-ocr-eng`); tldr (`tealdeer`); woff2-font-awesome (`fonts-font-awesome`); yaru-icon-theme (`yaru-theme-icon`); zbar (`zbar-tools`); libsecret (`libsecret-1-0`; Arch's `secret-tool` is lost, low value); libyaml (`libyaml-0-2`). Moved into the distro's own packages: asdcontrol, hyprland-preview-share-picker, localsend, ffmpegthumbnailer and pamixer (desktop packages); hyprland, quickshell, sddm, uwsm, gnome-keyring, wireplumber, xdg-desktop-portal-gtk and -hyprland (session packages); ttf-ia-writer and ttf-jetbrains-mono-nerd-basic (`oaxaca-fonts`). Replaced: chromium (the xtradeb PPA's build, preinstalled), evince (Papers; stonking's evince is an alpha).
+| Omarchy's package (Arch) | On Oaxaca |
+|---|---|
+| avahi | `avahi-daemon` |
+| bluez-utils | `bluez`, `bluez-tools` |
+| fcitx5-gtk, fcitx5-qt | `fcitx5-frontend-gtk3`, `-gtk4`, `-qt6` |
+| fd | `fd-find` |
+| gpu-screen-recorder | `gpu-screen-recorder-cli` |
+| gvfs-mtp, gvfs-nfs, gvfs-smb | `gvfs-backends` |
+| libvips | `libvips-tools` |
+| nautilus-python | `python3-nautilus` |
+| networkmanager | `network-manager` |
+| noto-fonts, -cjk, -emoji | `fonts-noto-core`, `-cjk`, `-color-emoji` |
+| nss-mdns | `libnss-mdns` |
+| nvim | `neovim` |
+| python-gobject | `python3-gi` |
+| qt6-imageformats | `qt6-image-formats-plugins` |
+| sushi | `gnome-sushi` |
+| tesseract, tesseract-data-eng | `tesseract-ocr`, `tesseract-ocr-eng` |
+| tldr | `tealdeer` |
+| woff2-font-awesome | `fonts-font-awesome` |
+| yaru-icon-theme | `yaru-theme-icon` |
+| zbar | `zbar-tools` |
+| libsecret | `libsecret-1-0` (Arch's `secret-tool` is lost; low value) |
+| libyaml | `libyaml-0-2` |
+| asdcontrol, hyprland-preview-share-picker, localsend, ffmpegthumbnailer, pamixer | the distro's desktop packages |
+| hyprland, quickshell, sddm, uwsm, gnome-keyring, wireplumber, xdg-desktop-portal-gtk, -hyprland | the distro's session packages |
+| ttf-ia-writer, ttf-jetbrains-mono-nerd-basic | `oaxaca-fonts` |
+| chromium | the xtradeb PPA's build, preinstalled |
+| evince | Papers (stonking's evince is an alpha) |
 
 ### Justified
 
@@ -133,7 +228,6 @@ avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fci
 
 | Package | What it is | Facts (stonking, 2026-10-16) | How |
 |---|---|---|---|
-| Omarchy's own MIT apps: herdr, cliamp, omawrite, omacut, omacalc, try | terminal multiplexer, music player, writing app, video trimmer, calculator, throwaway directories | not in stonking; licensed MIT or Apache-2.0 | build in the distro's apt repository, as LocalSend and ttfx are |
 
 ## Features cut inside files the port kept
 
@@ -144,7 +238,7 @@ avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fci
 | FRED kernel parameter | `install/hardware/all.sh` (`fred=on` on Panther Lake) | turns on Intel's FRED event delivery | docs/6: wrote Limine drop-ins | `CONFIG_X86_FRED=y` in the image's kernel, and mainline's default is on | **Justified** (a no-op on Ubuntu's kernel) |
 | RetroArch CRT shader and full core set | `bin/omarchy-install-gaming-retroarch` | CRT look, about 30 cores | in-file comment: no Ubuntu packages; the Online Updater fetches them | | **Justified** |
 | HEY bindings and mailto | `applications.lua`, `mimeapps.list` | HEY web app | choice 27, the maintainer's request | Super+Shift+E opens Thunderbird | **Replaced** |
-| Herdr, Cliamp, Omawrite, lazydocker bindings; `h` alias | `applications.lua`, `utilities.lua`, `aliases` | Omarchy's own apps | choice 5 | not in stonking | **Justified** |
+| Omawrite and lazydocker bindings | `applications.lua` | Omarchy's own apps | choice 5 | omawrite stays out (docs/6 choice 80); lazydocker is not in stonking | **Justified** |
 | OpenClaw as default agent | `bin/omarchy-default-agent`, `bin/omarchy-agent` | `omarchy default agent openclaw`, and the agent launcher's OpenClaw branch | `PORT.md`: only a third party's snap | OpenClaw is not restored (docs/6 choice 73); the launcher's branch went with it on 2026-10-16 | **Justified** |
 | Bluetooth pairing agent `bt-agent.service` | `install/user/first-run/enable-user-units.sh` | headless pairing | docs/6: blueman's applet autostarts | not checked that XDG autostart runs under the uwsm session | **Replaced**, to confirm on a booted Oaxaca |
 | Debug log upload | `bin/omarchy-debug` | 24-hour shareable URL on logs.omarchy.org | in-file comment: no upload service | Omarchy's own service | **Justified** |
@@ -190,7 +284,7 @@ Test cases deleted from files that stay: the OpenClaw cases in `default-agent-te
 
 Things in the port today that call something deleted, or ship without the feature they served (fixed ones are in [Restored](#restored)):
 
-- Scripts with nothing calling them: `omarchy-launch-terminal-herdr`, `-menu-herdr-keybindings`, `-refresh-herdr`, `-restart-herdr` and `config/herdr/`; `omarchy-theme-set-t3code`; `install/omarchy-other.packages` (Arch package names, read by nothing).
+- Scripts with nothing calling them: `omarchy-theme-set-t3code`; `install/omarchy-other.packages` (Arch package names, read by nothing).
 - Comments and docs that are out of date: `enable-services.sh` describes a wait-online mask that is gone; the package list says Chromium is a snap placeholder with snapd pinned out, and that "dev-env installs" lua51, luarocks and python-poetry-core through mise (it does not; and Omarchy shipped `dotnet-runtime` for Pinta); `PORT.md` says Omarchy's list does not install `try` (it has `tobi-try`); docs/6 says Chrome and VS Code were replaced (both are back); docs/0 and docs/1 give different reasons for leaving out hibernation; `docs/file-layout.md` mentions `keyboard-backlight` and `limine-entry-tool`.
 
 ## Restored
@@ -231,3 +325,4 @@ Every feature added back since the audit, with its tier and item, the date, and 
 | 4 | Minecraft | Install and Remove > Gaming > Minecraft, Omarchy's menu lines and remover; the installer downloads Mojang's own `Minecraft.deb` and installs it with apt, after the distro's `oaxaca-gdk-pixbuf-compat`, which provides the GdkPixbuf library's old package name that Mojang's package still depends on and Ubuntu no longer provides | 76 |
 | 4 | NordVPN and Bitwarden | Install > Service > NordVPN and > Bitwarden, Omarchy's menu lines, from the vendors' own snaps (`nordvpn`, publisher NordVPN; `bitwarden`, publisher 8bit Solutions LLC, Bitwarden's company; both verified on the Snap Store; Omarchy's Bitwarden CLI is left out) instead of the AUR; Remove > Snap removes them, as Omarchy's general remove does | 77 |
 | sysctl | `tcp_mtu_probing=1` | Omarchy's `etc/sysctl.d/99-omarchy-sysctl.conf` with only its MTU probing line, so connections recover on networks that drop path-MTU messages | 79 |
+| 5 | herdr and cliamp | Install and Remove > Development > Herdr and > Service > cliamp, installed per user through mise (`mise use -g`, both in mise's registry, from their own release binaries); Omarchy's bindings (Super+Ctrl+Return, Super+Ctrl+K, Super+Shift+Alt+M) and the `h` alias, and the kept herdr helpers are used again | 80 |
