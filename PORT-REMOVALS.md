@@ -87,7 +87,7 @@ Checks that came up while restoring, not yet done:
 | ONCE | a GitHub binary, and it needs Docker |
 | ChatGPT desktop, Grok Bot, Hermes Desktop, Perplexity | only third parties' snaps or nothing; web apps and the agents cover them |
 | T3 Code | a GitHub release only |
-| Hibernation | out of the first release (docs/0 and docs/1 give different reasons: Secure Boot lockdown versus scope) |
+| Hibernation: `omarchy-hibernation-setup` (a swap file at `/swap/swapfile` sized for RAM, resume wiring through mkinitcpio and a Limine drop-in), `omarchy-hibernation-remove`, `omarchy-hibernation-available`, and the menu's Hibernate entry | out of the first release in every configuration, for scope (the distro's docs/1, section 5): hibernation needs swap sized to RAM on the encrypted disk, resume wiring in Ubuntu's initramfs, and a port of Omarchy's scripts away from Limine, btrfs and mkinitcpio. With Secure Boot on, the kernel's lockdown also blocks hibernation (`/sys/power/disk` reads `[disabled]`). May come later: as an opt-in with Secure Boot off (docs/1, section 5), and with Secure Boot on as well if RFC patches posted to linux-pm on 2026-10-08, which let a locked-down kernel hibernate by signing the saved memory with a TPM key, are merged and reach Ubuntu's kernel (docs/1, "Suspend, hibernate and Secure Boot") |
 | Direct boot of a UKI, Limine's refresh | the distro boots with GRUB only |
 | Package channels | the distro's apt repository has none |
 | Upgrade to Quattro | Omarchy's own migration path |
