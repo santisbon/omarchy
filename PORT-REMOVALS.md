@@ -28,10 +28,6 @@ A numbered decision in one of the build repository's step documents. "docs/6" is
 - **Partial**: part of the feature can come back, or it can come back another way.
 - **Unclear**: the facts needed to decide were not reachable, such as whether Ubuntu has the problem a fix is for.
 
-### Tier
-
-The audit's first ranking of the features to restore, by what a user meets first: tier 1, broken or weaker than Omarchy; tier 2, cheap restores; tier 2b, hardware fixes for other machines (added with docs/6, choice 48); tier 3, Omarchy's preinstalled defaults; tier 4, menu installers; tier 5, larger projects. The choices in docs/6 cite items by tier ("tier 1, item 7"); [Restored](#restored) keeps those numbers.
-
 ## How the audit was done
 
 The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on this branch: 321 files. The 106 migrations among them are covered in `migrations/README.md`; the deleted tests are listed in [Tests](#tests) below. The rest, 183 files, plus the 70 menu entries removed from `default/omarchy/omarchy-menu.jsonc`, the 97 package names that Omarchy's `install/omarchy-base.packages` has and the port's does not, and the features cut inside the 121 files both sides have, were read one by one against the reasons recorded in this repository's docs and the fork, and checked against stonking on Launchpad, the Snap Store (`snap info`), Flathub, vendor apt repositories, mainline Linux 7.3 and the live root filesystem built 2026-10-16.
@@ -49,7 +45,7 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 The candidates left, in the order to take them. Each names its section below; the sections give the facts.
 
-1. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat.
+1. **Larger projects**: a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat.
 2. **Waiting for evidence on Ubuntu**: the wireless regulatory domain from the timezone (verdict Unclear). ([System files](#system-install-and-hardware-files))
 
 ## Open questions
@@ -287,41 +283,41 @@ Things in the port today that call something deleted, or ship without the featur
 
 ## Restored
 
-Every feature added back since the audit, with its tier and item, the date, and the choice in docs/6 that records the reason it holds on Ubuntu.
+Every feature added back since the audit, with the choice in docs/6 that records the reason it holds on Ubuntu.
 
-| Tier, item | Feature | What came back | Choice |
-|---|---|---|---|
-| 1, 1 | Firewall | ufw on for the next boot, LocalSend's port 53317 allowed, Ubuntu's policies (deny incoming), no Docker rules; `install/config/firewall.sh` | 40 |
-| 1, 2 | Wi-Fi power save off | Omarchy's `etc/NetworkManager/conf.d/omarchy-wifi-powersave.conf` (`wifi.powersave = 2`), over Ubuntu's `wifi.powersave = 3`: link drops on Intel BE200/BE211 firmware | 42 |
-| 1, 3 | Tools kept files call | ttfx (built in the distro's apt repository) for the screensaver; inxi for the debug report; starship, eza and zoxide for the prompt and the `ls`, `lt` and `cd` aliases; btop and lazygit with Omarchy's configurations for the agent skill. Tensaku's two callers (`omarchy-clipboard-open`, imv's Ctrl+E) moved to swappy instead, which replaced Tensaku on purpose (choice 29) | 43 |
-| 1, 4 | Hyprland's reload guard around upgrades | `oaxaca-config`'s preinst pauses, its postinst resumes (Omarchy's libalpm hooks, for dpkg) | 44 |
-| 1, 5 | systemd-oomd scope | Omarchy's `app.slice` drop-in, plus `user@.service` set to `auto`, so the compositor is not a kill candidate | 45 |
-| 1, 6 | SSH keepalive | `ServerAliveInterval 15`, `ServerAliveCountMax 3`, `ConnectTimeout 10` as a package file in `etc/ssh/ssh_config.d/`, for the kept `ssh-reconnect` | 46 |
-| 1, 7 | Basic tools | unzip, GNOME Disks, GNOME Calculator in place of Omacalc (Super+Ctrl+Q, the Calculator key), btop with Super+Ctrl+T and theme sync; `oaxaca-desktop-apps` dropped | 43, 47 |
-| 2 | Share > Receive, Install > Service > Chromium Account | Omarchy's two menu lines | 49 |
-| 2 | `ic`, `ix`, `icx` aliases | `tdl c`, `tdl cx`, `tdl c cx` | 50 |
-| 2 | Voxtype's first-run invitation | the post-update hook, its line in `omarchy-provision-first-run`, and `voxtype-invitation-test.sh` | 51 |
-| 2 | 1Password's Chromium extension | written and removed with 1Password | 52 |
-| 2 | Fingerprint skipped while the lid is closed | the port's own pam-auth-update profile, `omarchy-fprintd`: Ubuntu's line with Omarchy's `pam_exec` gate in front | 53 |
-| 2 | DNS for networks joined later | NetworkManager's global DNS over D-Bus as well as the profiles, granted by a polkit rule | 54 |
-| 2 | ASUS Panther Lake display options | `xe.enable_dpcd_backlight=1` (B9406, UX5406AA) and `xe.enable_panel_replay=0` (B9406) in `/etc/modprobe.d`, on the same DMI match; need on Ubuntu not verified ([Open questions](#open-questions)) | 55 |
-| 2 | Intel video acceleration | `libmfx-gen1.2` (Quick Sync) or `i965-va-driver` (GMA-era GPUs), by GPU, at install | 56 |
-| 2 | BCM4331 Wi-Fi firmware | `firmware-b43-installer` on that PCI id (multiverse; its postinst downloads the firmware from a third party's GitHub release at install) | 57 |
-| 2 | inotify watch limit | `fs.inotify.max_user_watches=524288` over localsearch's 65536 | 58 |
-| 2 | whois | in the base list | 59 |
-| 2 | inxi | with tier 1, item 3 | 43 |
-| found | Wi-Fi 7 off only on a Dell XPS on Panther Lake | the kept `fix-wifi7-eht.sh` turned Wi-Fi 7 off on every BE200 and BE211, the Legion's card included; now only on the machines its comment names, and `oaxaca-config`'s postinst removes the file elsewhere; need on Ubuntu not verified | 60 |
-| 2b, 2 | Surface keyboard at the disk encryption passphrase prompt | an initramfs-tools hook that adds `surface_aggregator_hub`, the one of Omarchy's ten modules Ubuntu's initramfs lacks | 63 |
-| 2b, 3 | MacBook8,1 SPI keyboard at the same prompt | an initramfs-tools hook that adds `spi-pxa2xx-pci`, the one module Ubuntu's initramfs lacks | 64 |
-| 2b, 5 | Intel IPU7 camera (partial) | libcamera, its GStreamer element and its PipeWire plugin on the OV08X40 match; Ubuntu's kernel has the drivers and firmware | 65 |
-| 2b, 4 | Dell XPS haptic touchpad | `packages/dell-xps-touchpad-haptics` in the build repository, installed on the detector's match; Hardware > Touchpad Haptics | 66 |
-| 2b, 6 | Framework 16 keyboard lighting | `packages/qmk-hid` in the build repository, installed by `framework16.sh` | 67 |
-| 2b, 7 | ASUS ROG tools and the Hybrid GPU toggle | `packages/asusctl` (6.5.0, from `github.com/OpenGamingCollective/asusctl`) and `packages/supergfxctl` (5.2.7); `asus-rog.sh`, `omarchy-hw-hybrid-gpu`, `omarchy-toggle-hybrid-gpu`, `force-igpu`, the start delay and their tests (`hw-hybrid-gpu-test.sh`, `hybrid-gpu-test.sh`); Hybrid GPU shows only on ASUS ROG laptops with two GPUs, and the scripts call `gnutimeout` | 68 |
-| 3 | mise | preinstalled from mise's own apt repository (`mise.jdx.dev/deb`) by the distro's image build, so apt updates it, as Omarchy preinstalls it; the port's own menu entry and on-demand installer (`omarchy-mise-ensure`) are gone, so the commands that use mise are Omarchy's again | 69 |
-| 3 | dua-cli and the Disk Usage launcher | `dua-cli` in the base list and Omarchy's `applications/Disk Usage.desktop` (`dua i /` in a floating terminal), with Yaru's `disk-usage-app` icon since no theme in the image has Omarchy's `disk-usage`; migration `1792196970` adds the launcher for existing users | 70 |
-| 4 | Heroic Games Launcher | Install and Remove > Gaming > Heroic (Epic Games), Omarchy's menu lines, from Flathub's verified `com.heroicgameslauncher.hgl` instead of Omarchy's repository; the remover deletes the app's data and `~/Games/Heroic`, as Omarchy's does | 75 |
-| 4 | Minecraft | Install and Remove > Gaming > Minecraft, Omarchy's menu lines and remover; the installer downloads Mojang's own `Minecraft.deb` and installs it with apt, after the distro's `oaxaca-gdk-pixbuf-compat`, which provides the GdkPixbuf library's old package name that Mojang's package still depends on and Ubuntu no longer provides | 76 |
-| 4 | NordVPN and Bitwarden | Install > Service > NordVPN and > Bitwarden, Omarchy's menu lines, from the vendors' own snaps (`nordvpn`, publisher NordVPN; `bitwarden`, publisher 8bit Solutions LLC, Bitwarden's company; both verified on the Snap Store; Omarchy's Bitwarden CLI is left out) instead of the AUR; Remove > Snap removes them, as Omarchy's general remove does | 77 |
-| sysctl | `tcp_mtu_probing=1` | Omarchy's `etc/sysctl.d/99-omarchy-sysctl.conf` with only its MTU probing line, so connections recover on networks that drop path-MTU messages | 79 |
-| 5 | herdr and cliamp | Install and Remove > Development > Herdr and > Service > cliamp, installed per user through mise (`mise use -g`, both in mise's registry, from their own release binaries); Omarchy's bindings (Super+Ctrl+Return, Super+Ctrl+K, Super+Shift+Alt+M) and the `h` alias, and the kept herdr helpers are used again | 80 |
-| 5 | Learn > Herdr | Omarchy's menu line, which lists herdr's key bindings (`omarchy-menu-herdr-keybindings`), shown only when herdr is installed | 80 |
+| Feature | What came back | Choice |
+|---|---|---|
+| Firewall | ufw on for the next boot, LocalSend's port 53317 allowed, Ubuntu's policies (deny incoming), no Docker rules; `install/config/firewall.sh` | 40 |
+| Wi-Fi power save off | Omarchy's `etc/NetworkManager/conf.d/omarchy-wifi-powersave.conf` (`wifi.powersave = 2`), over Ubuntu's `wifi.powersave = 3`: link drops on Intel BE200/BE211 firmware | 42 |
+| Tools kept files call | ttfx (built in the distro's apt repository) for the screensaver; inxi for the debug report; starship, eza and zoxide for the prompt and the `ls`, `lt` and `cd` aliases; btop and lazygit with Omarchy's configurations for the agent skill. Tensaku's two callers (`omarchy-clipboard-open`, imv's Ctrl+E) moved to swappy instead, which replaced Tensaku on purpose (choice 29) | 43 |
+| Hyprland's reload guard around upgrades | `oaxaca-config`'s preinst pauses, its postinst resumes (Omarchy's libalpm hooks, for dpkg) | 44 |
+| systemd-oomd scope | Omarchy's `app.slice` drop-in, plus `user@.service` set to `auto`, so the compositor is not a kill candidate | 45 |
+| SSH keepalive | `ServerAliveInterval 15`, `ServerAliveCountMax 3`, `ConnectTimeout 10` as a package file in `etc/ssh/ssh_config.d/`, for the kept `ssh-reconnect` | 46 |
+| Basic tools | unzip, GNOME Disks, GNOME Calculator in place of Omacalc (Super+Ctrl+Q, the Calculator key), btop with Super+Ctrl+T and theme sync; `oaxaca-desktop-apps` dropped | 43, 47 |
+| Share > Receive, Install > Service > Chromium Account | Omarchy's two menu lines | 49 |
+| `ic`, `ix`, `icx` aliases | `tdl c`, `tdl cx`, `tdl c cx` | 50 |
+| Voxtype's first-run invitation | the post-update hook, its line in `omarchy-provision-first-run`, and `voxtype-invitation-test.sh` | 51 |
+| 1Password's Chromium extension | written and removed with 1Password | 52 |
+| Fingerprint skipped while the lid is closed | the port's own pam-auth-update profile, `omarchy-fprintd`: Ubuntu's line with Omarchy's `pam_exec` gate in front | 53 |
+| DNS for networks joined later | NetworkManager's global DNS over D-Bus as well as the profiles, granted by a polkit rule | 54 |
+| ASUS Panther Lake display options | `xe.enable_dpcd_backlight=1` (B9406, UX5406AA) and `xe.enable_panel_replay=0` (B9406) in `/etc/modprobe.d`, on the same DMI match; need on Ubuntu not verified ([Open questions](#open-questions)) | 55 |
+| Intel video acceleration | `libmfx-gen1.2` (Quick Sync) or `i965-va-driver` (GMA-era GPUs), by GPU, at install | 56 |
+| BCM4331 Wi-Fi firmware | `firmware-b43-installer` on that PCI id (multiverse; its postinst downloads the firmware from a third party's GitHub release at install) | 57 |
+| inotify watch limit | `fs.inotify.max_user_watches=524288` over localsearch's 65536 | 58 |
+| whois | in the base list | 59 |
+| inxi | with the tools the kept files call | 43 |
+| Wi-Fi 7 off only on a Dell XPS on Panther Lake | the kept `fix-wifi7-eht.sh` turned Wi-Fi 7 off on every BE200 and BE211, the Legion's card included; now only on the machines its comment names, and `oaxaca-config`'s postinst removes the file elsewhere; need on Ubuntu not verified | 60 |
+| Surface keyboard at the disk encryption passphrase prompt | an initramfs-tools hook that adds `surface_aggregator_hub`, the one of Omarchy's ten modules Ubuntu's initramfs lacks | 63 |
+| MacBook8,1 SPI keyboard at the same prompt | an initramfs-tools hook that adds `spi-pxa2xx-pci`, the one module Ubuntu's initramfs lacks | 64 |
+| Intel IPU7 camera (partial) | libcamera, its GStreamer element and its PipeWire plugin on the OV08X40 match; Ubuntu's kernel has the drivers and firmware | 65 |
+| Dell XPS haptic touchpad | `packages/dell-xps-touchpad-haptics` in the build repository, installed on the detector's match; Hardware > Touchpad Haptics | 66 |
+| Framework 16 keyboard lighting | `packages/qmk-hid` in the build repository, installed by `framework16.sh` | 67 |
+| ASUS ROG tools and the Hybrid GPU toggle | `packages/asusctl` (6.5.0, from `github.com/OpenGamingCollective/asusctl`) and `packages/supergfxctl` (5.2.7); `asus-rog.sh`, `omarchy-hw-hybrid-gpu`, `omarchy-toggle-hybrid-gpu`, `force-igpu`, the start delay and their tests (`hw-hybrid-gpu-test.sh`, `hybrid-gpu-test.sh`); Hybrid GPU shows only on ASUS ROG laptops with two GPUs, and the scripts call `gnutimeout` | 68 |
+| mise | preinstalled from mise's own apt repository (`mise.jdx.dev/deb`) by the distro's image build, so apt updates it, as Omarchy preinstalls it; the port's own menu entry and on-demand installer (`omarchy-mise-ensure`) are gone, so the commands that use mise are Omarchy's again | 69 |
+| dua-cli and the Disk Usage launcher | `dua-cli` in the base list and Omarchy's `applications/Disk Usage.desktop` (`dua i /` in a floating terminal), with Yaru's `disk-usage-app` icon since no theme in the image has Omarchy's `disk-usage`; migration `1792196970` adds the launcher for existing users | 70 |
+| Heroic Games Launcher | Install and Remove > Gaming > Heroic (Epic Games), Omarchy's menu lines, from Flathub's verified `com.heroicgameslauncher.hgl` instead of Omarchy's repository; the remover deletes the app's data and `~/Games/Heroic`, as Omarchy's does | 75 |
+| Minecraft | Install and Remove > Gaming > Minecraft, Omarchy's menu lines and remover; the installer downloads Mojang's own `Minecraft.deb` and installs it with apt, after the distro's `oaxaca-gdk-pixbuf-compat`, which provides the GdkPixbuf library's old package name that Mojang's package still depends on and Ubuntu no longer provides | 76 |
+| NordVPN and Bitwarden | Install > Service > NordVPN and > Bitwarden, Omarchy's menu lines, from the vendors' own snaps (`nordvpn`, publisher NordVPN; `bitwarden`, publisher 8bit Solutions LLC, Bitwarden's company; both verified on the Snap Store; Omarchy's Bitwarden CLI is left out) instead of the AUR; Remove > Snap removes them, as Omarchy's general remove does | 77 |
+| `tcp_mtu_probing=1` | Omarchy's `etc/sysctl.d/99-omarchy-sysctl.conf` with only its MTU probing line, so connections recover on networks that drop path-MTU messages | 79 |
+| herdr and cliamp | Install and Remove > Development > Herdr and > Service > cliamp, installed per user through mise (`mise use -g`, both in mise's registry, from their own release binaries); Omarchy's bindings (Super+Ctrl+Return, Super+Ctrl+K, Super+Shift+Alt+M) and the `h` alias, and the kept herdr helpers are used again | 80 |
+| Learn > Herdr | Omarchy's menu line, which lists herdr's key bindings (`omarchy-menu-herdr-keybindings`), shown only when herdr is installed | 80 |
