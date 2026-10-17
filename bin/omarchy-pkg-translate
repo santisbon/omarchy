@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# omarchy:summary=Print the Ubuntu package names for package names that may be Arch Linux's
+# omarchy:args=[--explain] <packages...>
+# omarchy:hidden=true
+
+# Plugins and themes written for Omarchy name Arch Linux's packages. omarchy-pkg-add,
+# omarchy-pkg-present and omarchy-pkg-missing pass their arguments through this script
+# (the distro's docs/6, choice 86), which prints one name per line:
+#   - a name listed in $OMARCHY_PATH/default/omarchy/arch-package-names becomes the Ubuntu
+#     packages listed beside it (that file lists only Arch names that are not also Ubuntu
+#     package names, so a hit never shadows a real Ubuntu package);
+#   - python-<name>, when apt knows python3-<name> and not python-<name>, becomes
+#     python3-<name>;
+#   - any other name is printed as it is.
+# --explain also says on stderr what it translated.
+
+explain=0
+if [[ ${1:-} == --explain ]]; then
+  explain=1
+  shift
+fi
+
+names_file="${OMARCHY_PATH:-/usr/share/omarchy}/default/omarchy/arch-package-names"
+apt_knows() { apt-cache show --no-all-versions -- "$1" >/dev/null 2>&1; }
+
+for pkg in "$@"; do
+  ubuntu=""
+  [[ -f $names_file ]] && ubuntu=$(awk -v name="$pkg" '$1 == name { $1 = ""; sub(/^ /, ""); print; exit }' "$names_file")
+  if [[ -z $ubuntu && $pkg == python-* ]] && ! apt_knows "$pkg" && apt_knows "python3-${pkg#python-}"; then
+    ubuntu="python3-${pkg#python-}"
+  fi
+  if [[ -n $ubuntu ]]; then
+    (( explain )) && echo "Using Ubuntu's $ubuntu for Arch's $pkg." >&2
+    printf '%s\n' $ubuntu
+  else
+    printf '%s\n' "$pkg"
+  fi
+done

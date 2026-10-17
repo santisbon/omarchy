@@ -3,7 +3,11 @@
 # omarchy:summary=Returns true if all of the named packages are installed on the system (or false if any of them are missing).
 # omarchy:args=<packages...>
 
-for pkg in "$@"; do
+# Arch Linux's package names, which plugins and themes written for Omarchy use, are checked
+# under their Ubuntu names (omarchy-pkg-translate, the distro's docs/6, choice 86).
+mapfile -t packages < <(omarchy-pkg-translate "$@")
+
+for pkg in "${packages[@]}"; do
   [[ $(dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null) == "installed" ]] || exit 1
 done
 

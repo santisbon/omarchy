@@ -74,8 +74,12 @@ out=$(OMARCHY_PATH="$ROOT" PATH="$stubs:$ROOT/bin:$PATH" omarchy-pkg-add bluez-o
   fail "pkg add installs translated names" "$out"
 [[ $(sort "$installed" | paste -sd' ') == "bluez-obexd python3-requests zip" ]] ||
   fail "pkg add installs Ubuntu's names for Arch's and passes known names through" "$(cat "$installed")"
-grep -qF "Installing Ubuntu's bluez-obexd for Arch's bluez-obex." <<<"$out" || fail "pkg add says what it translated" "$out"
-pass "pkg add installs Ubuntu's packages for Arch names, from the table and python-*"
+grep -qF "Using Ubuntu's bluez-obexd for Arch's bluez-obex." <<<"$out" || fail "pkg add says what it translated" "$out"
+OMARCHY_PATH="$ROOT" PATH="$stubs:$ROOT/bin:$PATH" omarchy-pkg-present bluez-obex ||
+  fail "pkg present checks an Arch name under its Ubuntu name"
+! OMARCHY_PATH="$ROOT" PATH="$stubs:$ROOT/bin:$PATH" omarchy-pkg-missing bluez-obex ||
+  fail "pkg missing checks an Arch name under its Ubuntu name"
+pass "pkg add, present and missing use Ubuntu's packages for Arch names, from the table and python-*"
 
 # --- the renamed tree: kept names, links, migration ------------------------------------
 tree="$work/tree"

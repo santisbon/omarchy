@@ -1,39 +1,203 @@
-# Arch Linux package names and the Ubuntu packages that stand in for them, read by
-# omarchy-pkg-add when a plugin or theme written for Omarchy asks for an Arch name that apt
-# does not know (the distro's docs/6, choice 86). One package per line: the Arch name, then
-# one or more Ubuntu names. A name apt knows is installed as it is, without this table.
-# Most lines come from the port's own list of renamed packages (PORT-REMOVALS.md, "Renamed
-# for Ubuntu or provided another way"); every Ubuntu name was checked in stonking's main,
-# universe, multiverse and restricted indexes on 2026-10-17.
+# Arch Linux package names and the Ubuntu packages that stand in for them (the distro's
+# docs/6, choice 86). omarchy-pkg-translate reads this file for omarchy-pkg-add,
+# omarchy-pkg-present and omarchy-pkg-missing, so plugins and themes written for Omarchy can
+# name Arch's packages.
+#
+# Format: one package per line, the Arch name first, then one or more Ubuntu packages; lines
+# starting with # are ignored. Rules for an entry:
+#   - the Arch name is not also an Ubuntu package name, so an entry never hides a real Ubuntu
+#     package (checked against stonking's main, universe, multiverse and restricted indexes);
+#   - every Ubuntu name is in stonking's archive, or in the distro's own apt repository
+#     (written with Omarchy's name, which the build renames: omarchy-fonts);
+#   - python-<name> needs an entry only when Ubuntu's package is not python3-<name>; the
+#     translator turns the others into python3-<name> by itself.
+#
+# Where the names come from (2026-10-17): every package name that the 5602 plugin
+# repositories in Omarchy's plugin marketplace (registry.json of
+# github.com/omacom/omarchy-plugin-marketplace) pass to omarchy-pkg-add, omarchy-pkg-present,
+# omarchy-pkg-missing, Omarchy's AUR commands, or pacman, yay or paru -S, in their code, CI
+# workflows and messages (5575 cloned, 881 with such a line), plus the port's own list of
+# renamed packages (PORT-REMOVALS.md). Each Ubuntu package was chosen by the files both
+# install (commands, shared libraries, Python modules), using Arch's core, extra and
+# multilib files databases and stonking's Contents-amd64, then checked by hand.
+# Arch names whose software Ubuntu does not package are not here; docs/6, choice 86, lists them.
+
+# Build tools and languages
 base-devel build-essential
-bind bind9-dnsutils
+go golang-go
+ninja ninja-build
+nodejs-lts-jod nodejs
+protobuf protobuf-compiler
+python python3
+rust rustc cargo
+shaderc glslc
+glslang glslang-tools
+
+# Python modules whose Ubuntu package is not python3-<name>
+python-gobject python3-gi
+python-onnxruntime-cpu python3-onnxruntime
+python-pillow python3-pil
+python-pipx pipx
+python-pyserial python3-serial
+
+# Libraries and their tools
+cairo libcairo2
+fuse2 libfuse2t64
+ggml-cpu libggml0
+ggml-vulkan libggml0-backend-vulkan
+glib2 libglib2.0-0t64 libglib2.0-bin
+gtk-layer-shell libgtk-layer-shell0
+gtk4 libgtk-4-1 libgtk-4-bin
+gtk4-layer-shell libgtk4-layer-shell0
+hidapi libhidapi-hidraw0 libhidapi-libusb0
+json-c libjson-c5
+json-glib libjson-glib-1.0-0 json-glib-tools
+libadwaita libadwaita-1-0
+libarchive libarchive13t64 libarchive-tools
+libepoxy libepoxy0
+libevdev libevdev2 libevdev-tools
+libfido2 libfido2-1 fido2-tools
+libgcrypt libgcrypt20
+libnotify libnotify4 libnotify-bin
+libpulse libpulse0 pulseaudio-utils
+libsecret libsecret-1-0 libsecret-tools
+libsodium libsodium26
+libvips libvips-tools
+libxkbcommon libxkbcommon0 libxkbcommon-tools
+libyaml libyaml-0-2
+md4c libmd4c0 md2html
+nlohmann-json nlohmann-json3-dev
+nss libnss3 libnss3-tools
+pango libpango-1.0-0
+pcre2 libpcre2-8-0 pcre2-utils
+poppler-glib libpoppler-glib8t64
+portaudio libportaudio2
+postgresql-libs libpq5 postgresql-client
+projectm libprojectm3
+librsvg librsvg2-2 librsvg2-bin
+systemd-libs libsystemd0
+toxcore libtoxcore2
+bcg729 libbcg729-0
+taglib libtag2
+vte3 libvte-2.91-0
+vte4 libvte-2.91-gtk4-0
+vulkan-icd-loader libvulkan1
+wayland libwayland-client0 libwayland-cursor0 libwayland-egl1 libwayland-bin
+webkit2gtk libwebkit2gtk-4.1-0
+zlib zlib1g
+
+# Qt and QML (the shell's plugins are QML)
+pyside6 python3-pyside6.qtcore python3-pyside6.qtgui python3-pyside6.qtquick
+qt5-declarative libqt5qml5 libqt5quick5 qml-module-qtquick2
+qt6-5compat libqt6core5compat6 qml6-module-qt5compat-graphicaleffects
+qt6-base libqt6core6t64 libqt6gui6 libqt6widgets6 libqt6dbus6
+qt6-connectivity libqt6bluetooth6
+qt6-declarative qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtqml-workerscript qml6-module-qtquick-templates
+qt6-imageformats qt6-image-formats-plugins
+qt6-multimedia libqt6multimedia6 qml6-module-qtmultimedia
+qt6-multimedia-ffmpeg libqt6multimedia6
+qt6-quick3d qml6-module-qtquick3d
+qt6-quicktimeline qml6-module-qtquick-timeline
+qt6-shadertools libqt6shadertools6
+qt6-svg libqt6svg6
+qt6-tools qt6-tools-dev-tools
+qt6-webengine libqt6webenginecore6 qml6-module-qtwebengine
+qt6-websockets libqt6websockets6 qml6-module-qtwebsockets
+
+# Desktop, graphics and sound
+adwaita-cursors adwaita-icon-theme
+geoclue geoclue-2.0
+gpu-screen-recorder gpu-screen-recorder-cli
+gst-libav gstreamer1.0-libav
+gst-plugin-va gstreamer1.0-plugins-bad
+gst-plugins-bad gstreamer1.0-plugins-bad
+gst-plugins-base gstreamer1.0-plugins-base
+gst-plugins-good gstreamer1.0-plugins-good
+gst-plugins-ugly gstreamer1.0-plugins-ugly
+gstreamer gstreamer1.0-tools
+libva-utils vainfo
+mesa libgl1-mesa-dri libglx-mesa0 libegl-mesa0
+nautilus-python python3-nautilus
+plasma-meta kde-plasma-desktop
+rubberband rubberband-cli
+sushi gnome-sushi
+vulkan-swrast mesa-vulkan-drivers
+xkeyboard-config xkb-data
+xorg-server-xvfb xvfb
+xorg-xauth xauth
+yaru-icon-theme yaru-theme-icon
+
+# Fonts
+noto-fonts fonts-noto-core
+noto-fonts-cjk fonts-noto-cjk
+noto-fonts-emoji fonts-noto-color-emoji
+ttf-dejavu fonts-dejavu-core
+ttf-jetbrains-mono fonts-jetbrains-mono
+ttf-jetbrains-mono-nerd omarchy-fonts
+ttf-liberation fonts-liberation
+woff2-font-awesome fonts-font-awesome
+
+# Hardware and devices
+android-tools adb fastboot
+android-udev android-sdk-platform-tools-common
+bluez-libs libbluetooth3
 bluez-obex bluez-obexd
 bluez-utils bluez bluez-tools
 fcitx5-gtk fcitx5-frontend-gtk3 fcitx5-frontend-gtk4
 fcitx5-qt fcitx5-frontend-qt6
-fd fd-find
-gpu-screen-recorder gpu-screen-recorder-cli
+framework-system framework-tool
+lib32-gcc-libs lib32gcc-s1
+libratbag ratbagd
+pam-u2f libpam-u2f pamu2fcfg
+polkit polkitd pkexec
+
+# Networking
+avahi avahi-daemon avahi-utils
+bind bind9-dnsutils
+gvfs-dnssd gvfs-backends
 gvfs-mtp gvfs-backends
 gvfs-nfs gvfs-backends
 gvfs-smb gvfs-backends
-libnotify libnotify-bin
-libsecret libsecret-1-0 libsecret-tools
-libvips libvips-tools
-libyaml libyaml-0-2
-nautilus-python python3-nautilus
 networkmanager network-manager
-noto-fonts fonts-noto-core
-noto-fonts-cjk fonts-noto-cjk
-noto-fonts-emoji fonts-noto-color-emoji
+networkmanager-openconnect network-manager-openconnect
+networkmanager-openvpn network-manager-openvpn
+networkmanager-vpn-plugin-l2tp network-manager-l2tp
 nss-mdns libnss-mdns
-nvim neovim
 openssh openssh-client openssh-server
-python-gobject python3-gi
-qt6-imageformats qt6-image-formats-plugins
-sushi gnome-sushi
+strongswan-ikev1 strongswan
+
+# Applications and command-line tools
+docker docker.io
+fd fd-find
+github-cli gh
+helix hx
+libguestfs libguestfs-tools
+libqalculate qalc
+libreoffice-fresh libreoffice
+libvirt libvirt-daemon-system libvirt-clients
+llama-cpp llama.cpp llama.cpp-tools
+luacheck lua-check
+mariadb-clients mariadb-client
+nextcloud-client nextcloud-desktop
+nvim neovim
+perl-image-exiftool libimage-exiftool-perl
+poppler poppler-utils
+procps-ng procps
+qemu-base qemu-system-x86 qemu-utils
+qemu-desktop qemu-system-x86 qemu-system-gui qemu-utils
+quickshell-git quickshell
+rpm-tools rpm
+shadow passwd
+spectacle kde-spectacle
+sqlite sqlite3
+steam steam-installer
+task taskwarrior
 tesseract tesseract-ocr
 tesseract-data-eng tesseract-ocr-eng
+tesseract-data-jpn tesseract-ocr-jpn
+tesseract-data-jpn_vert tesseract-ocr-jpn-vert
 tldr tealdeer
-woff2-font-awesome fonts-font-awesome
-yaru-icon-theme yaru-theme-icon
+vice-sdl2 vice
+voxtype-bin voxtype
+whisper-cpp whisper.cpp whisper.cpp-tools
 zbar zbar-tools
