@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# omarchy:summary=Install and launch Mojang's Minecraft Launcher.
+# omarchy:requires-sudo=true
+
+set -e
+
+# Omarchy installs minecraft-launcher from its own repository (rebuilt from the AUR). Ubuntu's
+# archive has none; Mojang publishes the launcher as a .deb, which this downloads and installs.
+# Mojang's package still depends on libgdk-pixbuf2.0-0, the GdkPixbuf library's old package
+# name, which Ubuntu no longer provides, so the distro's omarchy-gdk-pixbuf-compat (an empty
+# package that provides the old name and depends on the library) goes in first. The launcher
+# updates the game itself.
+echo "Installing Minecraft..."
+omarchy-pkg-add omarchy-gdk-pixbuf-compat
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+curl -fsSL --retry 3 https://launcher.mojang.com/download/Minecraft.deb -o "$tmp/Minecraft.deb"
+chmod 644 "$tmp/Minecraft.deb"
+# A path with a slash makes apt-get treat the argument as a local deb and resolve its
+# dependencies from the archive, which dpkg -i alone would not.
+sudo apt-get install -y "$tmp/Minecraft.deb"
+omarchy-pkg-present minecraft-launcher
+
+omarchy-launcher-rescan
+setsid uwsm-app -- gtk-launch minecraft-launcher >/dev/null 2>&1 &
