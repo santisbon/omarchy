@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# omarchy:summary=Link Omarchy's per-user paths to the distro's, for Omarchy's plugins and themes
+# omarchy:hidden=true
+
+# Plugins and themes written for Omarchy read and write ~/.config/omarchy (their own
+# folders under plugins/ and themes/ among them), ~/.local/state/omarchy, and the older
+# ~/.local/share/omarchy. The distro's build renames those paths, so this script links each
+# Omarchy path to the distro's (the distro's docs/6, choice 86). It runs for every new user
+# (install/user/compat-links.sh) and once for existing users (a migration). A path that
+# already exists is left alone, and on a tree that is not renamed there is nothing to link.
+
+set -euo pipefail
+
+# "omar""chy" is written in two parts so the build's rename, which turns every omarchy into
+# the distro's name, leaves the upstream name as it is here.
+upstream="omar""chy"
+own="omarchy"
+[[ $own != "$upstream" ]] || exit 0
+
+link() {
+  local path="$1" target="$2"
+  [[ -e $path || -L $path ]] && return 0
+  mkdir -p "$(dirname -- "$path")"
+  ln -s "$target" "$path"
+}
+
+link "$HOME/.config/$upstream" "$own"
+link "$HOME/.local/state/$upstream" "$own"
+link "$HOME/.local/share/$upstream" "${OMARCHY_PATH:-/usr/share/$own}"

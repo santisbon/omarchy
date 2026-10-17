@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# omarchy:summary=Returns false: the AUR, Arch Linux's user repository, is not a source on this system.
+# omarchy:hidden=true
+
+# Omarchy's version asks the AUR whether it is up. The distro installs software with apt, so
+# plugins written for Omarchy that check this before an AUR install take their "unavailable"
+# branch (the distro's docs/6, choice 86).
+exit 1

@@ -38,4 +38,14 @@ case ":$PATH:" in
   *":$HOME/.local/bin:"*) ;;
   *) PATH="${PATH:+$PATH:}$HOME/.local/bin" ;;
 esac
+
+# Stand-ins for Arch Linux's package tools (pacman, yay, paru, makepkg) that plugins and
+# themes written for Omarchy call; see omarchy-arch-standin. Last on PATH, so a real tool
+# of the same name wins when one is installed.
+if [ -d /usr/lib/omarchy/arch-standins ]; then
+  case ":$PATH:" in
+    *":/usr/lib/omarchy/arch-standins:"*) ;;
+    *) PATH="${PATH:+$PATH:}/usr/lib/omarchy/arch-standins" ;;
+  esac
+fi
 export PATH

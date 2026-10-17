@@ -13,11 +13,25 @@
 #      user-facing messages become the distro's; with DISTRO_FORK_REPO set (owner/name of
 #      this fork on GitHub, such as santisbon/omarchy), that repository's name is kept too,
 #      because the agent skills send bug reports there;
-#   3. renames every file and directory whose name contains "omarchy" or "Omarchy";
-#   4. renames the icon font's family inside default/fonts/<id>/<id>.ttf with fontTools,
-#      because the shell asks for that family by name.
+#   3. renames every file and directory whose name contains "omarchy" or "Omarchy", except
+#      Chromium's native-messaging host files, which are named after the host they declare.
 # The result is what the distro's packages install: bin/<id>-*, /usr/share/<id>/..., the
-# <id>-*.service units, the <id> Lua module, the <id> font family.
+# <id>-*.service units, the <id> Lua module.
+#
+# Names kept for Omarchy's plugins and themes (the distro's docs/6, choice 86). Plugins and
+# themes written for Omarchy use these, and users do not see them, so step 2 leaves them as
+# they are; the packaging adds omarchy-* links for the commands and paths users do see:
+#   - environment variables, OMARCHY_* (OMARCHY_PATH, OMARCHY_GPU_OFFLOAD, ...);
+#   - the built-in plugins' IDs and IPC targets (omarchy.bar, omarchy.clock, ...: every "id"
+#     of a manifest under shell/plugins), and the omarchy.* namespace in the checks that
+#     reserve it (omarchy.*, "omarchy.", omarchy.$service, omarchy\.);
+#   - the "omarchy" section of a plugin manifest and the code that reads it
+#     (manifest.omarchy, .omarchy.clonedFrom);
+#   - Wayland app IDs and native-messaging host names (org.omarchy.terminal,
+#     com.omarchy.copy_url), which window rules and browser extensions match;
+#   - the menu's entry keys (update.omarchy, learn.omarchy);
+#   - the icon font's family, "omarchy", which menu entries and plugins name in iconFont and
+#     fontFamily (the font file itself moves to default/fonts/<id>/<id>.ttf).
 #
 # This script never runs on a git checkout (the port is kept un-renamed in git so that it
 # rebases onto Omarchy's tags); the packaging copies the tree first. --force overrides
@@ -57,45 +71,58 @@ find themes -path '*/backgrounds/*' -type f -iname '*omarchy*' -print -delete 2>
 export RENAME_ID="$id" RENAME_NAME="$name" RENAME_UPPER="$upper"
 export RENAME_BUG_URL="${DISTRO_BUG_URL:-}" RENAME_HOME_URL="${DISTRO_HOME_URL:-}"
 export RENAME_FORK_REPO="${DISTRO_FORK_REPO:-}"
-grep -rIlZ --exclude-dir=.git -E 'omarchy|Omarchy|OMARCHY' . | xargs -0 -r perl -pi -e '
-  # The fork repository name stays as it is: hidden from the rules below, then put back.
-  if ($ENV{RENAME_FORK_REPO} ne q{}) { s#\Q$ENV{RENAME_FORK_REPO}\E#\x{1}FORK\x{1}#g; }
+# The built-in plugins' IDs without the omarchy. prefix, as one alternation: clock|menu|...
+RENAME_KEEP_IDS=$(grep -rhoE '"id"[[:space:]]*:[[:space:]]*"omarchy\.[a-z0-9-]+"' shell |
+  sed -E 's/.*"omarchy\.([a-z0-9-]+)"/\1/' | sort -u | paste -sd'|')
+[[ -n $RENAME_KEEP_IDS ]] || { echo "rename.sh: found no plugin IDs under shell/plugins" >&2; exit 1; }
+export RENAME_KEEP_IDS
+# The names kept for plugins and themes (see the top of this script) and the fork repository
+# name, hidden from the renaming rules as numbered placeholders and put back afterwards. The
+# check at the end of this script hides the same names before it looks for leftovers.
+KEEP='
+  our @kept = ();
+  my $hide = sub { push @kept, $_[0]; "\x{1}" . $#kept . "\x{1}" };
+  if ($ENV{RENAME_FORK_REPO} ne q{}) { s#\Q$ENV{RENAME_FORK_REPO}\E#$hide->($&)#ge; }
+  s/OMARCHY_/$hide->($&)/ge;
+  s/(?:org|com|\[o\]rg)(?:\\\\|\\)?\.omarchy(?=(?:\\\\|\\)?\.)/$hide->($&)/ge;
+  s/omarchy\.(?:$ENV{RENAME_KEEP_IDS})(?![\w-])/$hide->($&)/ge;
+  s/omarchy\.(?=[*"\x27\$\\])|omarchy\\\./$hide->($&)/ge;
+  s/(?<=\.)omarchy(?=\s*(?:[|=)?:,;]|\.clone|\s+else\b))|(?<=\]\.)omarchy\b/$hide->($&)/ge;
+  s/"omarchy"(?=\s*:)/$hide->($&)/ge;
+  s/(?<=[a-z]\.)(?<!hypr\.)omarchy(?=")/$hide->($&)/ge;
+  s/(?<=iconFont":")omarchy(?=")|(?<=fontFamily: ")omarchy(?=")/$hide->($&)/ge;
+'
+grep -rIlZ --exclude-dir=.git -E 'omarchy|Omarchy|OMARCHY' . | xargs -0 -r perl -pi -e "$KEEP"'
   # Support pointers in user-facing messages go to the distro, when the build says where.
   if ($ENV{RENAME_BUG_URL} ne q{}) { s#https://omarchy\.org/discord#$ENV{RENAME_BUG_URL}#g; }
   if ($ENV{RENAME_HOME_URL} ne q{}) { s#https://omarchy\.org(?![/\w])#$ENV{RENAME_HOME_URL}#g; }
   s/OMARCHY/$ENV{RENAME_UPPER}/g;
   s/Omarchy(?!\.org)/$ENV{RENAME_NAME}/g;
   s/(?<!omacom\/)(?<!basecamp\/)(?<!omacom-io\/)(?<!the-)omarchy(?!\.org)(?!-pkgs)(?!-mirror)(?!-site)(?!-audio-tuner)/$ENV{RENAME_ID}/g;
-  if ($ENV{RENAME_FORK_REPO} ne q{}) { s#\x{1}FORK\x{1}#$ENV{RENAME_FORK_REPO}#g; }
+  s/\x{1}(\d+)\x{1}/$kept[$1]/g;
 '
 
 # 3. Paths, deepest first so a directory is renamed after its contents.
-find . -depth \( -name '*omarchy*' -o -name '*Omarchy*' \) -print0 | while IFS= read -r -d '' path; do
+find . -depth \( -name '*omarchy*' -o -name '*Omarchy*' \) ! -name 'com.omarchy.*' -print0 | while IFS= read -r -d '' path; do
   base=${path##*/}; dir=${path%/*}
   new=${base//omarchy/$id}; new=${new//Omarchy/$name}
   [[ $new != "$base" ]] && mv "$path" "$dir/$new"
 done
 
-# 4. The icon font's family name. The shell's QML names the family "omarchy" (now the id),
-#    so the font must answer to it.
-font="default/fonts/$id/$id.ttf"
-if [[ -f $font ]]; then
-  python3 - "$font" "$id" "$name" <<'PYEOF'
-import sys
-from fontTools.ttLib import TTFont
-path, ident, name = sys.argv[1:]
-font = TTFont(path)
-for record in font["name"].names:
-    text = record.toUnicode()
-    new = text.replace("omarchy", ident).replace("Omarchy", name)
-    if new != text:
-        record.string = new
-font.save(path)
-print(f"rename.sh: font family in {path} is now {ident}")
-PYEOF
+# 4. The check: after the names kept for plugins and themes and Omarchy's own addresses, no
+#    omarchy may be left. A leftover would be a reference the rules above missed; the
+#    packaging's omarchy-* links would hide it at run time, so the build fails here instead.
+#    This script itself is exempt: it spells out the patterns.
+left=$(grep -rIlZ --exclude-dir=.git -E 'omarchy|Omarchy|OMARCHY' . | grep -zv '^\./port/rename\.sh$' |
+  xargs -0 -r perl -ne "$KEEP"'
+    s/\x{1}\d+\x{1}//g;
+    s#(?:omacom|basecamp|omacom-io)/omarchy|the-omarchy|omarchy-(?:pkgs|mirror|site|audio-tuner)|[Oo]marchy\.org##g;
+    print "$ARGV:$.: $_" if /omarchy|Omarchy|OMARCHY/;
+    close ARGV if eof;
+  ' | cut -c1-200)
+if [[ -n $left ]]; then
+  echo "rename.sh: these mentions of omarchy are neither renamed nor on the keep list:" >&2
+  printf '%s\n' "$left" | head -n 20 >&2
+  exit 1
 fi
-
-# What is left is Omarchy's own addresses, by design.
-left=$(grep -rIo --exclude-dir=.git -E '[^ ]*omarchy[^ ]*' . | sort | uniq -c | sort -rn || true)
-echo "rename.sh: done; remaining mentions of omarchy (Omarchy's own addresses):"
-printf '%s\n' "$left" | head -n 20
+echo "rename.sh: done; only Omarchy's own addresses and the names kept for plugins and themes say omarchy"

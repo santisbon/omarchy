@@ -58,6 +58,25 @@ if ! git clone -- "$REPO_URL" "$THEME_PATH"; then
   exit 1
 fi
 
+# Themes written for Omarchy on Arch may call pacman, yay, paru or makepkg (in a hook,
+# say), which this system does not have (the distro's docs/6, choice 86). Warn, and ask
+# when someone is at the terminal, "no" by default.
+if arch_matches=$(omarchy-arch-tools-scan "$THEME_PATH"); then
+  cat >&2 <<WARN
+
+⚠️  This theme refers to Arch Linux's package tools, and Omarchy installs software
+  with apt. Parts of the theme may not work here. What was found:
+
+$(printf '%s\n' "$arch_matches" | sed 's/^/      /')
+
+WARN
+  if [[ -t 0 && -t 1 ]] && ! gum confirm --default=false "Install it anyway?"; then
+    rm -rf "$THEME_PATH"
+    echo "Theme not installed."
+    exit 1
+  fi
+fi
+
 # Apply the new theme with omarchy-theme-set, which stages only the files an
 # extra theme is allowed to contribute and names anything it dropped.
 omarchy-theme-set "$THEME_NAME"

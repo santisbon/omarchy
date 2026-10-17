@@ -1,0 +1,39 @@
+# Arch Linux package names and the Ubuntu packages that stand in for them, read by
+# omarchy-pkg-add when a plugin or theme written for Omarchy asks for an Arch name that apt
+# does not know (the distro's docs/6, choice 86). One package per line: the Arch name, then
+# one or more Ubuntu names. A name apt knows is installed as it is, without this table.
+# Most lines come from the port's own list of renamed packages (PORT-REMOVALS.md, "Renamed
+# for Ubuntu or provided another way"); every Ubuntu name was checked in stonking's main,
+# universe, multiverse and restricted indexes on 2026-10-17.
+base-devel build-essential
+bind bind9-dnsutils
+bluez-obex bluez-obexd
+bluez-utils bluez bluez-tools
+fcitx5-gtk fcitx5-frontend-gtk3 fcitx5-frontend-gtk4
+fcitx5-qt fcitx5-frontend-qt6
+fd fd-find
+gpu-screen-recorder gpu-screen-recorder-cli
+gvfs-mtp gvfs-backends
+gvfs-nfs gvfs-backends
+gvfs-smb gvfs-backends
+libnotify libnotify-bin
+libsecret libsecret-1-0 libsecret-tools
+libvips libvips-tools
+libyaml libyaml-0-2
+nautilus-python python3-nautilus
+networkmanager network-manager
+noto-fonts fonts-noto-core
+noto-fonts-cjk fonts-noto-cjk
+noto-fonts-emoji fonts-noto-color-emoji
+nss-mdns libnss-mdns
+nvim neovim
+openssh openssh-client openssh-server
+python-gobject python3-gi
+qt6-imageformats qt6-image-formats-plugins
+sushi gnome-sushi
+tesseract tesseract-ocr
+tesseract-data-eng tesseract-ocr-eng
+tldr tealdeer
+woff2-font-awesome fonts-font-awesome
+yaru-icon-theme yaru-theme-icon
+zbar zbar-tools

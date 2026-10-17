@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# omarchy:summary=Stand in for Arch Linux's package tools that plugins and themes call
+# omarchy:hidden=true
+
+# The distro's packaging links pacman, yay, paru and makepkg to this script in a directory
+# at the end of PATH (env-bootstrap), so a real tool of that name, if one is ever installed,
+# still wins; omarchy-pkg-aur-add and omarchy-pkg-aur-install call it with their own name
+# first (the distro's docs/6, choice 86). Plugins and themes written for Omarchy call these
+# tools; the distro installs software with apt.
+#   - A query (pacman -Q..., yay -Q..., paru -Q...) answers "not installed" quietly, so a
+#     plugin's presence checks go down their "missing" branch instead of failing loudly.
+#   - Anything else (installs, removals, upgrades, makepkg) changes nothing: it prints what
+#     was asked, sends a desktop notification, and exits 1.
+
+tool=$(basename -- "$0")
+[[ $tool == omarchy-arch-standin ]] && tool=${1:-pacman} && shift
+
+if [[ $tool != makepkg && ${1:-} == -Q* ]]; then
+  exit 1
+fi
+
+command="$tool${*:+ $*}"
+case $tool in
+  *-pkg-aur-*) what="$tool installs from the AUR, Arch Linux's user repository," ;;
+  *) what="$tool is Arch Linux's package tool," ;;
+esac
+cat >&2 <<EOF
+$what and Omarchy installs software with apt.
+Nothing was changed. The command that ran: $command
+Look for the Ubuntu package with Install > Package in the Omarchy menu, or: apt search <name>
+EOF
+if omarchy-cmd-present omarchy-notification-send; then
+  omarchy-notification-send -u normal "$tool is not available" "Something ran \"$command\". Omarchy installs software with apt; nothing was changed." >/dev/null 2>&1 || true
+fi
+exit 1

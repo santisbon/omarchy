@@ -14,8 +14,13 @@ tag the distro adopts.
   `OMARCHY_PATH`, `/usr/share/omarchy`), so that a rebase onto the next Omarchy tag meets the
   same names on both sides. The distro's packaging copies the tree and runs the script on the
   copy with `DISTRO_ID` and `DISTRO_NAME` from `distro.conf`, which is what makes every command
-  `oaxaca-*`, every path `/usr/share/oaxaca`, the Lua module `oaxaca` and the icon font family
-  `oaxaca`. The script is not run on this checkout.
+  `oaxaca-*`, every path `/usr/share/oaxaca` and the Lua module `oaxaca`. Since 2026-10-17 the
+  script keeps Omarchy's spelling for the names plugins and themes written for Omarchy use and
+  users do not see (built-in plugin IDs such as `omarchy.clock`, `OMARCHY_*` variables, app IDs
+  such as `org.omarchy.terminal`, a plugin manifest's `omarchy` section, the menu's entry keys,
+  the icon font family `omarchy`), fails when any other "omarchy" is left, and the packaging
+  adds `omarchy-*` links beside the commands (the distro's docs/6, choice 86). The script is not
+  run on this checkout.
 - `PORT.md`, this file.
 
 Nothing here is a Debian package: `debian/` lives in `santisbon/oaxaca` under `packages/desktop/`,
@@ -26,7 +31,9 @@ a change is being developed).
 ## Rules for a change
 
 - Keep Omarchy's names in every file. Write `omarchy-foo`, `$OMARCHY_PATH`, `/usr/share/omarchy`;
-  the rename script does the rest at build time.
+  the rename script does the rest at build time. Where a script needs Omarchy's own name after
+  the rename (to link or rewrite toward it), write it in two parts, `"omar""chy"`, as
+  `bin/omarchy-compat-links` does; the rename leaves that alone.
 - Keep Omarchy's script conventions (`# omarchy:summary=` headers, `omarchy-cmd-present`,
   `omarchy-notification-send`, `gum`).
 - Start minimal and add, never install and remove: the branch carries Ubuntu's configuration plus

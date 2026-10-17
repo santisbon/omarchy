@@ -5,6 +5,35 @@
 # omarchy:examples=omarchy pkg add jq ripgrep
 # omarchy:requires-sudo=true
 
+# Plugins and themes written for Omarchy ask for Arch Linux's package names. A name apt
+# does not know is looked up in $OMARCHY_PATH/default/omarchy/arch-package-names and
+# replaced by the Ubuntu packages listed there; an Arch python-<name> with no entry becomes
+# python3-<name> when apt knows that (the distro's docs/6, choice 86). A name apt knows is
+# never translated, so Ubuntu names given by the port's own scripts pass through unchanged.
+names_file="${OMARCHY_PATH:-/usr/share/omarchy}/default/omarchy/arch-package-names"
+apt_knows() { apt-cache show --no-all-versions -- "$1" >/dev/null 2>&1; }
+
+packages=()
+for pkg in "$@"; do
+  if apt_knows "$pkg"; then
+    packages+=("$pkg")
+    continue
+  fi
+  ubuntu=""
+  [[ -f $names_file ]] && ubuntu=$(awk -v name="$pkg" '$1 == name { $1 = ""; sub(/^ /, ""); print; exit }' "$names_file")
+  if [[ -z $ubuntu && $pkg == python-* ]] && apt_knows "python3-${pkg#python-}"; then
+    ubuntu="python3-${pkg#python-}"
+  fi
+  if [[ -n $ubuntu ]]; then
+    echo "Installing Ubuntu's $ubuntu for Arch's $pkg."
+    read -r -a translated <<<"$ubuntu"
+    packages+=("${translated[@]}")
+  else
+    packages+=("$pkg")
+  fi
+done
+set -- "${packages[@]}"
+
 if omarchy-pkg-missing "$@"; then
   # --no-install-recommends keeps a request for one tool from dragging in the
   # archive's suggestions around it; callers name everything they need.

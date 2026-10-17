@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# omarchy:summary=List where a plugin or theme folder refers to Arch Linux's package tools
+# omarchy:args=<folder>
+# omarchy:hidden=true
+
+# omarchy-plugin-add and omarchy-theme-install run this on a fresh clone and warn before
+# keeping it (the distro's docs/6, choice 86). Plugins and themes written for Omarchy may
+# call pacman, yay, paru or makepkg, or read pacman's files, which the distro does not have
+# (it installs software with apt). A match is a hint, not a verdict: the words also turn up
+# in comments and messages, so the callers ask rather than refuse. "om[a]rchy" in the
+# pattern keeps the build's rename from turning Omarchy's AUR helper into the distro's name.
+# Prints up to 10 matching lines as <file>:<line>: <text>, and exits 0 when it found any,
+# 1 when it found none.
+
+set -uo pipefail
+
+dir=${1:?usage: omarchy-arch-tools-scan <folder>}
+[[ -d $dir ]] || { echo "omarchy-arch-tools-scan: $dir is not a folder" >&2; exit 2; }
+
+pattern='\b(pacman|yay|paru|makepkg)\b|/var/lib/pacman|om[a]rchy-pkg-aur-add|om[a]rchy pkg aur'
+matches=$(cd "$dir" && grep -rInE --exclude-dir=.git --exclude='*.md' -- "$pattern" . 2>/dev/null |
+  sed -E 's#^\./##; s/^([^:]+:[0-9]+:)[[:space:]]*/\1 /' | cut -c1-160)
+[[ -n $matches ]] || exit 1
+printf '%s\n' "$matches" | head -n 10
+total=$(printf '%s\n' "$matches" | wc -l)
+(( total > 10 )) && echo "... and $(( total - 10 )) more"
+exit 0

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# omarchy:summary=Stand in for Omarchy's AUR package picker: the AUR is not a source on this system
+# omarchy:hidden=true
+
+# Omarchy's version installs from the AUR, Arch Linux's user repository, through yay. Plugins
+# written for Omarchy call it; the distro installs software with apt, so this says so and
+# changes nothing (omarchy-arch-standin, the distro's docs/6, choice 86).
+exec omarchy-arch-standin omarchy-pkg-aur-install "$@"
