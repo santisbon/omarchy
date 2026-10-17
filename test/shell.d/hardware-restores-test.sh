@@ -60,6 +60,11 @@ grep -qx 'options iwlwifi disable_11be=Y' "$work/root/etc/modprobe.d/iwlwifi-dis
 run_hook() { sed "s#/usr/share/initramfs-tools/hook-functions#$work/hook-functions#" "$1" | sh; }
 echo 'force_load() { echo "force_load $1"; }' >"$work/hook-functions"
 
+rm -rf "$work/root/etc"; mkdir -p "$work/root/etc"
+ln -s /usr/share/zoneinfo/America/Mexico_City "$work/root/etc/localtime"
+run set-wireless-regdom.sh
+grep -qx 'options cfg80211 ieee80211_regdom=MX' "$work/root/etc/modprobe.d/omarchy-wireless-regdom.conf" || fail "the timezone's country becomes cfg80211's regulatory domain"
+
 rm -rf "$work/root/etc"
 stub omarchy-hw-surface 'exit 0'
 run fix-surface-keyboard.sh >/dev/null

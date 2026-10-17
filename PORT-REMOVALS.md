@@ -46,7 +46,6 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 The candidates left, in the order to take them. Each names its section below; the sections give the facts.
 
 1. **Larger projects**: a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat.
-2. **Waiting for evidence on Ubuntu**: the wireless regulatory domain from the timezone (verdict Unclear). ([System files](#system-install-and-hardware-files))
 
 ## Open questions
 
@@ -113,7 +112,6 @@ The 92 files deleted under `install/`, `etc/` and `default/` went in four port c
 
 | Feature | Files | What it did | Removed because | Checked facts | Verdict |
 |---|---|---|---|---|---|
-| Wireless regulatory domain | `install/hardware/set-wireless-regdom.sh` | the country of the timezone chosen at install, written to Arch's `/etc/conf.d/wireless-regdom` | no reason recorded | Ubuntu's equivalent is `options cfg80211 ieee80211_regdom=XX` (the image's `cfg80211` has the parameter); nothing showed Ubuntu needs it, since a Wi-Fi card normally learns the country from the access point (802.11d). Restored and withdrawn the same day (docs/6, choice 62) | **Unclear**: restore when a machine on Ubuntu is seen stuck on the world domain, missing channels |
 
 ### Replaced
 
@@ -321,3 +319,4 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | `tcp_mtu_probing=1` | Omarchy's `etc/sysctl.d/99-omarchy-sysctl.conf` with only its MTU probing line, so connections recover on networks that drop path-MTU messages | 79 |
 | herdr and cliamp | Install and Remove > Development > Herdr and > Service > cliamp, installed per user through mise (`mise use -g`, both in mise's registry, from their own release binaries); Omarchy's bindings (Super+Ctrl+Return, Super+Ctrl+K, Super+Shift+Alt+M) and the `h` alias, and the kept herdr helpers are used again | 80 |
 | Learn > Herdr | Omarchy's menu line, which lists herdr's key bindings (`omarchy-menu-herdr-keybindings`), shown only when herdr is installed | 80 |
+| Wireless regulatory domain | `install/hardware/set-wireless-regdom.sh`: the country of the timezone chosen at install, written as `options cfg80211 ieee80211_regdom=XX` to `/etc/modprobe.d/omarchy-wireless-regdom.conf` instead of Arch's `/etc/conf.d/wireless-regdom`; a Wi-Fi card that manages its own regulatory domain, such as Intel's, ignores it | 82 |
