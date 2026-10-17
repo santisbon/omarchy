@@ -81,7 +81,7 @@ You start mpv via the application launcher (`Super + Space`) or just double-clic
 
 [OBS Studio](https://obsproject.com/) lets you record or stream video from multiple inputs. You can mix a screencast with a webcam with a microphone input. It's what was used to record the Omarchy screencasts.
 
-You start OBS Studio via the application launcher (`Super + Space`).
+It's not part of the base install: install it from _Install > Productivity > OBS Studio_ in the Omarchy menu (`Super + Space`), which installs the OBS project's own Flatpak from Flathub. Then start it via the application launcher (`Super + Space`).
 
 ## Kdenlive
 

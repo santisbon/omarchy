@@ -209,9 +209,9 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 | qemu-user-static-binfmt | for multi-architecture Docker builds; justified while Docker is out |
 | Obsidian | Omarchy's preinstalled notes app, with Super+Shift+O and theme sync; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 | ruby | Omarchy ships a base Ruby on purpose (upstream `b7989ac8`); the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
-| docker.io, docker-buildx, docker-compose-v2 | Omarchy preinstalls and enables Docker; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
-| xournalpp, obs-studio, kdenlive | Omarchy's preinstalled apps; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
-| Pinta, Moonlight | Omarchy's preinstalled apps (Flathub here); the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
+| docker.io, docker-buildx, docker-compose-v2 | Omarchy preinstalls and enables Docker; the distro's maintainer chose not to restore Docker (2026-10-16, docs/6 choice 71) |
+| Xournal++, Kdenlive (`xournalpp`, `kdenlive`) | Omarchy's preinstalled apps: a handwriting and PDF annotation app, a video editor; the distro's maintainer chose not to restore them (2026-10-16, docs/6 choice 71) |
+| Pinta, Moonlight | Omarchy's preinstalled apps (Flathub here); the distro's maintainer chose not to restore them (2026-10-16, docs/6 choice 71) |
 | LibreOffice (preinstalled) | the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Install > Productivity > LibreOffice installs Canonical's snap on demand |
 | omarchy-nvim, with lua5.1, luarocks and tree-sitter-cli | Omarchy's LazyVim configuration for Neovim; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Neovim is preinstalled with its own defaults |
 | libpq-dev, libmariadb-dev | headers for Rails' PostgreSQL and MySQL drivers in Omarchy's dev-env ruby; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
@@ -320,3 +320,4 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | herdr and cliamp | Install and Remove > Development > Herdr and > Service > cliamp, installed per user through mise (`mise use -g`, both in mise's registry, from their own release binaries); Omarchy's bindings (Super+Ctrl+Return, Super+Ctrl+K, Super+Shift+Alt+M) and the `h` alias, and the kept herdr helpers are used again | 80 |
 | Learn > Herdr | Omarchy's menu line, which lists herdr's key bindings (`omarchy-menu-herdr-keybindings`), shown only when herdr is installed | 80 |
 | Wireless regulatory domain | `install/hardware/set-wireless-regdom.sh`: the country of the timezone chosen at install, written as `options cfg80211 ieee80211_regdom=XX` to `/etc/modprobe.d/omarchy-wireless-regdom.conf` instead of Arch's `/etc/conf.d/wireless-regdom`; a Wi-Fi card that manages its own regulatory domain, such as Intel's, ignores it | 82 |
+| OBS Studio | Install and Remove > Productivity > OBS Studio, from Flathub's `com.obsproject.Studio`, one of the OBS project's two official channels (its PPA has no build for this Ubuntu release); Omarchy preinstalls it, the port offers it instead. Omarchy's window rule for `com.obsproject.Studio` was kept and matches the Flatpak | 83 |

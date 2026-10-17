@@ -110,24 +110,25 @@ assertDeepEqual(
 const defaultItems = menu.parseMenuJsonc(defaultMenuJsonc)
 const defaultById = Object.fromEntries(defaultItems.map(item => [item.id, item]))
 
-// Needs the real menu: app rows sort after all menu items, and only at that
+// Needs the real menu (Omarchy's test used Brave and Zen, whose entries the port
+// dropped; Chromium and Firefox have the same three entries): app rows sort after all menu items, and only at that
 // item count does the order tiebreak alone bury an installed app.
 const rankBase = menu.mergeMenuSources(defaultItems, [])
 const ranked = menu.mergeAppRows(rankBase.items, rankBase.itemOrder, [
-  { id: 'apps.brave', parent: 'apps', kind: 'app', label: 'Brave', description: '', aliases: [] },
+  { id: 'apps.chromium', parent: 'apps', kind: 'app', label: 'Chromium', description: '', aliases: [] },
   { id: 'apps.fontforge', parent: 'apps', kind: 'app', label: 'FontForge', description: '', aliases: [] },
-  { id: 'apps.zen', parent: 'apps', kind: 'app', label: 'Zen Browser', description: '', aliases: [] }
+  { id: 'apps.firefox', parent: 'apps', kind: 'app', label: 'Firefox Web Browser', description: '', aliases: [] }
 ])
 const rankScore = (id, query) => menu.searchScore(ranked.items, ranked.items[id], query)
 assert(
-  ['install.browser.brave', 'remove.browser.brave', 'setup.default.browser.brave'].every(
-    id => rankScore('apps.brave', 'brave') < rankScore(id, 'brave')
+  ['install.browser.chromium', 'remove.browser.chromium', 'setup.default.browser.chromium'].every(
+    id => rankScore('apps.chromium', 'chromium') < rankScore(id, 'chromium')
   ),
   'menu ranks an installed app above menu entries matching the query equally well'
 )
 assert(
-  ['install.browser.zen', 'remove.browser.zen', 'setup.default.browser.zen'].every(
-    id => rankScore('apps.zen', 'zen') < rankScore(id, 'zen')
+  ['install.browser.firefox', 'remove.browser.firefox', 'setup.default.browser.firefox'].every(
+    id => rankScore('apps.firefox', 'firefox') < rankScore(id, 'firefox')
   ),
   'menu ranks an app matching the query as a whole word above exact-labeled menu entries'
 )
@@ -181,19 +182,12 @@ assert(
   defaultById['setup.input'].action.includes('input.lua'),
   'menu keeps Input as a direct config action'
 )
+// Omarchy's Setup > Direct Boot (Limine) and Setup > Reset Computer are not in the port
+// (PORT-REMOVALS.md), so their three checks are left out.
 assert(
-  defaultById['setup.direct-boot'].action.includes('omarchy-setup-direct-boot'),
-  'menu places Direct Boot directly under Setup'
-)
-assert(
-  defaultById['setup.reset'].action.includes('omarchy-system-factory-reset'),
-  'menu exposes Reset Computer under Setup'
-)
-const setupEntries = defaultItems.filter(item => item.parent === 'setup')
-assertEqual(
-  setupEntries[setupEntries.length - 1].id,
-  'setup.reset',
-  'menu lists Reset Computer last under Setup'
+  defaultById['install.productivity.obs'].action.includes('omarchy-pkg-flatpak-add com.obsproject.Studio')
+    && defaultById['remove.productivity.obs'].action.includes('omarchy-pkg-flatpak-drop com.obsproject.Studio'),
+  'menu installs and removes OBS Studio from Flathub under Productivity'
 )
 const expectedAgents = {
   pi: { icon: '\ue901', iconFont: 'omarchy', label: 'Pi' },
@@ -204,7 +198,6 @@ const expectedAgents = {
   grok: { icon: '\ue904', iconFont: 'omarchy', label: 'Grok' },
   gemini: { icon: '󰫢', label: 'Gemini' },
   hermes: { icon: '\ue90a', iconFont: 'omarchy', label: 'Hermes' },
-  openclaw: { icon: '\ue90c', iconFont: 'omarchy', label: 'OpenClaw' },
   copilot: { icon: '', label: 'Copilot' },
   crush: { icon: '󰋑', label: 'Crush' },
   muse: { icon: '󰛤', label: 'Muse Code' },
@@ -228,7 +221,7 @@ assertDeepEqual(
   defaultItems
     .filter(item => item.parent === 'setup.default.agent')
     .map(item => item.label),
-  ['Claude', 'Codex', 'Copilot', 'Crush', 'Cursor CLI', 'Gemini', 'Grok', 'Hermes', 'Muse Code', 'omp', 'OpenClaw', 'OpenCode', 'Pi'],
+  ['Claude', 'Codex', 'Copilot', 'Crush', 'Cursor CLI', 'Gemini', 'Grok', 'Hermes', 'Muse Code', 'omp', 'OpenCode', 'Pi'],
   'menu sorts coding agents alphabetically'
 )
 assert(!defaultById['install.ai.crush'], 'menu removes Crush from Install > AI')
