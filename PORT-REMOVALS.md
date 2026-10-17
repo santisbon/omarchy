@@ -49,7 +49,7 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 The candidates left, in the order to take them. Each names its section below; the sections give the facts.
 
-1. **Omarchy's preinstalled defaults** (tier 3): dua-cli with its "Disk Usage" launcher; Docker with sudoless Docker and the database installer; the preinstalled apps (Xournal++, OBS Studio, Kdenlive, Pinta and Moonlight from Flathub, LibreOffice and Obsidian from their vendors' snaps); Omarchy's LazyVim configuration through `/etc/skel`; ruby; the Rails database headers for `dev-env ruby`. ([Packages](#packages-dropped-from-the-base-list), [Commands](#commands-launchers-and-menu-entries))
+1. **Omarchy's preinstalled defaults** (tier 3): Docker with sudoless Docker and the database installer; the preinstalled apps (Xournal++, OBS Studio, Kdenlive, Pinta and Moonlight from Flathub, LibreOffice and Obsidian from their vendors' snaps); Omarchy's LazyVim configuration through `/etc/skel`; ruby; the Rails database headers for `dev-env ruby`. ([Packages](#packages-dropped-from-the-base-list), [Commands](#commands-launchers-and-menu-entries))
 2. **Menu installers that work on Ubuntu** (tier 4): Brave, Edge and Zen; Helix, Cursor and Zed; the six Nerd Fonts, built from the release zip `oaxaca-fonts` already uses; OpenClaw through mise; Heroic, NordVPN, Bitwarden, Sunshine and Minecraft. ([Commands](#commands-launchers-and-menu-entries))
 3. **Two small network settings**: `tcp_mtu_probing=1`, and a PATH for `ssh host command`. ([System files](#system-install-and-hardware-files))
 4. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Omarchy's own MIT-licensed apps (herdr, cliamp, omawrite, omacut, omacalc, try) built in the distro's apt repository as LocalSend is; the Windows VM after Docker; Learn > Omarchy with a caveat.
@@ -87,7 +87,6 @@ Checks that came up while restoring, not yet done:
 | Sunshine | `bin/omarchy-install-service-sunshine`, `-remove-service-sunshine` | game-streaming host | `PORT.md`: Flathub | Flathub `dev.lizardbyte.app.Sunshine` (verified); Omarchy's installer also opens Sunshine's TCP and UDP ports in ufw for private networks and Tailscale, adds a Sunshine Admin web app and starts Sunshine with Hyprland | **Partial**: Sunshine itself from Flathub instead of Omarchy's package; the rest of Omarchy's installer can come with it (ufw rules for its ports from private networks and Tailscale, the Sunshine Admin web app, Hyprland autostart). Whether the Flatpak needs an extra step for virtual input devices was not checked |
 | Windows VM | `bin/omarchy-windows-vm`; `install.windows`, `remove.windows` | Windows in the `dockurr/windows` container over RDP | `PORT.md`: runs on Docker | needs Docker, `freerdp3-x11` (universe), `netcat-openbsd`; the image is from Docker Hub, not one of the project's package sources | **Restore**, once Docker is back and if pulling the image from Docker Hub is acceptable (a source the project's requirements do not list) |
 | Learn > Omarchy | `learn.omarchy` | Omarchy's manual | none recorded | parts of the manual do not apply (the firewall's Docker rules, pacman, Limine), most does | **Partial**: with a caveat, or a page of the port's own |
-| Disk Usage | `applications/Disk Usage.desktop` and icon | opened `dua i /`, dua-cli's interactive disk-usage view of the whole system, in a terminal | docs/6 | `dua-cli` 2.34.0-1 in universe | **Restore**, together with the `dua-cli` package ([Packages](#packages-dropped-from-the-base-list)): the launcher needs the program |
 
 ### Replaced
 
@@ -143,7 +142,6 @@ avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fci
 
 | Package | What it is | Facts (stonking, 2026-10-16) | How |
 |---|---|---|---|
-| dua-cli | disk usage TUI behind the "Disk Usage" launcher | universe 2.34.0-1 | base list, launcher |
 | Obsidian | notes (Super+Shift+O, theme sync) | the vendor's snap (`obsidianmd`, classic) and Flathub | snap, `omarchy-theme-set-obsidian`, binding |
 | ruby | Omarchy ships it on purpose ("Ensure the system always has a base ruby", upstream `b7989ac8`) | main | base list |
 | Docker (docker.io, docker-buildx, docker-compose-v2) | containers, enabled by Omarchy with sudoless access | main and universe | with Omarchy's deleted setup scripts; lazydocker would need a build of the distro's own |
@@ -245,3 +243,4 @@ Every feature added back since the audit, with its tier and item, the date, and 
 | 2b, 6 | Framework 16 keyboard lighting | `packages/qmk-hid` in the build repository, installed by `framework16.sh` | 67 |
 | 2b, 7 | ASUS ROG tools and the Hybrid GPU toggle | `packages/asusctl` (6.5.0, from `github.com/OpenGamingCollective/asusctl`) and `packages/supergfxctl` (5.2.7); `asus-rog.sh`, `omarchy-hw-hybrid-gpu`, `omarchy-toggle-hybrid-gpu`, `force-igpu`, the start delay and their tests (`hw-hybrid-gpu-test.sh`, `hybrid-gpu-test.sh`); Hybrid GPU shows only on ASUS ROG laptops with two GPUs, and the scripts call `gnutimeout` | 68 |
 | 3 | mise | preinstalled from mise's own apt repository (`mise.jdx.dev/deb`) by the distro's image build, so apt updates it, as Omarchy preinstalls it; the port's own menu entry and on-demand installer (`omarchy-mise-ensure`) are gone, so the commands that use mise are Omarchy's again | 69 |
+| 3 | dua-cli and the Disk Usage launcher | `dua-cli` in the base list and Omarchy's `applications/Disk Usage.desktop` (`dua i /` in a floating terminal), with Yaru's `disk-usage-app` icon since no theme in the image has Omarchy's `disk-usage`; migration `1792196970` adds the launcher for existing users | 70 |

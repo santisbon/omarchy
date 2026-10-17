@@ -136,6 +136,9 @@ unzip
 # Restored 2026-10-16 (docs/6, choice 59): whois, a small tool Omarchy preinstalls on purpose
 # (domain and IP-block registration lookups).
 whois
+# Restored 2026-10-16 (docs/6, choice 70): dua-cli, the disk usage viewer behind Omarchy's
+# "Disk Usage" launcher (applications/Disk Usage.desktop).
+dua-cli
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)
 snapd
 socat
@@ -227,7 +230,7 @@ ca-certificates
 # Omarchy's taste; see the distro repository's docs/6, "Core and apps"):
 # libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
-# build-essential, tree-sitter-cli, dua-cli: command-line preferences (yt-dlp, removed with
+# build-essential, tree-sitter-cli: command-line preferences (dua-cli came back on 2026-10-16; yt-dlp, removed with
 #   them, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
 #   starship, zoxide and eza came back on 2026-10-16, listed above)
 # wf-recorder, libsecret-tools: nothing in the port calls them (unzip and whois came back 2026-10-16, listed above)

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Disk Usage
+Exec=xdg-terminal-exec --app-id=TUI.float -e bash -c "dua i /"
+Terminal=false
+Type=Application
+# Omarchy names the icon disk-usage, which no icon theme in Ubuntu's image has; Yaru's icon for
+# disk usage is disk-usage-app.
+Icon=disk-usage-app
+StartupNotify=true
