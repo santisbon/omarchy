@@ -202,7 +202,7 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 | kernel-modules-hook | an Arch pacman hook; Ubuntu keeps old kernel packages installed |
 | inetutils | `hostname` and `iputils-ping` cover what is used |
 | tzupdate | not in stonking; Calamares guesses the timezone itself |
-| ufw-docker | not in stonking; re-check if Docker comes back with ufw enabled |
+| ufw-docker | not in stonking, and not needed for what the port offers: ufw-docker works around Docker Engine's own firewall rules on the host, which Docker's "Packet filtering and firewalls" page says divert published ports "before it reaches the `INPUT` and `OUTPUT` chains that ufw uses"; Omarchy's Docker Engine stays out (choice 71). Docker Desktop (choice 85) does not have that problem: Docker's "Networking on Docker Desktop" page (read 2026-10-17) says Docker Desktop "runs the Docker Engine inside a lightweight Linux virtual machine", that for a published port its "backend process listens on the specified host port" and forwards the connection into the VM, and that "Host firewalls can permit or deny inbound connections"; its how-tos page adds that the `docker0` bridge "is actually within the virtual machine". A published port is therefore an ordinary listening socket on the host, which ufw filters like any other; not yet tested on Oaxaca |
 | aether | Omarchy's theme designer; not in stonking, and its repository has no licence, so it cannot be redistributed |
 | python-poetry-core | nothing uses it (the list's recorded reason, "dev-env installs them via mise", is wrong: dev-env does not) |
 | dotnet-runtime | Omarchy shipped it for Pinta; justified only if Pinta comes from Flathub, which bundles .NET (the recorded reason is wrong too) |
@@ -211,7 +211,7 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 | ruby | Omarchy ships a base Ruby on purpose (upstream `b7989ac8`); the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 | docker.io, docker-buildx, docker-compose-v2 | Omarchy preinstalls and enables Docker; the distro's maintainer chose not to restore Omarchy's Docker (2026-10-16, docs/6 choice 71) and offers Docker Desktop instead (2026-10-17, choice 85) |
 | Pinta, Moonlight | Omarchy's preinstalled apps (Flathub here); the distro's maintainer chose not to restore them (2026-10-16, docs/6 choice 71) |
-| LibreOffice (preinstalled) | the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Install > Productivity > LibreOffice installs Canonical's snap on demand |
+| LibreOffice (preinstalled) | the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Install > Productivity > LibreOffice installs Canonical's snap on demand. The menu entry used Flathub's build first (The Document Foundation's, 2026-10-14) and moved to the Snap Store on 2026-10-15 because, on the laptop, Flathub's build drew most toolbar icons nearly invisible on the dark theme and opened its Save dialog larger than the screen; the snap showed neither (docs/6 choice 31) |
 | omarchy-nvim, with lua5.1, luarocks and tree-sitter-cli | Omarchy's LazyVim configuration for Neovim; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Neovim is preinstalled with its own defaults |
 | libpq-dev, libmariadb-dev | headers for Rails' PostgreSQL and MySQL drivers in Omarchy's dev-env ruby; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 
