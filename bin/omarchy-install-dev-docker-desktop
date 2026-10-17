@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# omarchy:summary=Install and launch Docker Desktop, from Docker's own package and apt repository.
+# omarchy:requires-sudo=true
+
+set -e
+
+# Omarchy preinstalls Docker Engine with its own setup, which the port leaves out (the distro's
+# docs/6, choice 71). This follows Docker's "Install Docker Desktop on Ubuntu" page instead
+# (docs.docker.com/desktop/setup/install/linux/ubuntu/, read 2026-10-17). That page lists
+# Ubuntu 26.04 and 24.04; Docker's apt repository already publishes a stonking suite (26.10),
+# which carries docker-ce-cli, the one dependency of Docker's package that Ubuntu's archive lacks.
+echo "Installing Docker Desktop..."
+
+# Docker's page: "If you're not using GNOME, you must install gnome-terminal to enable terminal
+# access from Docker Desktop."
+omarchy-pkg-add gnome-terminal
+
+# Step one of Docker's "Install using the apt repository" (docs.docker.com/engine/install/ubuntu/):
+# Docker's key and a deb822 source for the running codename, the stable component.
+codename=$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+omarchy-pkg-repo-add docker https://download.docker.com/linux/ubuntu/gpg \
+  https://download.docker.com/linux/ubuntu "$codename" stable "$(dpkg --print-architecture)"
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+curl -fsSL --retry 3 https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb -o "$tmp/docker-desktop-amd64.deb"
+chmod 644 "$tmp/docker-desktop-amd64.deb"
+# A path with a slash makes apt-get treat the argument as a local deb and resolve its
+# dependencies from the archive and Docker's repository. Docker's page says to ignore the
+# "Download is performed unsandboxed as root" notice apt prints for a downloaded package.
+sudo apt-get install -y "$tmp/docker-desktop-amd64.deb"
+omarchy-pkg-present docker-desktop
+
+# Docker's "KVM virtualization support": Docker Desktop runs its engine in a VM, and the page
+# says to add the user to the kvm group, which takes effect at the next sign-in.
+if ! id -nG "$USER" | tr ' ' '\n' | grep -qx kvm; then
+  sudo usermod -aG kvm "$USER"
+fi
+
+omarchy-launcher-rescan
+setsid uwsm-app -- gtk-launch docker-desktop >/dev/null 2>&1 &
+
+echo ""
+echo "Docker Desktop is installed. If it cannot reach /dev/kvm, sign out and back in."
+echo "To sign in to Docker Hub, Docker Desktop needs pass initialized first:"
+echo "  gpg --generate-key"
+echo "  pass init <the key ID gpg printed>"

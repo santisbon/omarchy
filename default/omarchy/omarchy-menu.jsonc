@@ -252,6 +252,7 @@
   "install.development.elixir.elixir": {"icon":"","label":"Elixir","when":"omarchy-cmd-present mise && [[ ! -d $HOME/.local/share/mise/installs/elixir ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env elixir'"},
   "install.development.elixir.phoenix": {"icon":"","label":"Phoenix","when":"omarchy-cmd-present mise && ! compgen -G \"$HOME/.mix/archives/phx_new*\"","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env phoenix'"},
   "install.development.herdr": {"icon":"","label":"Herdr","when":"! omarchy-cmd-present herdr","action":"omarchy-launch-floating-terminal-with-presentation 'mise use -g herdr && { [[ -f ~/.config/herdr/config.toml ]] || omarchy-refresh-herdr; }'"},
+  "install.development.docker-desktop": {"icon":"󰡨","label":"Docker Desktop","when":"! omarchy-pkg-present docker-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-dev-docker-desktop"},
 
   // Remove
   "remove.package": {"icon":"","label":"Package","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-remove"},
@@ -310,6 +311,7 @@
   "remove.development.elixir.elixir": {"icon":"","label":"Elixir","when":"[[ -d $HOME/.local/share/mise/installs/elixir ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-remove-dev-env elixir'"},
   "remove.development.elixir.phoenix": {"icon":"","label":"Phoenix","when":"[[ -d $HOME/.local/share/mise/installs/elixir ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-remove-dev-env phoenix'"},
   "remove.development.herdr": {"icon":"","label":"Herdr","when":"omarchy-cmd-present herdr","action":"omarchy-launch-floating-terminal-with-presentation 'mise unuse -g herdr'"},
+  "remove.development.docker-desktop": {"icon":"󰡨","label":"Docker Desktop","when":"omarchy-pkg-present docker-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-dev-docker-desktop"},
 
   // Update
   "update.omarchy": {"icon":"","iconFont":"omarchy","label":"Omarchy","action":"omarchy-launch-floating-terminal-with-presentation omarchy-update"},

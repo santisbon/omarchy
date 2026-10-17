@@ -18,13 +18,13 @@ To install, say, Ruby, you'd run `mise use -g ruby`, which will both install Rub
 
 ## Docker
 
-[Docker](https://www.docker.com/) hardly needs any introduction. It allows you to run isolated containers, and Omarchy installs everything needed to run it well, including Docker itself and [Docker Compose](https://docs.docker.com/compose/).
+[Docker](https://www.docker.com/) hardly needs any introduction. It allows you to run isolated containers.
 
-By default your user is *not* in the `docker` group. That group is effectively passwordless root — anything in it can `docker run -v /:/host` and take over the machine — so a single rogue script or dependency running as you would otherwise be one command away from root. So on the command line you run Docker with `sudo` (`sudo docker ps`, `sudo docker compose up`), and the graphical tools that talk to the daemon — the Docker TUI on `Super + Shift + D` and the Windows VM — ask for authorization when they need it. If you want the convenience of a groupless setup back and understand the tradeoff, enable it from **Setup > Security > Sudoless Docker** (or run `omarchy-setup-security-sudoless-docker`), which adds you to the `docker` group after a warning; then plain `docker` and the `d` alias work without `sudo` again.
+It's not part of the base install: install Docker Desktop from _Install > Development > Docker Desktop_ in the Omarchy menu (`Super + Space`). The installer follows [Docker's own instructions for Ubuntu](https://docs.docker.com/desktop/setup/install/linux/ubuntu/): it adds Docker's apt repository, installs gnome-terminal (Docker Desktop opens container terminals in it), installs Docker's package, and adds you to the `kvm` group, since Docker Desktop runs its engine in a virtual machine. Docker Desktop comes with the `docker` command and [Docker Compose](https://docs.docker.com/compose/). Sign out and back in if Docker Desktop says it can't reach `/dev/kvm`.
 
-Remember to checkout the Lazydocker command to manage your containers in a cool TUI using `Super + Shift + D`; it asks for authorization the first time unless you have enabled sudoless Docker.
+To sign in to Docker Hub, Docker Desktop stores your credentials with [`pass`](https://www.passwordstore.org/), which you set up once: run `gpg --generate-key`, then `pass init` with the key ID it prints ([Docker's steps](https://docs.docker.com/desktop/setup/install/linux/#signing-in-with-docker-desktop-for-linux)).
 
-You can setup the common databases for local development in Docker using _Install > Development > Docker DB_ in the Omarchy menu.
+_Remove > Development > Docker Desktop_ removes it with its containers, images and settings.
 
 ## GitHub CLI
 

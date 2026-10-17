@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# omarchy:summary=Remove Docker Desktop along with its containers, images and settings.
+# omarchy:requires-sudo=true
+
+set -e
+
+# Docker's "Uninstall Docker Desktop" page, Ubuntu tab (docs.docker.com/desktop/uninstall/,
+# read 2026-10-17): purge the package, delete ~/.docker/desktop and /usr/local/bin/com.docker.cli,
+# and take credsStore and currentContext out of ~/.docker/config.json. The purge also deletes
+# ~/.config/Docker Desktop (the package's postrm) and the dependencies apt installed for it.
+omarchy-pkg-drop docker-desktop
+rm -rf "$HOME/.docker/desktop"
+sudo rm -f /usr/local/bin/com.docker.cli
+
+config=$HOME/.docker/config.json
+if [[ -f $config ]]; then
+  jq 'del(.credsStore, .currentContext)' "$config" >"$config.tmp"
+  mv "$config.tmp" "$config"
+fi
+
+# Docker's repository stays while Docker Engine from it is still installed.
+if ! omarchy-pkg-present docker-ce; then
+  omarchy-pkg-repo-remove docker
+fi
+
+echo ""
+echo "Docker Desktop and its data have been removed."
