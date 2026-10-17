@@ -49,11 +49,10 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 The candidates left, in the order to take them. Each names its section below; the sections give the facts.
 
-1. **Omarchy's preinstalled defaults** (tier 3): Docker with sudoless Docker and the database installer; the preinstalled apps (Xournal++, OBS Studio, Kdenlive, Pinta and Moonlight from Flathub, LibreOffice and Obsidian from their vendors' snaps); Omarchy's LazyVim configuration through `/etc/skel`; ruby; the Rails database headers for `dev-env ruby`. ([Packages](#packages-dropped-from-the-base-list), [Commands](#commands-launchers-and-menu-entries))
-2. **Menu installers that work on Ubuntu** (tier 4): Brave, Edge and Zen; Helix, Cursor and Zed; the six Nerd Fonts, built from the release zip `oaxaca-fonts` already uses; OpenClaw through mise; Heroic, NordVPN, Bitwarden, Sunshine and Minecraft. ([Commands](#commands-launchers-and-menu-entries))
-3. **Two small network settings**: `tcp_mtu_probing=1`, and a PATH for `ssh host command`. ([System files](#system-install-and-hardware-files))
-4. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Omarchy's own MIT-licensed apps (herdr, cliamp, omawrite, omacut, omacalc, try) built in the distro's apt repository as LocalSend is; the Windows VM after Docker; Learn > Omarchy with a caveat.
-5. **Waiting for evidence on Ubuntu**: the wireless regulatory domain from the timezone (verdict Unclear). ([System files](#system-install-and-hardware-files))
+1. **Menu installers that work on Ubuntu** (tier 4): Brave, Edge and Zen; Helix, Cursor and Zed; the six Nerd Fonts, built from the release zip `oaxaca-fonts` already uses; OpenClaw through mise; Heroic, NordVPN, Bitwarden, Sunshine and Minecraft. ([Commands](#commands-launchers-and-menu-entries))
+2. **Two small network settings**: `tcp_mtu_probing=1`, and a PATH for `ssh host command`. ([System files](#system-install-and-hardware-files))
+3. **Larger projects** (tier 5): a factory reset on Timeshift and `oem-config`; Omarchy's own MIT-licensed apps (herdr, cliamp, omawrite, omacut, omacalc, try) built in the distro's apt repository as LocalSend is; Learn > Omarchy with a caveat.
+4. **Waiting for evidence on Ubuntu**: the wireless regulatory domain from the timezone (verdict Unclear). ([System files](#system-install-and-hardware-files))
 
 ## Open questions
 
@@ -72,7 +71,6 @@ Checks that came up while restoring, not yet done:
 
 | Feature | Files and menu entries | What it did | Removed because | Checked facts | Verdict |
 |---|---|---|---|---|---|
-| Docker: sudoless Docker, Docker databases, Docker TUI | `bin/omarchy-sudo-docker`, `-setup-security-sudoless-docker`, `-remove-security-sudoless-docker`, `-install-docker-dbs`, `-launch-docker-tui`, `applications/Docker.desktop`; `install.development.docker-dbs`, `setup.security.sudoless-docker`, `remove.security.sudoless-docker` | Omarchy preinstalls Docker, keeps the user out of the root-equivalent `docker` group behind an opt-in, and offers one-click MySQL, Postgres, Redis, MongoDB, MariaDB and MSSQL containers | `PORT.md`: they "run on Docker, whose setup the port removed"; docs/6, "Core and apps" | `docker.io` 29.7.2 is in main, `docker-compose-v2` and `docker-buildx` in universe; the scripts only use `docker run` and `usermod`; the reason is circular | **Restore** after an Install > Development > Docker entry; the Docker TUI only if lazydocker (not in stonking) is built in the distro's apt repository |
 | Factory reset | `bin/omarchy-system-factory-reset`, `-factory-reset-finish`, `-provision-owner`; `setup.reset` | on btrfs, swapped `@` for the installer's factory snapshot, re-keyed the disk encryption and recreated the owner at first boot | docs/6: among "programs the distro cannot install"; docs/1: scripts tied to Limine and Snapper | the same mistake as snapshots: only the Limine and mkinitcpio steps were Arch-specific; btrfs installs have Timeshift; `oem-config` (universe) creates a user at first boot | **Partial**: a factory Timeshift snapshot at install, restored by the reset, then `oem-config-prepare`; the re-keying needs rewriting |
 | Brave, Edge | `install.browser.brave`, `.edge`, and their remove and default-browser entries | regular Brave and Microsoft Edge | docs/6: Chrome, Edge and VS Code replaced by open counterparts | Chrome and VS Code are back in the menu, so the rule no longer holds; Brave's repository (already added for Brave Origin) has `brave-browser`; `packages.microsoft.com/repos/edge` has `microsoft-edge-stable` | **Restore** through `omarchy-pkg-repo-add` |
 | Zen | `install.browser.zen` and its remove and default entries | Firefox-based browser | `PORT.md` only notes Omarchy offers it | Flathub `app.zen_browser.zen` (verified); no apt repository or snap | **Partial**: from Flathub |
@@ -80,12 +78,10 @@ Checks that came up while restoring, not yet done:
 | Helix | `bin/omarchy-install-editor-helix`; `install.editor.helix` | Helix linked to the theme | `PORT.md`: Install > Package, without Omarchy's setup | `hx` in universe; the branch still has `helix.toml.tpl` and `omarchy-restart-helix` | **Restore** |
 | Cursor | `install.editor.cursor` | Cursor editor | none recorded | Cursor's apt repository (`downloads.cursor.com/aptrepo`) has `cursor`; its signing key URL not verified | **Restore** through `omarchy-pkg-repo-add` |
 | Zed | `bin/omarchy-install-editor-zed`; `install.editor.zed` | Zed themed by Omarchy's `omazed` | `PORT.md` | Ubuntu's `zed` is another program; Flathub `dev.zed.Zed` (unverified); `omazed` is nowhere | **Partial**: Flathub, no theme sync |
-| Obsidian theme sync | `bin/omarchy-theme-set-obsidian` | copy the theme's `obsidian.css` into every vault | `c304e943` (Obsidian was no longer preinstalled) | the themes still render `obsidian.css` | **Restore** with the app |
 | OpenClaw | `bin/omarchy-install-ai-openclaw`, `-remove-ai-openclaw`, `-install-openclaw-cli`; `install.ai.openclaw`, `remove.ai.openclaw`, `setup.default.agent.openclaw`, `remove.ai` | the OpenClaw agent, its gateway and Control UI, and the default-agent choice | `PORT.md`: the snap is a third party's | Omarchy's package is the npm module; npm has `openclaw` 2026.10.4 from the project; the port installs other npm agents through mise; `omarchy-launch-openclaw` and `-openclaw-onboard` were kept | **Restore** through `mise use -g npm:openclaw` |
 | Heroic, Minecraft | `bin/omarchy-install-gaming-heroic`, `-remove-gaming-heroic`, `-remove-gaming-minecraft`; their menu entries | game launchers | `PORT.md`: Install > Flatpak | Flathub `com.heroicgameslauncher.hgl` (verified), `com.mojang.Minecraft` (unverified) | **Restore** Heroic as a Flathub entry; Minecraft **Unclear**: Flathub's `com.mojang.Minecraft` is not marked as verified, so it may not be Mojang's own |
 | NordVPN, Bitwarden | `bin/omarchy-install-service-nordvpn`; `install.service.nordvpn`, `install.service.bitwarden` | VPN client; password manager | `PORT.md`: Install > Snap | NordVPN's apt repository answers and its snap is the vendor's; Bitwarden's snap and Flatpak are verified | **Restore** (NordVPN like Mullvad; Bitwarden like Thunderbird) |
 | Sunshine | `bin/omarchy-install-service-sunshine`, `-remove-service-sunshine` | game-streaming host | `PORT.md`: Flathub | Flathub `dev.lizardbyte.app.Sunshine` (verified); Omarchy's installer also opens Sunshine's TCP and UDP ports in ufw for private networks and Tailscale, adds a Sunshine Admin web app and starts Sunshine with Hyprland | **Partial**: Sunshine itself from Flathub instead of Omarchy's package; the rest of Omarchy's installer can come with it (ufw rules for its ports from private networks and Tailscale, the Sunshine Admin web app, Hyprland autostart). Whether the Flatpak needs an extra step for virtual input devices was not checked |
-| Windows VM | `bin/omarchy-windows-vm`; `install.windows`, `remove.windows` | Windows in the `dockurr/windows` container over RDP | `PORT.md`: runs on Docker | needs Docker, `freerdp3-x11` (universe), `netcat-openbsd`; the image is from Docker Hub, not one of the project's package sources | **Restore**, once Docker is back and if pulling the image from Docker Hub is acceptable (a source the project's requirements do not list) |
 | Learn > Omarchy | `learn.omarchy` | Omarchy's manual | none recorded | parts of the manual do not apply (the firewall's Docker rules, pacman, Limine), most does | **Partial**: with a caveat, or a page of the port's own |
 
 ### Replaced
@@ -94,7 +90,7 @@ the AUR commands (Install > Package, Snap and Flatpak); pacman upkeep (`omarchy-
 
 ### Justified
 
-Battle.net (umu-launcher not in stonking); ONCE (a GitHub binary, needs Docker); ChatGPT desktop, Grok Bot, Hermes Desktop, Perplexity (only third parties' snaps or nothing; web apps and the agents cover them); T3 Code (a GitHub release only); hibernation (out of the first release; docs/0 and docs/1 give different reasons, Secure Boot lockdown versus scope); direct boot of a UKI and Limine's refresh (GRUB only); package channels (the apt repository has none); upgrade to Quattro (Omarchy's own migration path); log upload and the Omarchy Discord (Omarchy's services); Learn > Herdr (Herdr is not available); the preinstalls toggle (nothing removable is preinstalled); the PHP development environment, Install and Remove > Development > PHP with its PHP, Laravel and Symfony entries (nothing in the desktop uses PHP; Symfony was removed with the port, PHP and Laravel on 2026-10-16 by the distro's maintainer, docs/6 choice 41).
+Battle.net (umu-launcher not in stonking); ONCE (a GitHub binary, needs Docker); ChatGPT desktop, Grok Bot, Hermes Desktop, Perplexity (only third parties' snaps or nothing; web apps and the agents cover them); T3 Code (a GitHub release only); hibernation (out of the first release; docs/0 and docs/1 give different reasons, Secure Boot lockdown versus scope); direct boot of a UKI and Limine's refresh (GRUB only); package channels (the apt repository has none); upgrade to Quattro (Omarchy's own migration path); log upload and the Omarchy Discord (Omarchy's services); Learn > Herdr (Herdr is not available); the preinstalls toggle (nothing removable is preinstalled); Docker with sudoless Docker, the Docker databases and the Docker TUI, and Obsidian's theme sync (Omarchy's preinstalled Docker and Obsidian are not restored: the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71)); the Windows VM (it runs in a Docker container, so it stays out with Docker); the PHP development environment, Install and Remove > Development > PHP with its PHP, Laravel and Symfony entries (nothing in the desktop uses PHP; Symfony was removed with the port, PHP and Laravel on 2026-10-16 by the distro's maintainer, docs/6 choice 41).
 
 ## System, install and hardware files
 
@@ -137,27 +133,27 @@ avahi (`avahi-daemon`); bluez-utils (`bluez`, `bluez-tools`); fcitx5-gtk and fci
 | python-poetry-core | nothing uses it (the list's recorded reason, "dev-env installs them via mise", is wrong: dev-env does not) |
 | dotnet-runtime | Omarchy shipped it for Pinta; justified only if Pinta comes from Flathub, which bundles .NET (the recorded reason is wrong too) |
 | qemu-user-static-binfmt | for multi-architecture Docker builds; justified while Docker is out |
+| Obsidian | Omarchy's preinstalled notes app, with Super+Shift+O and theme sync; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
+| ruby | Omarchy ships a base Ruby on purpose (upstream `b7989ac8`); the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
+| docker.io, docker-buildx, docker-compose-v2 | Omarchy preinstalls and enables Docker; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
+| xournalpp, obs-studio, kdenlive | Omarchy's preinstalled apps; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
+| Pinta, Moonlight | Omarchy's preinstalled apps (Flathub here); the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
+| LibreOffice (preinstalled) | the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Install > Productivity > LibreOffice installs Canonical's snap on demand |
+| omarchy-nvim, with lua5.1, luarocks and tree-sitter-cli | Omarchy's LazyVim configuration for Neovim; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Neovim is preinstalled with its own defaults |
+| libpq-dev, libmariadb-dev | headers for Rails' PostgreSQL and MySQL drivers in Omarchy's dev-env ruby; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 
 ### Restore candidates
 
 | Package | What it is | Facts (stonking, 2026-10-16) | How |
 |---|---|---|---|
-| Obsidian | notes (Super+Shift+O, theme sync) | the vendor's snap (`obsidianmd`, classic) and Flathub | snap, `omarchy-theme-set-obsidian`, binding |
-| ruby | Omarchy ships it on purpose ("Ensure the system always has a base ruby", upstream `b7989ac8`) | main | base list |
-| Docker (docker.io, docker-buildx, docker-compose-v2) | containers, enabled by Omarchy with sudoless access | main and universe | with Omarchy's deleted setup scripts; lazydocker would need a build of the distro's own |
-| xournalpp, obs-studio, kdenlive | Omarchy's preinstalled apps | universe | base list (kdenlive is large) |
-| Pinta, Moonlight | Omarchy's preinstalled apps | not in stonking; Flathub (Pinta's snap is a third party's) | Flathub |
-| LibreOffice | office suite | Install > Productivity installs Canonical's snap | preinstall the snap to match Omarchy |
 | Omarchy's own MIT apps: herdr, cliamp, omawrite, omacut, omacalc, try | terminal multiplexer, music player, writing app, video trimmer, calculator, throwaway directories | not in stonking; licensed MIT or Apache-2.0 | build in the distro's apt repository, as LocalSend and ttfx are |
-| Omarchy's LazyVim configuration (omarchy-nvim), with lua5.1, luarocks, tree-sitter-cli and a C compiler | Neovim set up by Omarchy | the port dropped it because the package build cannot fetch plugins | ship the configuration in `/etc/skel` and let lazy.nvim fetch plugins on first launch |
-| libpq-dev, libmariadb-dev | headers for Rails' pg and mysql2 gems | main | add to `dev-env ruby` |
 
 ## Features cut inside files the port kept
 
 | Feature | Where | What it did | Removed because | Checked facts | Verdict |
 |---|---|---|---|---|---|
 | Edge, Brave, Zen | `bin/omarchy-install-browser`, `-remove-browser`, `-theme-set-browser`, `-theme-set-browser-policy`, `-install-chromium-copy-url` | install, remove and theme these browsers | docs/6: proprietary builds replaced by open counterparts | Chrome and VS Code came back since, so that rule no longer holds; Microsoft's Edge apt repository, Brave's repository (already added for Brave Origin) and Flathub's `app.zen_browser.zen` (verified) exist | **Restore** |
-| Obsidian binding and theme sync | `applications.lua` (Super+Shift+O), `omarchy-theme-set` | launch and theme Obsidian | docs/6, core and apps | Snap Store (`obsidianmd`) and Flathub | **Partial**: a binding shown only when Obsidian is installed |
+| Obsidian binding and theme sync | `applications.lua` (Super+Shift+O), `omarchy-theme-set` | launch and theme Obsidian | docs/6, core and apps | Snap Store (`obsidianmd`) and Flathub | **Justified**: the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 | Symfony development environment | `bin/omarchy-install-dev-env`, `-remove-dev-env` | `omarchy install dev-env symfony`, which installed PHP and `symfony-cli` | none recorded; the branches were removed cleanly in `ef4c9211` | Symfony is a PHP web framework; nothing in Omarchy or the port uses it; the rest of Install > Development > PHP went too (docs/6 choice 41) | **Justified**: dropped by the distro's maintainer, 2026-10-16 |
 | FRED kernel parameter | `install/hardware/all.sh` (`fred=on` on Panther Lake) | turns on Intel's FRED event delivery | docs/6: wrote Limine drop-ins | `CONFIG_X86_FRED=y` in the image's kernel, and mainline's default is on | **Justified** (a no-op on Ubuntu's kernel) |
 | RetroArch CRT shader and full core set | `bin/omarchy-install-gaming-retroarch` | CRT look, about 30 cores | in-file comment: no Ubuntu packages; the Online Updater fetches them | | **Justified** |
