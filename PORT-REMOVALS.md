@@ -24,9 +24,9 @@ A numbered decision in one of the build repository's step documents. "docs/6" is
 
 - **Justified**: the reason for removing the feature holds.
 - **Replaced**: the distro does the same job another way, named in the row.
-- **Restore**: the reason does not hold, and the feature works on Ubuntu within the project's requirements (Secure Boot without a MOK, Ubuntu's signed GRUB and kernel, packages from Ubuntu's archive, vendor apt repositories, the Snap Store, Flathub or the distro's own apt repository).
-- **Partial**: part of the feature can come back, or it can come back another way.
-- **Unclear**: the facts needed to decide were not reachable, such as whether Ubuntu has the problem a fix is for.
+- **Partial**: the reason does not hold for all of the feature: part of it can come back within the project's requirements (Secure Boot without a MOK, Ubuntu's signed GRUB and kernel, packages from Ubuntu's archive, vendor apt repositories, the Snap Store, Flathub or the distro's own apt repository), or it can come back another way.
+
+Features whose reason did not hold at all were restored and are listed in [Restored](#restored).
 
 ## How the audit was done
 
@@ -43,9 +43,10 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 ## Still to restore
 
-The candidates left, in the order to take them. Each names its section below; the sections give the facts.
+Two candidates are left, both larger projects; [Commands, launchers and menu entries](#commands-launchers-and-menu-entries) gives the facts for each:
 
-1. **Larger projects**: a factory reset on Timeshift and `oem-config`; Learn > Omarchy with a caveat.
+- a factory reset on Timeshift and `oem-config`;
+- Learn > Omarchy, with a caveat or a page of the port's own.
 
 ## Open questions
 
@@ -60,7 +61,7 @@ Checks that came up while restoring, not yet done:
 
 85 deleted files under `bin/` and `applications/` and 70 removed menu entries, grouped by feature. The commits that deleted them, `ef4c9211` (47 files), `c304e943` (37) and `963b196e` (the HEY handler), give no reason per item; the reasons are from docs/6, docs/1, docs/0 and `PORT.md`.
 
-### Restore or partly restore
+### Partly restore
 
 | Feature | Files and menu entries | What it did | Removed because | Checked facts | Verdict |
 |---|---|---|---|---|---|
@@ -71,7 +72,7 @@ Checks that came up while restoring, not yet done:
 
 | Feature | What does the job instead |
 |---|---|
-| The AUR commands | Install > Package, Snap and Flatpak |
+| The AUR commands | Install > Package, Snap and Flatpak; `omarchy-pkg-aur-add`, `-install` and `-accessible` are back as stand-ins that tell plugins written for Omarchy that the distro uses apt (docs/6 choice 86, [Restored](#restored)) |
 | pacman upkeep | `omarchy-update-system-pkgs` with apt |
 | The 32-bit GPU libraries | `omarchy-install-32bit-graphics` |
 | The local package test | `UPSTREAM_DIR=… scripts/build.sh` in the build repository |
@@ -90,7 +91,7 @@ Checks that came up while restoring, not yet done:
 | Hibernation: `omarchy-hibernation-setup` (a swap file at `/swap/swapfile` sized for RAM, resume wiring through mkinitcpio and a Limine drop-in), `omarchy-hibernation-remove`, `omarchy-hibernation-available`, and the menu's Hibernate entry | out of the first release in every configuration, for scope (the distro's docs/1, section 5): hibernation needs swap sized to RAM on the encrypted disk, resume wiring in Ubuntu's initramfs, and a port of Omarchy's scripts away from Limine, btrfs and mkinitcpio. With Secure Boot on, the kernel's lockdown also blocks hibernation (`/sys/power/disk` reads `[disabled]`). May come later: as an opt-in with Secure Boot off (docs/1, section 5), and with Secure Boot on as well if RFC patches posted to linux-pm on 2026-10-08, which let a locked-down kernel hibernate by signing the saved memory with a TPM key, are merged and reach Ubuntu's kernel (docs/1, "Suspend, hibernate and Secure Boot") |
 | Direct boot of a UKI, Limine's refresh | the distro boots with GRUB only |
 | Package channels | the distro's apt repository has none |
-| Upgrade to Quattro | Omarchy's own migration path |
+| Upgrade to Quattro | Omarchy's migration from Omarchy 3 to Omarchy 4 (Quattro); no Oaxaca install ever ran Omarchy 3 |
 | Log upload, the Omarchy Discord | Omarchy's own services |
 | The preinstalls toggle | nothing removable is preinstalled |
 | Docker: sudoless Docker, the Docker databases, the Docker TUI | Docker is not preinstalled: the distro's maintainer's decision (2026-10-16, docs/6 choice 71); Docker Desktop is installable instead (Restored, below, choice 85) |
@@ -107,11 +108,6 @@ Checks that came up while restoring, not yet done:
 ## System, install and hardware files
 
 The 92 files deleted under `install/`, `etc/` and `default/` went in four port commits, none of whose messages gives a reason: `ef4c9211` "Port Omarchy v4.0.4 to Ubuntu" (60 files), `4b680c26` "Remove features we provide through Ubuntu" (29), `c304e943` "Trim pre-installed software" (2), `3c21fd64` "Don't customize firewall" (1). The reasons below are from docs/6, docs/1, docs/4 and `PORT.md`. Facts were read from the live root filesystem tarball built 2026-10-16 (kernel 7.3.0-9), stonking's packages on Launchpad, and mainline Linux 7.3-rc7.
-
-### Restore, partly restore, or unclear
-
-| Feature | Files | What it did | Removed because | Checked facts | Verdict |
-|---|---|---|---|---|---|
 
 ### Replaced
 
@@ -144,7 +140,7 @@ The 92 files deleted under `install/`, `etc/` and `default/` went in four port c
 | Shutdown timeouts and open-file limits | taste; Ubuntu's user manager already stops in 5 s |
 | plocate tuning, dirmngr keyservers, sudo's password tries | Ubuntu's defaults |
 | zram and zswap, and the zram tuning in `99-omarchy-sysctl.conf` | swap on zram is not used |
-| Docker's daemon setup | Docker is not preinstalled |
+| Docker's daemon setup | Omarchy's Docker Engine is not restored (docs/6 choice 71); Docker Desktop, installable from the menu, runs its own engine in a virtual machine (choice 85) |
 | resolved's multicast setting | a no-op on Ubuntu |
 | faillock | Ubuntu's PAM stack has no `pam_faillock` |
 | The powerprofilesctl shebang | Ubuntu's is already `/usr/bin/python3` |
@@ -206,7 +202,7 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 | aether | Omarchy's theme designer; not in stonking, and its repository has no licence, so it cannot be redistributed |
 | python-poetry-core | nothing uses it (the list's recorded reason, "dev-env installs them via mise", is wrong: dev-env does not) |
 | dotnet-runtime | Omarchy shipped it for Pinta; justified only if Pinta comes from Flathub, which bundles .NET (the recorded reason is wrong too) |
-| qemu-user-static-binfmt | for multi-architecture Docker builds; justified while Docker is out |
+| qemu-user-static-binfmt | for multi-architecture builds with Omarchy's Docker Engine, which stays out (docs/6 choice 71) |
 | Obsidian | Omarchy's preinstalled notes app, with Super+Shift+O and theme sync; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 | ruby | Omarchy ships a base Ruby on purpose (upstream `b7989ac8`); the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
 | docker.io, docker-buildx, docker-compose-v2 | Omarchy preinstalls and enables Docker; the distro's maintainer chose not to restore Omarchy's Docker (2026-10-16, docs/6 choice 71) and offers Docker Desktop instead (2026-10-17, choice 85) |
@@ -214,11 +210,6 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 | LibreOffice (preinstalled) | the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Install > Productivity > LibreOffice installs Canonical's snap on demand. The menu entry used Flathub's build first (The Document Foundation's, 2026-10-14) and moved to the Snap Store on 2026-10-15 because, on the laptop, Flathub's build drew most toolbar icons nearly invisible on the dark theme and opened its Save dialog larger than the screen; the snap showed neither (docs/6 choice 31) |
 | omarchy-nvim, with lua5.1, luarocks and tree-sitter-cli | Omarchy's LazyVim configuration for Neovim; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71); Neovim is preinstalled with its own defaults |
 | libpq-dev, libmariadb-dev | headers for Rails' PostgreSQL and MySQL drivers in Omarchy's dev-env ruby; the distro's maintainer chose not to restore it (2026-10-16, docs/6 choice 71) |
-
-### Restore candidates
-
-| Package | What it is | Facts (stonking, 2026-10-16) | How |
-|---|---|---|---|
 
 ## Features cut inside files the port kept
 
@@ -275,7 +266,7 @@ Test cases deleted from files that stay: the OpenClaw cases in `default-agent-te
 
 Things in the port today that call something deleted, or ship without the feature they served (fixed ones are in [Restored](#restored)):
 
-- Scripts with nothing calling them: `omarchy-theme-set-t3code`; `install/omarchy-other.packages` (Arch package names, read by nothing).
+- `install/omarchy-other.packages`: Arch package names, read by nothing. (`omarchy-theme-set-t3code`, listed here before, is called by `omarchy-theme-set` and themes T3 Code when it is installed another way, as Helix's template does for Helix.)
 
 ## Restored
 
@@ -321,3 +312,4 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | OBS Studio | Install and Remove > Productivity > OBS Studio, from Flathub's `com.obsproject.Studio`, one of the OBS project's two official channels (its PPA has no build for this Ubuntu release); Omarchy preinstalls it, the port offers it instead. Omarchy's window rule for `com.obsproject.Studio` was kept and matches the Flatpak | 83 |
 | Xournal++ and Kdenlive | Install and Remove > Productivity > Xournal++ and > Kdenlive, from Flathub's `com.github.xournalpp.xournalpp` (verified, the Xournal++ team's) and `org.kde.kdenlive` (verified, KDE's), each an official channel its project names; Omarchy preinstalls both, the port offers them instead. Omarchy's `config/xournalpp/settings.xml` (dark mode forced) is not restored; Omarchy's window rule for `org.kde.kdenlive` was kept and matches the Flatpak | 84 |
 | Docker, as Docker Desktop | Install and Remove > Development > Docker Desktop, following Docker's "Install Docker Desktop on Ubuntu" page: gnome-terminal from Ubuntu's universe component (the page asks for it outside GNOME), Docker's apt repository (`download.docker.com/linux/ubuntu`, stonking suite, stable component) for the `docker-ce-cli` dependency, Docker's `docker-desktop-amd64.deb` installed with apt, and the user added to the kvm group; the remover follows Docker's uninstall page and drops Docker's repository unless Docker Engine (`docker-ce`) is installed. Omarchy's own Docker (preinstalled Docker Engine, its daemon setup, sudoless Docker, the Docker databases, the Docker TUI) stays out (choice 71) | 85 |
+| Omarchy's AUR commands, as stand-ins | `omarchy-pkg-aur-add` and `-install` say that the distro installs software with apt and change nothing, and `-accessible` answers no, so plugins written for Omarchy that call them fail clearly; part of the compatibility with Omarchy's plugins and themes, with the `omarchy-*` links, the kept internal names, and stand-ins for `pacman`, `yay`, `paru` and `makepkg` | 86 |
