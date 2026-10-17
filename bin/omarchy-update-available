@@ -4,6 +4,9 @@
 
 set -euo pipefail
 
+# The update runs this from the terminal it was started in, whose environment can predate the
+# packages just installed and lack OMARCHY_PATH.
+OMARCHY_PATH=${OMARCHY_PATH:-/usr/share/omarchy}
 updates=()
 
 if [[ $OMARCHY_PATH != "/usr/share/omarchy" ]]; then

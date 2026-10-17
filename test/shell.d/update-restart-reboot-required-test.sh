@@ -27,3 +27,16 @@ run
 grep -q '^gum confirm Updates require reboot. Ready?$' "$TEST_LOG" || fail "a package's /run/reboot-required brings the reboot question" "$(cat "$TEST_LOG")"
 
 pass "the update offers a reboot when a package asked for one in /run/reboot-required"
+
+# A session that began before the update that introduced OMARCHY_PATH: the restart step puts
+# the variable into the user manager, so the shell and units started afterwards have it.
+stub systemctl 'echo "systemctl $*" >>"$TEST_LOG"; [[ $2 == show-environment ]] && printf "%s\n" ${TEST_SESSION_ENV:-}; exit 0'
+: >"$TEST_LOG"
+rm -f "$work/run/reboot-required"
+(unset OMARCHY_PATH; run)
+grep -qx 'systemctl --user set-environment OMARCHY_PATH=/usr/share/omarchy' "$TEST_LOG" ||
+  fail "the restart step gives a session without OMARCHY_PATH the packaged tree" "$(cat "$TEST_LOG")"
+: >"$TEST_LOG"
+TEST_SESSION_ENV=OMARCHY_PATH=/home/me/omarchy run
+! grep -q 'set-environment' "$TEST_LOG" || fail "the restart step leaves a session's OMARCHY_PATH alone" "$(cat "$TEST_LOG")"
+pass "the update gives a session that predates OMARCHY_PATH the variable"

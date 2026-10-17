@@ -265,3 +265,22 @@ restart_pid_one=""
 grep -F "ipc -n -p $restart_root/shell call -- lock lock" "$ipc_log" >/dev/null || fail "dead-lock recovery re-acquires the session lock"
 grep -F "ipc -n -p $restart_root/shell call -- lock status" "$ipc_log" >/dev/null || fail "dead-lock recovery waits for the lock to become secure"
 pass "restart recovers a locked session whose lock client died"
+
+# A session that began before the update that introduced OMARCHY_PATH: neither the user manager
+# nor the caller has it, and the restart looked for the shell at "/shell" (2026-10-17). Both
+# commands fall back to the packaged tree. Where that tree is installed, the restart would act
+# on the real shell, so the check runs only where it is absent.
+if [[ ! -e /usr/share/omarchy/shell/shell.qml ]]; then
+  unset_error=$(env -u OMARCHY_PATH PATH="$restart_bin:$PATH" \
+    XDG_RUNTIME_DIR="$runtime_dir" \
+    OMARCHY_TEST_SESSION_PATH="" \
+    "$ROOT/bin/omarchy-restart-shell" 2>&1) && fail "restart without the packaged shell fails"
+  [[ $unset_error == *"not found: /usr/share/omarchy/shell" ]] ||
+    fail "restart without OMARCHY_PATH looks for the packaged shell" "$unset_error"
+
+  unset_error=$(env -u OMARCHY_PATH PATH="$wrapper_bin:$PATH" "$ROOT/bin/omarchy-shell" shell ping 2>&1) &&
+    fail "shell IPC without the packaged shell fails"
+  [[ $unset_error == *"not found: /usr/share/omarchy/shell/shell.qml" ]] ||
+    fail "shell IPC without OMARCHY_PATH looks for the packaged shell" "$unset_error"
+  pass "restart and shell IPC fall back to the packaged shell without OMARCHY_PATH"
+fi

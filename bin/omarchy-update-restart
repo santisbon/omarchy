@@ -44,9 +44,17 @@ for file in "$HOME"/.local/state/omarchy/restart-*-required; do
   fi
 done
 
+# The user manager's environment was filled at login, before these packages. A session that
+# began before the update that introduced OMARCHY_PATH (the distro's docs/6, choice 86) lacks
+# it, and so would the units and the shell started from here on.
+if ! systemctl --user show-environment 2>/dev/null | grep -q '^OMARCHY_PATH='; then
+  systemctl --user set-environment "OMARCHY_PATH=${OMARCHY_PATH:-/usr/share/omarchy}" 2>/dev/null || true
+fi
+
 # Updates routinely replace the shell's QML, and a stale process can lazy-load
 # new files into old code. A restart failure (locked session, ssh, TTY) only
-# prints its reason: the next update or login gets a fresh shell anyway.
+# prints its reason: the next update or login gets a fresh shell anyway. The
+# reload message waits for the restart, which it used to precede even when the
+# restart failed (2026-10-17).
 echo -e "\e[32m\nRestarting shell\e[0m"
-echo "All plugins have been reloaded"
-omarchy-restart-shell || true
+omarchy-restart-shell && echo "All plugins have been reloaded" || true

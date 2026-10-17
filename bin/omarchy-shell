@@ -37,7 +37,9 @@ USAGE
 fi
 
 (( $# >= 2 )) || fail "Usage: omarchy-shell <target> <method> [args...]"
-[[ -n ${OMARCHY_PATH:-} ]] || fail "OMARCHY_PATH is not set"
+# A caller from a session that began before OMARCHY_PATH was set (one logged in before the
+# update that introduced it, or a unit started outside the session) gets the packaged tree.
+OMARCHY_PATH=${OMARCHY_PATH:-/usr/share/omarchy}
 [[ -f $OMARCHY_PATH/shell/shell.qml ]] || fail "omarchy-shell config not found: $OMARCHY_PATH/shell/shell.qml"
 
 # qs matches instances by display, and a caller from outside the session (an

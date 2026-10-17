@@ -160,3 +160,18 @@ grep -Fx 'omarchy-dev-checkout 1 new commit on origin/quattro' "$stdout" >/dev/n
   fail "update checker reports cached dev commits after a fetch failure" "$(cat "$stdout")"
 [[ ! -s $stderr ]] || fail "update checker keeps dev fetch failures quiet" "$(cat "$stderr")"
 pass "update checker uses cached dev state when fetching is unavailable"
+
+# The update runs the checker from the terminal it was started in, and a session that began
+# before the update that introduced OMARCHY_PATH has none (2026-10-17: "line 9: OMARCHY_PATH:
+# unbound variable").
+if (
+  export TEST_APT_UPGRADABLE=none TEST_GIT_LOG="$git_log"
+  env -u OMARCHY_PATH PATH="$stub_bin:$PATH" "$ROOT/bin/omarchy-update-available"
+) >"$stdout" 2>"$stderr"; then
+  status=0
+else
+  status=$?
+fi
+(( status == 1 )) || fail "update checker without OMARCHY_PATH reports up to date" "$(cat "$stderr")"
+! grep -q 'unbound variable' "$stderr" || fail "update checker tolerates an unset OMARCHY_PATH" "$(cat "$stderr")"
+pass "update checker runs in a session without OMARCHY_PATH"
