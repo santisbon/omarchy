@@ -102,7 +102,7 @@ default/**                     ──►  omarchy-settings    /usr/share/omarchy
   ├─ uwsm/env.d/10-omarchy                              /usr/share/uwsm/env.d/
   ├─ environment.d/*.conf                               /usr/lib/environment.d/
   ├─ fontconfig/conf.avail/50-omarchy.conf              /usr/share/fontconfig/conf.avail/
-  │                                                       + symlink /etc/fonts/conf.d/50-omarchy.conf
+  │                                                       + symlink /etc/fonts/conf.d/51-omarchy.conf (after 50-user.conf)
   ├─ xdg-terminal-exec/*.list                           /usr/share/xdg-terminal-exec/
   ├─ applications/mimeapps.list                         /usr/share/applications/mimeapps.list
   ├─ systemd/user/*.{service,path}                      /usr/lib/systemd/user/

@@ -3,4 +3,7 @@
 # omarchy:summary=List available monospace fonts
 # omarchy:examples=omarchy font list | omarchy font set "CaskaydiaMono Nerd Font"
 
-fc-list :spacing=100 -f "%{family[0]}\n" | grep -v -i -E 'emoji|signwriting|omarchy' | sort -u
+# Icon fonts that fontconfig reports as monospaced are left out: chosen as the text font they
+# draw icons in place of letters. On Ubuntu, starship's Recommends brings Material Icons
+# (fonts-material-design-icons-iconfont), which Arch's starship does not.
+fc-list :spacing=100 -f "%{family[0]}\n" | grep -v -i -E 'emoji|signwriting|omarchy|material icons|font awesome' | sort -u
