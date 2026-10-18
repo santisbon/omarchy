@@ -208,7 +208,11 @@ install_provisioning_units() {
 # mounted as subvolume /@, as the next boot sees it: cryptsetup's initramfs hook and GRUB find
 # the root's device from that mount (a chroot into a plain directory left the unlock out of the
 # initramfs, "cryptsetup: WARNING: Couldn't determine root device", and stopped grub-probe), and
-# GRUB writes rootflags=subvol=@ from it.
+# GRUB writes rootflags=subvol=@ from it. On an EFI System Partition shared with another
+# system, grub-install writes the plain stub, which loses the fallback to that system, so the
+# distro's loader-fallback (oaxaca-base, the distro's docs/7 choice 24) writes it back, as it does
+# after the installer and after every GRUB or shim upgrade; with no previous system recorded it
+# does nothing.
 run_boot_chain() {
   local root="$1" initramfs="${2:-}"
   ROOT="$root" INITRAMFS="$initramfs" unshare --mount --propagation private bash -euo pipefail -c '
@@ -226,6 +230,9 @@ run_boot_chain() {
     chroot "$ROOT" grub-install --target=x86_64-efi --efi-directory=/boot/efi \
       --bootloader-id=ubuntu --uefi-secure-boot --no-nvram
     chroot "$ROOT" update-grub
+    if [[ -x $ROOT/usr/libexec/omarchy/loader-fallback ]]; then
+      chroot "$ROOT" /usr/libexec/omarchy/loader-fallback
+    fi
   ' >>"$LOG_FILE" 2>&1
 }
 
