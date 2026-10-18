@@ -33,3 +33,43 @@ if grep -F 'skip-first-run-update-notification' "$ROOT/install/user/first-run/wi
 fi
 
 pass "first-run uses one lifecycle completion marker"
+
+# A new user's first login, against a stand-in tree: the shipped migrations are marked done
+# before anything else, so the user is not offered them, and every step runs. In the live
+# session (boot=casper on the kernel command line) the keybinding lesson is skipped and the
+# update prompt is held back.
+fake="$test_tmp/omarchy"
+mkdir -p "$fake/migrations" "$fake/install/user/first-run"
+touch "$fake/migrations/1700000001.sh" "$fake/migrations/1700000002.sh"
+for step in enable-user-units gnome-theme gtk-primary-paste audio-tuning welcome wifi; do
+  printf '#!/bin/bash\necho "%s live=${OMARCHY_LIVE_SESSION:-unset}" >>"$OMARCHY_TEST_STEPS"\n' "$step" \
+    >"$fake/install/user/first-run/$step.sh"
+done
+cat >"$mock_bin/omarchy-done" <<'SH'
+#!/bin/bash
+[[ $1 == "check" ]] && exit 1
+exit 0
+SH
+printf '#!/bin/bash\nexit 0\n' >"$mock_bin/omarchy-hook-install"
+printf '#!/bin/bash\nexit 0\n' >"$mock_bin/omarchy-notification-wait"
+chmod +x "$mock_bin"/*
+
+run_first_run() {
+  HOME="$test_tmp/$1" PATH="$mock_bin:$PATH" OMARCHY_PATH="$fake" \
+    OMARCHY_TEST_FINALIZE_CALLED="$finalize_called" OMARCHY_TEST_STEPS="$test_tmp/$1.steps" \
+    OMARCHY_KERNEL_CMDLINE="$test_tmp/cmdline" bash "$ROOT/bin/omarchy-provision-first-run" >/dev/null
+}
+
+echo "BOOT_IMAGE=/vmlinuz root=UUID=x ro quiet splash" >"$test_tmp/cmdline"
+run_first_run installed
+for m in 1700000001.sh 1700000002.sh; do
+  [[ -f $test_tmp/installed/.local/state/omarchy/migrations/$m ]] || fail "a new user's first-run marks migration $m done"
+done
+grep -qx 'welcome live=0' "$test_tmp/installed.steps" || fail "an installed system shows the welcome" "$(cat "$test_tmp/installed.steps")"
+pass "a new user's first-run marks the shipped migrations done"
+
+echo "BOOT_IMAGE=/casper/vmlinuz boot=casper quiet splash" >"$test_tmp/cmdline"
+run_first_run live
+! grep -q '^welcome' "$test_tmp/live.steps" || fail "the live session skips the welcome" "$(cat "$test_tmp/live.steps")"
+grep -qx 'wifi live=1' "$test_tmp/live.steps" || fail "the Wi-Fi step learns it runs in the live session" "$(cat "$test_tmp/live.steps")"
+pass "the live session skips the keybinding lesson and tells the Wi-Fi step"

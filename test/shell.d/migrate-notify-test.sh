@@ -10,6 +10,9 @@ trap 'rm -rf "$test_tmp"' EXIT
 stub_bin="$test_tmp/bin"
 test_home="$test_tmp/home"
 mkdir -p "$stub_bin" "$test_home"
+# An existing user: first-run finished at their first login.
+mkdir -p "$test_home/.local/state/omarchy/done"
+touch "$test_home/.local/state/omarchy/done/first-run-user"
 
 cat >"$stub_bin/omarchy-migrate" <<'SH'
 #!/bin/bash
@@ -164,3 +167,11 @@ grep -Fx 'omarchy-launch-floating-terminal-with-presentation' "$test_tmp/notify-
   grep -Fx 'omarchy-migrate' "$test_tmp/notify-args" >/dev/null ||
   fail "migration notifier points the click command at omarchy-migrate"
 pass "migration notifier lets the shell own the click instead of waiting for it"
+
+# A new user before first-run has finished: first-run marks the shipped migrations done and
+# starts the notifier itself, so this run must not offer them (2026-10-17: the same 12
+# migrations offered twice at a new user's first login).
+rm -f "$test_tmp/notify-args" "$test_home/.local/state/omarchy/done/first-run-user"
+run_notify "1792256553.sh" || fail "the notifier exits cleanly before first-run is done"
+! notify_args_written || fail "no notification before first-run is done" "$(cat "$test_tmp/notify-args")"
+pass "migration notifier waits for first-run on a new user's first login"

@@ -17,6 +17,11 @@ if update_in_progress; then
   exit 0
 fi
 
+# A new user's first login: first-run marks the shipped migrations done and then starts this
+# unit itself (enable-user-units.sh), so a run before first-run finishes would offer migrations
+# that are about to be marked, and the second run would offer them again.
+omarchy-done check first-run-user || exit 0
+
 pending_migrations=$(omarchy-migrate --pending 2>/dev/null) || exit 0
 pending_count=$(printf '%s\n' "$pending_migrations" | sed '/^[[:space:]]*$/d' | wc -l)
 

@@ -23,7 +23,8 @@ announce_network() {
     nm-online -q -t 3600 || return
   fi
 
-  notify_update
+  # The live session installs the system; it has nothing to update.
+  [[ ${OMARCHY_LIVE_SESSION:-0} == 1 ]] || notify_update
 }
 
 # Detached, so a slow or absent connection never holds up the rest of first run.

@@ -43,9 +43,28 @@ if omarchy-done check "$FIRST_RUN_DONE" && (( force == 0 )); then
   exit 0
 fi
 
+# A user's first login: every migration the packages ship fixes an install older than this
+# user, so all of them count as done. Omarchy's ISO marked them through
+# omarchy-provision-user --first-install, which the distro's installer does not run for the
+# user (it runs omarchy-apply-system), so every new user, and the live session's user, was
+# offered all of them (2026-10-17: "Click to run 12 pending migrations", twice). A --force
+# rerun is for an existing user, whose pending migrations stay pending.
+if (( force == 0 )); then
+  mkdir -p "$state_dir/migrations"
+  for migration in "$OMARCHY_PATH"/migrations/*.sh; do
+    [[ -f $migration ]] && touch "$state_dir/migrations/$(basename "$migration")"
+  done
+fi
+
 omarchy-provision-user "${finalize_user_args[@]}" || true
 
 mkdir -p "$state_dir"
+
+# The live session (the installation medium, booted by casper, whose kernel command line
+# carries boot=casper) is there to install from: no keybinding lesson, and nothing to update.
+live_session=0
+grep -qw 'boot=casper' "${OMARCHY_KERNEL_CMDLINE:-/proc/cmdline}" 2>/dev/null && live_session=1
+export OMARCHY_LIVE_SESSION=$live_session
 
 FIRST_RUN_LOG="$state_dir/first-run.log"
 first_run_failed=0
@@ -87,8 +106,10 @@ run_first_run_step "apply speaker tuning" \
 omarchy-notification-wait || log_first_run "Timed out waiting for notification service; continuing"
 # Each send returns only once the server has taken the toast, so sending in
 # order is enough to stack them newest-on-top.
-run_first_run_step "show welcome notification" \
-  bash "$OMARCHY_PATH/install/user/first-run/welcome.sh"
+if (( ! live_session )); then
+  run_first_run_step "show welcome notification" \
+    bash "$OMARCHY_PATH/install/user/first-run/welcome.sh"
+fi
 run_first_run_step "schedule Wi-Fi/update notifications" \
   bash "$OMARCHY_PATH/install/user/first-run/wifi.sh"
 
