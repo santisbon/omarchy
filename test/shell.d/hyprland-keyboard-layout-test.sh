@@ -64,8 +64,8 @@ assert_input() {
   pass "$description"
 }
 
-base_options="compose:caps,shift:both_capslock_cancel"
-toggle_options="$base_options,grp:alts_toggle"
+base_options=""
+toggle_options="grp:alts_toggle"
 
 assert_input "missing vconsole.conf falls back to us" "[us] [] [$base_options]"
 # Ubuntu writes the layout to /etc/default/keyboard (the installer through localectl, and the

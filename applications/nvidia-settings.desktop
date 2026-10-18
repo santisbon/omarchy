@@ -1,9 +1,0 @@
-[Desktop Entry]
-# Hides NVIDIA's own launcher (/usr/share/applications/nvidia-settings.desktop, from the
-# nvidia-settings package the NVIDIA driver brings): a file of the same name here shadows it.
-# The program configures the X server's NVIDIA driver, and the session is Wayland, where it can
-# only show the GPU's information. It stays installed and runs as nvidia-settings.
-Type=Application
-Name=NVIDIA X Server Settings
-Exec=nvidia-settings
-NoDisplay=true
