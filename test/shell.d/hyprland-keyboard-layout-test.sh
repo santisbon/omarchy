@@ -5,23 +5,30 @@ source "$(dirname "${BASH_SOURCE[0]}")/base-test.sh"
 require_command lua
 
 resolved_input() {
-  OMARCHY_PATH="$ROOT" OMARCHY_VCONSOLE="${1-}" lua <<'LUA'
+  OMARCHY_PATH="$ROOT" OMARCHY_VCONSOLE="${1-}" OMARCHY_DEFAULT_KEYBOARD="${2-}" lua <<'LUA'
 package.path = os.getenv("OMARCHY_PATH") .. "/?.lua;" .. package.path
 
 local vconsole = os.getenv("OMARCHY_VCONSOLE")
 local real_open = io.open
 
+local default_keyboard = os.getenv("OMARCHY_DEFAULT_KEYBOARD")
+
 io.open = function(path, mode)
-  if path ~= "/etc/vconsole.conf" then
+  local content
+  if path == "/etc/vconsole.conf" then
+    content = vconsole
+  elseif path == "/etc/default/keyboard" then
+    content = default_keyboard
+  else
     return real_open(path, mode)
   end
 
-  if not vconsole then
+  if not content or content == "" then
     return nil
   end
 
   local file = io.tmpfile()
-  file:write(vconsole)
+  file:write(content)
   file:seek("set")
   return file
 end
@@ -44,7 +51,9 @@ assert_input() {
   local expected="$2"
   local actual
 
-  if (( $# > 2 )); then
+  if (( $# > 3 )); then
+    actual=$(resolved_input "$3" "$4")
+  elif (( $# > 2 )); then
     actual=$(resolved_input "$3")
   else
     actual=$(resolved_input)
@@ -59,6 +68,16 @@ base_options="compose:caps,shift:both_capslock_cancel"
 toggle_options="$base_options,grp:alts_toggle"
 
 assert_input "missing vconsole.conf falls back to us" "[us] [] [$base_options]"
+# Ubuntu writes the layout to /etc/default/keyboard (the installer through localectl, and the
+# factory reset's first-boot form), not to /etc/vconsole.conf.
+assert_input "Ubuntu's /etc/default/keyboard is read without an XKB layout in vconsole.conf" "[de] [nodeadkeys] [$base_options]" 'KEYMAP=de
+' 'XKBMODEL="pc105"
+XKBLAYOUT="de"
+XKBVARIANT="nodeadkeys"
+'
+assert_input "vconsole.conf's layout wins over /etc/default/keyboard" "[fr] [] [$base_options]" 'XKBLAYOUT=fr
+' 'XKBLAYOUT="de"
+'
 assert_input "us layout passes through" "[us] [intl] [$base_options]" 'XKBLAYOUT=us
 XKBVARIANT=intl
 '

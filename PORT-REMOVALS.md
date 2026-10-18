@@ -43,9 +43,8 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 ## Still to restore
 
-Two candidates are left, both larger projects; [Commands, launchers and menu entries](#commands-launchers-and-menu-entries) gives the facts for each:
+One candidate is left; [Commands, launchers and menu entries](#commands-launchers-and-menu-entries) gives its facts:
 
-- a factory reset on Timeshift and `oem-config`;
 - Learn > Omarchy, with a caveat or a page of the port's own.
 
 ## Open questions
@@ -65,7 +64,6 @@ Checks that came up while restoring, not yet done:
 
 | Feature | Files and menu entries | What it did | Removed because | Checked facts | Verdict |
 |---|---|---|---|---|---|
-| Factory reset | `bin/omarchy-system-factory-reset`, `-factory-reset-finish`, `-provision-owner`; `setup.reset` | on btrfs, swapped `@` for the installer's factory snapshot, re-keyed the disk encryption and recreated the owner at first boot | docs/6: among "programs the distro cannot install"; docs/1: scripts tied to Limine and Snapper | the same mistake as snapshots: only the Limine and mkinitcpio steps were Arch-specific; btrfs installs have Timeshift; `oem-config` (universe) creates a user at first boot | **Partial**: a factory Timeshift snapshot at install, restored by the reset, then `oem-config-prepare`; the re-keying needs rewriting |
 | Learn > Omarchy | `learn.omarchy` | Omarchy's manual | none recorded | parts of the manual do not apply (the firewall's Docker rules, pacman, Limine), most does | **Partial**: with a caveat, or a page of the port's own |
 
 ### Replaced
@@ -144,7 +142,7 @@ The 92 files deleted under `install/`, `etc/` and `default/` went in four port c
 | resolved's multicast setting | a no-op on Ubuntu |
 | faillock | Ubuntu's PAM stack has no `pam_faillock` |
 | The powerprofilesctl shebang | Ubuntu's is already `/usr/bin/python3` |
-| Omarchy's ISO provisioning and factory reset | Calamares installs; the reset relied on Limine and mkinitcpio |
+| Omarchy's ISO provisioning (the deferred install that asked for the owner at first boot) | Calamares installs and asks for the user itself; the factory reset, which shares its first-boot form, is back (see [Restored](#restored), choice 87) |
 | Network cleanup | archinstall leftovers |
 | The PATH for `ssh host command` (`ssh-command-path.sh` added mise's shims and `~/.local/bin` to `/etc/security/pam_env.conf`) | the distro's maintainer's decision (2026-10-16, docs/6 choice 79) |
 | The BCM4360's Wi-Fi driver | `broadcom-sta-dkms` only, so it needs a MOK |
@@ -258,6 +256,7 @@ Deleted test files, each with what it tested and the port commit that deleted it
 | `terminal-keybinding-migration-test.sh` | migration `1780057136` (Shift+Enter in terminals; the shipped terminal configurations already have the bindings) | `46dc3cdc` |
 | `update-pacman-guard-test.sh` | `omarchy-update-pacman-guard` | `ef4c9211` |
 | `zram-migration-test.sh` | migration `1785013000` | `46dc3cdc` |
+| `provisioning-groups-test.sh` | the groups `install/config/docker.sh` and `browser-policy.sh` recorded for Omarchy's deferred provisioning; `docker.sh` was deleted with Docker (docs/6 choice 71), and the factory reset's own group handling is tested in `factory-reset-test.sh` | 2026-10-17 |
 | `launch-openclaw-test.sh`, `openclaw-onboard-test.sh` | `omarchy-launch-openclaw` and `omarchy-openclaw-onboard`, removed with OpenClaw (docs/6 choice 73) | 2026-10-16 |
 
 Test cases deleted from files that stay: the OpenClaw cases in `default-agent-test.sh` (the launcher branch) and `remove-ai-test.sh` (the remover), and the `omarchy-install-font` cases in `desktop-entry-launch-test.sh` (2026-10-16, docs/6 choices 72 and 73); Bluetooth's `bt-agent.service` (`4b680c26`); migrations `1787515927`, `1787815267`, `1788724825`, `1785617047`, `1788577553`, `1785846769` (`46dc3cdc`); `omarchy-remove-preinstalls` (`c304e943`); the OpenClaw installer, the Zed and Heroic installers, Omarchy's CUPS hardening, the update's file- and package-conflict handler and its keyring and AUR steps, the hibernation setup, Remove > AI, and the omarchy-dev package channel (all `ef4c9211`).
@@ -297,6 +296,7 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | Surface keyboard at the disk encryption passphrase prompt | an initramfs-tools hook that adds `surface_aggregator_hub`, the one of Omarchy's ten modules Ubuntu's initramfs lacks | 63 |
 | MacBook8,1 SPI keyboard at the same prompt | an initramfs-tools hook that adds `spi-pxa2xx-pci`, the one module Ubuntu's initramfs lacks | 64 |
 | Intel IPU7 camera (partial) | libcamera, its GStreamer element and its PipeWire plugin on the OV08X40 match; Ubuntu's kernel has the drivers and firmware | 65 |
+| Factory reset | Setup > Reset Computer on btrfs installs: `omarchy-system-factory-reset`, `-factory-reset-finish`, `omarchy-provision-owner` and `install/provisioning/` (the form and the two units), rewritten for GRUB, initramfs-tools and Ubuntu's accounts; the installer takes `@factory` (the distro's docs/7 choice 52) instead of Omarchy's ISO. `setup-form-test.sh` passes again; `factory-reset-test.sh` is new | 87 |
 | Dell XPS haptic touchpad | `packages/dell-xps-touchpad-haptics` in the build repository, installed on the detector's match; Hardware > Touchpad Haptics | 66 |
 | Framework 16 keyboard lighting | `packages/qmk-hid` in the build repository, installed by `framework16.sh` | 67 |
 | ASUS ROG tools and the Hybrid GPU toggle | `packages/asusctl` (6.5.0, from `github.com/OpenGamingCollective/asusctl`) and `packages/supergfxctl` (5.2.7); `asus-rog.sh`, `omarchy-hw-hybrid-gpu`, `omarchy-toggle-hybrid-gpu`, `force-igpu`, the start delay and their tests (`hw-hybrid-gpu-test.sh`, `hybrid-gpu-test.sh`); Hybrid GPU shows only on ASUS ROG laptops with two GPUs, and the scripts call `gnutimeout` | 68 |

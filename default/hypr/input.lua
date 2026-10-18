@@ -1,8 +1,8 @@
 -- https://wiki.hypr.land/Configuring/Basics/Variables/#input
 
-local function read_vconsole()
+local function read_keyboard_file(path)
   local values = {}
-  local file = io.open("/etc/vconsole.conf", "r")
+  local file = io.open(path, "r")
   if not file then
     return values
   end
@@ -26,7 +26,12 @@ end
 local non_latin_layouts =
   " af am ara bd bg by et ge gr il in iq ir kg kh kz la lk mk mm mn mv np rs ru sy th tj ua "
 
-local vconsole = read_vconsole()
+-- Arch keeps the layout in /etc/vconsole.conf; Ubuntu's installer and "localectl
+-- set-x11-keymap" write it to /etc/default/keyboard (same KEY=value format) instead.
+local vconsole = read_keyboard_file("/etc/vconsole.conf")
+if not vconsole.XKBLAYOUT then
+  vconsole = read_keyboard_file("/etc/default/keyboard")
+end
 
 local kb_layout = vconsole.XKBLAYOUT or "us"
 local kb_variant = vconsole.XKBVARIANT or ""

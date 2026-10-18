@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# omarchy:summary=First-boot worker that finishes an omarchy-system-factory-reset reset
+# omarchy:requires-sudo=true
+# omarchy:hidden=true
+
+# Runs once, early on the first boot after omarchy-system-factory-reset, via
+# omarchy-system-factory-reset-finish.service (armed by /var/lib/omarchy/provisioning/wipe-pending).
+# Ordered before the mounts of @home, @log, @cache and @swap, so those can be dropped and
+# recreated as empty subvolumes instead of rm -rf'd file by file.
+#
+# The root is already a fresh clone of @factory (staged by
+# omarchy-system-factory-reset); this deletes the previous root (@omarchy-old-*),
+# recreates @home, @log and @cache, recreates @swap with a swap file of the old one's size
+# (the old one held the previous owner's memory), deletes Timeshift's snapshots (the
+# previous owner's system), and gives the machine new SSH host keys.
+
+set -uo pipefail
+
+PROVISIONING_DIR=/var/lib/omarchy/provisioning
+TOP_MNT=/run/omarchy-system-factory-reset-finish-top
+
+[[ -f $PROVISIONING_DIR/wipe-pending ]] || exit 0
+
+if (( EUID != 0 )); then
+  echo "Error: omarchy-system-factory-reset-finish must run as root" >&2
+  exit 1
+fi
+
+# This runs before var-log.mount, so a log file under /var/log would be
+# shadowed (and @log is recreated below anyway). stdout goes to the journal,
+# which is volatile in /run this early and flushed into the fresh @log later.
+echo "=== Omarchy factory wipe started: $(date '+%Y-%m-%d %H:%M:%S') ==="
+
+log() {
+  echo "factory-wipe: $1"
+}
+
+root_device() {
+  findmnt -no SOURCE / | sed 's/\[.*\]//'
+}
+
+abort() {
+  # Keep wipe-pending so the wipe retries next boot, and so provisioning stays
+  # gated (it refuses to create a user on a half-wiped system).
+  log "$1 — aborting; the wipe will retry on the next boot"
+  umount "$TOP_MNT" 2>/dev/null || true
+  rmdir "$TOP_MNT" 2>/dev/null || true
+  exit 1
+}
+
+delete_subvolume() {
+  local path="$1"
+  [[ -d $path ]] || return 0
+  btrfs subvolume delete --recursive "$path"
+}
+
+recreate_subvolume() {
+  local name="$1"
+  delete_subvolume "$TOP_MNT/$name"
+  btrfs subvolume create "$TOP_MNT/$name"
+}
+
+# The swap file lives alone in @swap (the installer's btrfsSwapSubvol). Recreated at the
+# old file's size, with btrfs's own command, which makes it nocow and preallocated as swap
+# on btrfs needs; swap-swapfile.swap turns it on from /etc/fstab once this unit is done.
+recreate_swap() {
+  [[ -d $TOP_MNT/@swap ]] || return 0
+  local size=0
+  [[ -f $TOP_MNT/@swap/swapfile ]] && size=$(stat -c %s "$TOP_MNT/@swap/swapfile")
+  recreate_subvolume @swap || return 1
+  if (( size > 0 )); then
+    btrfs filesystem mkswapfile --size "$size" "$TOP_MNT/@swap/swapfile" || return 1
+  fi
+}
+
+main() {
+  local device
+  device=$(root_device)
+  if [[ -z $device ]]; then
+    log "could not determine the btrfs root device; aborting"
+    exit 1
+  fi
+
+  mkdir -p "$TOP_MNT"
+  if ! mount -o subvolid=5 "$device" "$TOP_MNT"; then
+    log "could not mount the btrfs top level from $device; aborting"
+    exit 1
+  fi
+
+  local old
+  for old in "$TOP_MNT"/@omarchy-old-*; do
+    [[ -d $old ]] || continue
+    log "deleting previous system root $(basename "$old")"
+    delete_subvolume "$old" || abort "could not delete $(basename "$old")"
+  done
+
+  # A wipe that cannot recreate @home has not wiped anything — the seller's
+  # data would survive a "successful" factory reset.
+  log "recreating @home, @log and @cache"
+  recreate_subvolume @home || abort "could not recreate @home"
+  recreate_subvolume @log || abort "could not recreate @log"
+  recreate_subvolume @cache || abort "could not recreate @cache"
+
+  # The reset's copy of the previous /boot, kept in case the reset had to be undone.
+  rm -rf "$TOP_MNT/omarchy-reset-boot-backup"
+
+  log "recreating @swap and its swap file"
+  recreate_swap || abort "could not recreate the swap file"
+
+  # Timeshift keeps its btrfs snapshots under timeshift-btrfs/ at the top level: copies of
+  # the previous owner's system, and of /home when they included it.
+  if [[ -d $TOP_MNT/timeshift-btrfs/snapshots ]]; then
+    log "deleting Timeshift's snapshots"
+    local snapshot
+    for snapshot in "$TOP_MNT"/timeshift-btrfs/snapshots/*/@*; do
+      [[ -d $snapshot ]] || continue
+      delete_subvolume "$snapshot" || abort "could not delete $snapshot"
+    done
+    rm -rf "$TOP_MNT/timeshift-btrfs" || abort "could not delete timeshift-btrfs"
+  fi
+
+  umount "$TOP_MNT"
+  rmdir "$TOP_MNT" 2>/dev/null || true
+
+  # The reset removed the host keys; Ubuntu's openssh-server makes them only in its
+  # postinst, and its service refuses to start without them.
+  if [[ -x /usr/sbin/sshd ]]; then
+    log "generating SSH host keys"
+    ssh-keygen -A
+  fi
+
+  log "trimming free space"
+  fstrim -a 2>/dev/null || true
+
+  rm -f "$PROVISIONING_DIR/wipe-pending"
+  rm -f /etc/systemd/system/sysinit.target.wants/omarchy-system-factory-reset-finish.service
+  rm -f /etc/systemd/system/omarchy-system-factory-reset-finish.service
+
+  log "factory wipe complete"
+}
+
+main

@@ -1,0 +1,418 @@
+#!/bin/bash
+
+# omarchy:summary=Factory-reset this machine back to its freshly-installed state
+# omarchy:group=setup
+# omarchy:requires-sudo=true
+# omarchy:examples=sudo omarchy-system-factory-reset
+
+# Returns the machine to provisioning state — fully installed, no user, first-boot
+# setup pending — the state you want before selling or handing the machine on.
+#
+# The running root (@) is swapped for a fresh writable clone of the @factory
+# snapshot, so user-installed packages and /etc drift are gone too. The installer
+# takes that snapshot at the end of an install on btrfs (the distro's docs/7), so
+# only machines installed on btrfs from an ISO with that step can be reset; any
+# other machine has no baseline to return to and is turned away.
+#
+# Ubuntu's boot chain replaces Omarchy's Limine and mkinitcpio steps (the distro's docs/6):
+# an encrypted install keeps /boot on its own partition, outside the snapshot, so the
+# installer also keeps a copy of /boot inside @factory and the reset puts it back. Then,
+# chrooted into the factory root (mounted as @, after the swap) in a private mount namespace,
+# update-initramfs rebuilds the initramfs, grub-install puts the factory's shim and GRUB on the
+# EFI System Partition (packages updated since the install may have replaced them), and
+# update-grub writes the menu. If any of that fails, the previous root, its /boot and its GRUB
+# go back, so a failed reset leaves the machine as it was.
+#
+# The heavy lifting happens on the next boot via omarchy-system-factory-reset-finish, staged
+# here. On encrypted installs the LUKS volume is re-keyed to a throwaway
+# passphrase with an auto-unlock keyfile in the initramfs (/etc/crypttab names it, and
+# cryptsetup-initramfs's KEYFILE_PATTERN copies it in) for the provisioning window;
+# first-boot setup re-keys it to the new owner's password and removes the keyfile.
+#
+# Honest limitations:
+#  - On unencrypted disks this is deletion, not forensic erasure. fstrim helps
+#    on SSDs; use blkdiscard + a reinstall if you need certainty.
+#  - LUKS re-keying changes passphrases, not the volume key. Freed extents
+#    remain readable to someone with raw-device access and a valid passphrase.
+#    Use cryptsetup reencrypt or a reinstall if you need certainty.
+#  - Until the new owner finishes first-boot setup, an encrypted disk unlocks
+#    itself: the keyfile sits in the initramfs on the unencrypted /boot.
+
+set -euo pipefail
+
+PROVISIONING_DIR=/var/lib/omarchy/provisioning
+FACTORY_BOOT=/var/lib/omarchy/factory/boot
+PROVISIONING_KEY=/etc/omarchy/provisioning.key
+CONF_HOOK=/etc/cryptsetup-initramfs/conf-hook
+UMASK_CONF=/etc/initramfs-tools/conf.d/omarchy-provisioning
+OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+TOP_MNT=/run/omarchy-system-factory-reset/top
+NEXT_NAME=@omarchy-reset-next
+NEW_ROOT=/run/omarchy-system-factory-reset/root
+BOOT_BACKUP=omarchy-reset-boot-backup
+LOG_FILE=/var/log/omarchy-system-factory-reset.log
+
+# Self-elevate so the menu entry (and a bare shell invocation) need no sudo
+# prefix. The caller's gum theme vars are forwarded as `env` arguments rather
+# than via `sudo -E`, so styling survives even under an env_reset sudoers.
+if (( EUID != 0 )); then
+  mapfile -t gum_env < <(env | grep '^GUM_' || true)
+  exec sudo env "${gum_env[@]}" "$0" "$@"
+fi
+
+export PATH="$OMARCHY_PATH/bin:$PATH"
+
+log() {
+  echo "$1" | tee -a "$LOG_FILE" >/dev/null
+  gum style --foreground 8 "  $1"
+}
+
+fail() {
+  gum style --foreground 1 "Error: $1"
+  exit 1
+}
+
+root_device() {
+  findmnt -no SOURCE / | sed 's/\[.*\]//'
+}
+
+root_is_btrfs_at() {
+  [[ $(findmnt -no FSTYPE /) == btrfs ]] && findmnt -no OPTIONS / | grep -q "subvol=/@\(,\|$\)"
+}
+
+# The crypto_LUKS partition under the root's device-mapper device, or non-zero when the root
+# is not on LUKS. Ubuntu's initramfs opens it from /etc/crypttab, so there is no
+# cryptdevice= on the kernel command line to read, as Omarchy's Arch install had.
+luks_device() {
+  local src part
+  src=$(root_device)
+  [[ -n $src ]] || return 1
+  part=$(lsblk -nslpo NAME,FSTYPE "$src" 2>/dev/null | awk '$2=="crypto_LUKS"{print $1; exit}')
+  [[ -n $part ]] && { echo "$part"; return 0; }
+  return 1
+}
+
+encrypted_install() {
+  luks_device >/dev/null 2>&1
+}
+
+# No trailing `| head` stage: under pipefail an infinite tr killed by
+# SIGPIPE fails the substitution and errexit aborts the whole reset.
+generate_passphrase() {
+  local raw
+  raw=$(head -c 4096 /dev/urandom | tr -dc 'a-zA-Z0-9')
+  printf '%s' "${raw:0:48}"
+}
+
+cleanup() {
+  if mountpoint -q "$TOP_MNT" 2>/dev/null; then
+    if [[ -d $TOP_MNT/$NEXT_NAME && ${swap_done:-0} == 0 ]]; then
+      btrfs subvolume delete --recursive "$TOP_MNT/$NEXT_NAME" >/dev/null 2>&1 || true
+    fi
+    umount -R "$TOP_MNT" 2>/dev/null || true
+  fi
+  rmdir "$TOP_MNT" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+confirm_reset() {
+  echo
+  gum style --bold --foreground 1 "Reset this computer to factory state?"
+  echo
+  gum style "This will permanently erase:"
+  gum style "  • All user accounts and everything in /home"
+  gum style "  • All packages and system changes made since installation"
+  gum style "  • Machine identity (network connections, host keys, machine-id)"
+  gum style "  • Every Timeshift snapshot"
+  echo
+  gum style "The next boot asks for a new user, exactly like a fresh install."
+  gum style --foreground 8 "Note: on disks without encryption this is deletion, not secure erasure."
+  echo
+
+  local typed
+  typed=$(gum input --placeholder "Type 'reset' to continue" --prompt "> ") || exit 1
+  [[ $typed == "reset" ]] || fail "Reset not confirmed."
+}
+
+# Re-key to a throwaway passphrase whose keyfile auto-unlocks boot during the
+# provisioning window. $1 is the root of the staged factory system.
+stage_luks_rekey() {
+  local next="$1" device uuid passphrase
+
+  device=$(luks_device) || fail "encrypted install, but no LUKS partition found under the root"
+  [[ -e $device ]] || fail "LUKS device $device not found"
+  uuid=$(cryptsetup luksUUID "$device") || fail "could not read the LUKS UUID of $device"
+  grep -Eq "^[^#[:space:]]+[[:space:]]+UUID=$uuid([[:space:]]|$)" "$next/etc/crypttab" ||
+    fail "the factory system's /etc/crypttab has no entry for UUID=$uuid"
+
+  echo
+  gum style "Confirm your disk encryption passphrase to authorize the re-key."
+  local current
+  while true; do
+    current=$(gum input --password --placeholder "Current disk encryption passphrase" --prompt "Passphrase> ") || exit 1
+    if cryptsetup open --test-passphrase --key-file <(printf '%s' "$current") "$device" 2>/dev/null; then
+      break
+    fi
+    gum style --foreground 1 "That passphrase does not unlock $device. Try again."
+  done
+
+  passphrase=$(generate_passphrase)
+  cryptsetup luksAddKey --key-file <(printf '%s' "$current") "$device" <(printf '%s' "$passphrase")
+
+  install -d -m 755 "$next$PROVISIONING_DIR"
+  printf '%s' "$passphrase" >"$next$PROVISIONING_DIR/luks-key"
+  chmod 600 "$next$PROVISIONING_DIR/luks-key"
+
+  install -d -m 755 "$next${PROVISIONING_KEY%/*}"
+  printf '%s' "$passphrase" >"$next$PROVISIONING_KEY"
+  chmod 600 "$next$PROVISIONING_KEY"
+
+  # The root's crypttab line names the keyfile instead of asking. The originals of the
+  # two files changed here are kept, and first-boot setup puts them back byte for byte,
+  # so neither stays a modified conffile.
+  cp -p "$next/etc/crypttab" "$next$PROVISIONING_DIR/crypttab.orig"
+  awk -v uuid="UUID=$uuid" -v key="$PROVISIONING_KEY" \
+    'BEGIN { OFS = "\t" } !/^#/ && $2 == uuid { $3 = key } { print }' \
+    "$next$PROVISIONING_DIR/crypttab.orig" >"$next/etc/crypttab"
+
+  if [[ -f $next$CONF_HOOK ]]; then
+    cp -p "$next$CONF_HOOK" "$next$PROVISIONING_DIR/conf-hook.orig"
+  fi
+  install -d "$next${CONF_HOOK%/*}"
+  printf 'KEYFILE_PATTERN="%s"\n' "$PROVISIONING_KEY" >>"$next$CONF_HOOK"
+
+  # The initramfs then holds the key; keep it readable by root only.
+  install -d "$next${UMASK_CONF%/*}"
+  echo 'UMASK=0077' >"$next$UMASK_CONF"
+}
+
+install_provisioning_units() {
+  local next="$1" unit_src="$2"
+
+  install -Dm644 "$unit_src/omarchy-provision-owner.service" \
+    "$next/etc/systemd/system/omarchy-provision-owner.service"
+  install -Dm644 "$unit_src/omarchy-system-factory-reset-finish.service" \
+    "$next/etc/systemd/system/omarchy-system-factory-reset-finish.service"
+
+  install -d "$next/etc/systemd/system/multi-user.target.wants" \
+    "$next/etc/systemd/system/sysinit.target.wants"
+  ln -sf /etc/systemd/system/omarchy-provision-owner.service \
+    "$next/etc/systemd/system/multi-user.target.wants/omarchy-provision-owner.service"
+  ln -sf /etc/systemd/system/omarchy-system-factory-reset-finish.service \
+    "$next/etc/systemd/system/sysinit.target.wants/omarchy-system-factory-reset-finish.service"
+}
+
+# The boot chain of the root mounted at $1, chrooted into it in a mount namespace of its own
+# (unshare --propagation private), so none of its bind mounts or their unmounts reach this
+# running system: update-initramfs (with "initramfs"), grub-install, update-grub. The root is
+# mounted as subvolume /@, as the next boot sees it: cryptsetup's initramfs hook and GRUB find
+# the root's device from that mount (a chroot into a plain directory left the unlock out of the
+# initramfs, "cryptsetup: WARNING: Couldn't determine root device", and stopped grub-probe), and
+# GRUB writes rootflags=subvol=@ from it.
+run_boot_chain() {
+  local root="$1" initramfs="${2:-}"
+  ROOT="$root" INITRAMFS="$initramfs" unshare --mount --propagation private bash -euo pipefail -c '
+    mount --rbind /dev "$ROOT/dev"
+    mount -t proc proc "$ROOT/proc"
+    mount --rbind /sys "$ROOT/sys"
+    mount -t tmpfs tmpfs "$ROOT/run"
+    if findmnt -n /boot >/dev/null; then
+      mount --bind /boot "$ROOT/boot"
+    fi
+    if findmnt -n /boot/efi >/dev/null; then
+      mount --bind /boot/efi "$ROOT/boot/efi"
+    fi
+    [[ -z $INITRAMFS ]] || chroot "$ROOT" update-initramfs -u -k all
+    chroot "$ROOT" grub-install --target=x86_64-efi --efi-directory=/boot/efi \
+      --bootloader-id=ubuntu --uefi-secure-boot --no-nvram
+    chroot "$ROOT" update-grub
+  ' >>"$LOG_FILE" 2>&1
+}
+
+# Put the factory system's boot files in place, from the factory root now at @. With /boot on
+# its own partition (an encrypted install), the running /boot holds the current kernels, so the
+# copy of the factory /boot inside @factory goes back on it first: the factory root's
+# /usr/lib/modules matches only those kernels. Then the boot chain is rebuilt from that root,
+# because packages updated since the install may have put a newer shim and GRUB on the EFI
+# System Partition than the factory /boot matches.
+rebuild_boot() {
+  local device="$1"
+  mkdir -p "$NEW_ROOT"
+  mount -o subvol=/@ "$device" "$NEW_ROOT" || return 1
+
+  if findmnt -n /boot >/dev/null; then
+    if [[ ! -d $NEW_ROOT$FACTORY_BOOT ]]; then
+      log "/boot is its own partition, but the factory snapshot has no copy of it ($FACTORY_BOOT)"
+      return 1
+    fi
+    log "Restoring the factory system's /boot"
+    # Everything but efi/, the EFI System Partition's mount point; cp rather than rsync,
+    # which an installed system does not have.
+    { find /boot -mindepth 1 -maxdepth 1 ! -name efi -exec rm -rf {} + &&
+      cp -a "$NEW_ROOT$FACTORY_BOOT/." /boot/; } >>"$LOG_FILE" 2>&1 || return 1
+  fi
+
+  log "Rebuilding boot files from the factory system (this can take a minute)"
+  run_boot_chain "$NEW_ROOT" initramfs
+}
+
+# Remove one system's accounts and identity: users with uid 1000-59999 with their homes
+# and enrolled fingerprints, root's password, SSH host keys, network connections and the
+# login manager's last user. $1 is the root to scrub, $2 names it in the log.
+scrub_accounts_and_identity() {
+  local root="$1" what="${2:-the factory system}" user
+  for user in $(awk -F: '$3 >= 1000 && $3 < 60000 { print $1 }' "$root/etc/passwd"); do
+    log "Removing user $user from $what"
+    rm -rf "${root:?}/var/lib/fprint/$user"
+    userdel --root "$root" "$user" 2>>"$LOG_FILE" ||
+      fail "could not remove user $user from $what (see $LOG_FILE)"
+    rm -rf "${root:?}/home/$user"
+  done
+  passwd --root "$root" --lock root >>"$LOG_FILE" 2>&1 || true
+  rm -f "$root"/etc/ssh/ssh_host_*
+  rm -f "$root"/etc/NetworkManager/system-connections/*
+  rm -rf "$root"/var/lib/NetworkManager/* "$root/var/lib/tailscale"
+  rm -f "$root/var/lib/sddm/state.conf" "$root/etc/sddm.conf.d/autologin.conf"
+}
+
+# Remove the seller's account material and machine identity from the retained
+# @factory baseline so it can neither be mounted for recovery nor restore the
+# seller's account on a future reset. Idempotent (a scrubbed baseline has no
+# uid>=1000 accounts left to remove).
+sanitize_factory_baseline() {
+  local factory="$1"
+  btrfs property set -ts "$factory" ro false
+  scrub_accounts_and_identity "$factory" "the factory baseline"
+  : >"$factory/etc/machine-id"
+  btrfs property set -ts "$factory" ro true
+}
+
+stage_full_reset() {
+  local top="$TOP_MNT" next="$TOP_MNT/$NEXT_NAME"
+
+  log "Cloning the factory snapshot"
+  [[ -d $next ]] && btrfs subvolume delete --recursive "$next" >/dev/null
+  btrfs subvolume snapshot "$top/@factory" "$next" >>"$LOG_FILE"
+
+  local unit_src="$next/usr/share/omarchy/install/provisioning"
+  [[ -f $unit_src/omarchy-provision-owner.service && -x $next/usr/bin/omarchy-provision-owner ]] ||
+    fail "the factory snapshot predates provisioning support; cannot reset from it"
+
+  # The groups the factory system's user was in, which the new owner gets.
+  install -d -m 755 "$next$PROVISIONING_DIR"
+  local user
+  for user in $(awk -F: '$3 >= 1000 && $3 < 60000 { print $1 }' "$next/etc/passwd"); do
+    awk -F: -v u="$user" '{ n = split($4, m, ","); for (i = 1; i <= n; i++) if (m[i] == u) print $1 }' \
+      "$next/etc/group"
+  done | sort -u >"$next$PROVISIONING_DIR/groups"
+
+  log "Scrubbing machine identity from the factory system"
+  # A factory snapshot from a normal install contains the original user account;
+  # first-boot setup must start from none. A leftover account would keep its
+  # password hash and group memberships (including sudo), so failure here has to
+  # abort the reset, not be shrugged off.
+  scrub_accounts_and_identity "$next"
+  systemd-id128 new >"$next/etc/machine-id"
+
+  # @factory itself survives the wipe as the baseline for future resets. It
+  # came from a normal install, so it still holds the seller's account and
+  # /etc/shadow, which the new sudo user could mount and read — and a second
+  # reset would restore that account. Scrub it once, in place.
+  sanitize_factory_baseline "$top/@factory"
+
+  touch "$next$PROVISIONING_DIR/pending" "$next$PROVISIONING_DIR/wipe-pending"
+
+  install_provisioning_units "$next" "$unit_src"
+
+  if encrypted_install; then
+    stage_luks_rekey "$next"
+  fi
+
+  # A reset that stops halfway must leave the previous system as it was, bootable: /boot is
+  # kept at the top level until the reset is done (the finish step deletes the copy).
+  if findmnt -n /boot >/dev/null; then
+    log "Keeping a copy of the current /boot until the reset is done"
+    rm -rf "${top:?}/$BOOT_BACKUP"
+    mkdir -p "$top/$BOOT_BACKUP"
+    find /boot -mindepth 1 -maxdepth 1 ! -name efi -exec cp -a {} "$top/$BOOT_BACKUP/" \; >>"$LOG_FILE" 2>&1 ||
+      fail "could not copy /boot (see $LOG_FILE)"
+  fi
+
+  log "Activating the factory system"
+  local old="@omarchy-old-$(date +%s)"
+  mv "$top/@" "$top/$old"
+  mv "$next" "$top/@"
+  swap_done=1
+
+  if ! rebuild_boot "$(root_device)"; then
+    umount "$NEW_ROOT" 2>/dev/null || true
+    log "Putting the previous system back"
+    mv "$top/@" "$next"
+    mv "$top/$old" "$top/@"
+    swap_done=0
+    if [[ -d $top/$BOOT_BACKUP ]]; then
+      find /boot -mindepth 1 -maxdepth 1 ! -name efi -exec rm -rf {} +
+      cp -a "$top/$BOOT_BACKUP/." /boot/
+      rm -rf "${top:?}/$BOOT_BACKUP"
+    fi
+    # The EFI System Partition may already hold the factory system's GRUB; match it to the
+    # previous system's /boot again.
+    mount -o subvol=/@ "$(root_device)" "$NEW_ROOT" && run_boot_chain "$NEW_ROOT" || true
+    umount "$NEW_ROOT" 2>/dev/null || true
+    fail "rebuilding the boot files failed; the previous system is back (see $LOG_FILE)"
+  fi
+  umount "$NEW_ROOT"
+  sync
+}
+
+# A reset is a clone of @factory, so a machine without one has nothing to
+# return to. Only the installer's factory step takes that snapshot.
+require_factory_snapshot() {
+  [[ -d $TOP_MNT/@factory ]] && return 0
+
+  echo
+  gum style --bold --foreground 3 "This machine has no factory snapshot to reset to."
+  echo
+  gum style "A reset restores the @factory snapshot the Omarchy installer takes"
+  gum style "right after installing on btrfs. Machines installed on another file"
+  gum style "system, or before the installer took it, never got one, so there is"
+  gum style "no baseline here to return to."
+  echo
+  gum style --foreground 8 "Reinstall from the Omarchy ISO to make this machine resettable."
+  exit 1
+}
+
+main() {
+  omarchy-cmd-present btrfs || { echo "Error: btrfs-progs is required" >&2; exit 1; }
+
+  root_is_btrfs_at || fail "reset requires the installer's btrfs layout (subvol=@)"
+
+  touch "$LOG_FILE"
+  chmod 600 "$LOG_FILE"
+  swap_done=0
+
+  local device
+  device=$(root_device)
+  [[ -n $device ]] || fail "could not determine the root device"
+
+  mkdir -p "$TOP_MNT"
+  mountpoint -q "$TOP_MNT" || mount -o subvolid=5 "$device" "$TOP_MNT"
+
+  require_factory_snapshot
+
+  confirm_reset
+
+  stage_full_reset
+
+  umount -R "$TOP_MNT" 2>/dev/null || true
+
+  echo
+  gum style --bold "Reset staged. The wipe finishes on the next boot."
+  if gum confirm --affirmative "Reboot now" --negative "Reboot later" "Reboot to complete the reset?"; then
+    systemctl reboot
+  else
+    gum style --foreground 3 "Do not keep using this machine — changes made now will be lost."
+  fi
+}
+
+main "$@"
