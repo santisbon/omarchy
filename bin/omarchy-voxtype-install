@@ -59,6 +59,15 @@ if gum confirm "Install Voxtype (about 230 MB) and its speech model (about 150 M
   voxtype setup systemd
 
   hyprctl reload >/dev/null
-  omarchy-restart-shell
-  omarchy-notification-send -g  "Voxtype Dictation Ready" "Hold F9 to dictate (or toggle with Super + Ctrl + X)." -t 10000
+  # The keys are the only way to dictate (the bar's indicator opens Voxtype's settings), and
+  # Omarchy names them only in a 10-second toast. The port had lost the toast's glyph after -g,
+  # so the toast's title became its glyph (a fresh install, 2026-10-18); with set -e, a failed
+  # shell restart or toast would also skip the keys. The terminal keeps them on screen until
+  # the done screen's key press.
+  omarchy-restart-shell || true
+  omarchy-notification-send -g  "Voxtype Dictation Ready" "Hold F9 to dictate (or toggle with Super + Ctrl + X)." -t 10000 || true
+  echo
+  echo "Dictation is ready. Hold F9 and speak, then release F9 to type the text."
+  echo "Super + Ctrl + X starts dictation, and pressing the keys again stops it."
+  echo "Clicking the bar's microphone opens Voxtype's settings."
 fi
