@@ -35,10 +35,13 @@ end
 
 local kb_layout = vconsole.XKBLAYOUT or "us"
 local kb_variant = vconsole.XKBVARIANT or ""
--- Caps Lock is plain Caps Lock. Omarchy makes it the Compose key and moves Caps Lock to
--- both Shifts ("compose:caps,shift:both_capslock_cancel"); the distro's maintainer wants
--- the key itself back (docs/6, choice 90).
-local kb_options = ""
+-- The keyboard works as on any other system: the model and options the installer wrote
+-- (usually pc105 and none), so Caps Lock is Caps Lock and AltGr stays AltGr. Omarchy sets
+-- no model and makes Caps Lock the Compose key, with Caps Lock moved to both Shifts
+-- ("compose:caps,shift:both_capslock_cancel"); the distro's maintainer wants the keys
+-- exactly as chosen at installation (docs/6, choice 90).
+local kb_model = vconsole.XKBMODEL or ""
+local kb_options = vconsole.XKBOPTIONS or ""
 
 -- Hyprland resolves keybindings against the first entry in kb_layout, not the
 -- layout that's currently active, so Omarchy's Latin-keysym bindings (SUPER + W
@@ -47,15 +50,18 @@ local kb_options = ""
 if non_latin_layouts:find(" " .. kb_layout:match("^[^,]*") .. " ", 1, true) then
   kb_layout = "us," .. kb_layout
   kb_variant = "," .. kb_variant
-  -- Reach the original layout with Left Alt + Right Alt.
-  kb_options = kb_options == "" and "grp:alts_toggle" or kb_options .. ",grp:alts_toggle"
+  -- Reach the original layout with Left Alt + Right Alt, unless the installer's options
+  -- already name a switching key.
+  if not kb_options:find("grp:", 1, true) then
+    kb_options = kb_options == "" and "grp:alts_toggle" or kb_options .. ",grp:alts_toggle"
+  end
 end
 
 hl.config({
   input = {
     kb_layout = kb_layout,
     kb_variant = kb_variant,
-    kb_model = "",
+    kb_model = kb_model,
     kb_options = kb_options,
     kb_rules = "",
     follow_mouse = 1,
