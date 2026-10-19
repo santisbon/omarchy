@@ -1,0 +1,9 @@
+# Hides snapd's start-up check image from udisks2. At every start snapd checks that the kernel
+# can mount squashfs: it mounts a 4 KiB image from /tmp/syscheck-squashfs-* through a loop device
+# and unmounts it at once (snapd's syscheck/squashfs.go). The session's udiskie --automount keeps
+# every loop device with a backing file (its default filters skip only /var/lib/snapd/snaps/*),
+# so it tried to mount the image too: a loop device is not removable, udisks2 asked polkit for
+# org.freedesktop.udisks2.filesystem-mount-system, and the session showed an administrator
+# password dialog whenever snapd started (the distro's boot test, 2026-10-19). With
+# UDISKS_IGNORE set, udisks2 marks the device as hidden, and neither udiskie nor Files acts on it.
+SUBSYSTEM=="block", KERNEL=="loop[0-9]*", ACTION=="add|change", ATTR{loop/backing_file}=="/tmp/syscheck-squashfs-*", ENV{UDISKS_IGNORE}="1"
