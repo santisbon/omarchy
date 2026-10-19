@@ -12,13 +12,16 @@ mapfile -t packages < <(omarchy-pkg-translate --explain "$@")
 set -- "${packages[@]}"
 
 if omarchy-pkg-missing "$@"; then
+  as_root=(); (( EUID == 0 )) || as_root=(sudo)
+  # A system with no package lists yet (installed without a network, or by an installer that
+  # skipped the update) knows no package to install: apt-get then fails with "Unable to locate
+  # package". Fetch the lists first in that case only; apt's own timer keeps them fresh after.
+  if ! compgen -G '/var/lib/apt/lists/*_Packages' >/dev/null; then
+    "${as_root[@]}" apt-get update || exit 1
+  fi
   # --no-install-recommends keeps a request for one tool from dragging in the
   # archive's suggestions around it; callers name everything they need.
-  if (( EUID == 0 )); then
-    apt-get install -y --no-install-recommends "$@" || exit 1
-  else
-    sudo apt-get install -y --no-install-recommends "$@" || exit 1
-  fi
+  "${as_root[@]}" apt-get install -y --no-install-recommends "$@" || exit 1
 fi
 
 for pkg in "$@"; do
