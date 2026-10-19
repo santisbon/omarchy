@@ -182,8 +182,18 @@ assert(
   defaultById['setup.input'].action.includes('input.lua'),
   'menu keeps Input as a direct config action'
 )
-// Omarchy's Setup > Direct Boot (Limine) and Setup > Reset Computer are not in the port
-// (PORT-REMOVALS.md), so their three checks are left out.
+// Omarchy's Setup > Direct Boot (Limine) is not in the port (PORT-REMOVALS.md), so its check is
+// left out; Reset Computer is back with the factory reset (the distro's docs/6, choice 87).
+assert(
+  defaultById['setup.reset'].action.includes('omarchy-system-factory-reset'),
+  'menu exposes Reset Computer under Setup'
+)
+const setupEntries = defaultItems.filter(item => item.parent === 'setup')
+assertEqual(
+  setupEntries[setupEntries.length - 1].id,
+  'setup.reset',
+  'menu lists Reset Computer last under Setup'
+)
 assert(
   defaultById['install.productivity.obs'].action.includes('omarchy-pkg-flatpak-add com.obsproject.Studio')
     && defaultById['remove.productivity.obs'].action.includes('omarchy-pkg-flatpak-drop com.obsproject.Studio'),
