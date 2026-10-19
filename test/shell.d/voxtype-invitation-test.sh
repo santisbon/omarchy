@@ -55,3 +55,18 @@ HOME="$test_home" PATH="$test_bin:$ROOT/bin:$PATH" TEST_LOG="$log_file" bash "$h
 [[ $(grep -c '^notification$' "$log_file") -eq 1 ]] || fail "completed Voxtype invitation hook does not notify again"
 
 pass "Voxtype invitation only runs once"
+
+# Voxtype installed before the first update: no invitation, and the invitation counts as done.
+rm -rf "$test_home/.local/state/omarchy/done"
+: >"$log_file"
+cat >"$test_bin/voxtype" <<'EOF'
+#!/bin/bash
+EOF
+chmod +x "$test_bin/voxtype"
+run_invitation_hook
+
+[[ -s $log_file ]] && fail "Voxtype invitation is not sent when Voxtype is installed"
+[[ -f $test_home/.local/state/omarchy/done/voxtype-install-invitation ]] ||
+  fail "Voxtype invitation is marked done when Voxtype is installed"
+
+pass "Voxtype invitation skips a system that has Voxtype"

@@ -2,6 +2,15 @@
 
 set -e
 
+# Omarchy v4.0.4 sends the invitation on the first update whether or not Voxtype is installed,
+# and the invitation's installer then offers to install Voxtype again (a fresh install that had
+# added Voxtype from the menu before its first update, 2026-10-19). With Voxtype present, the
+# invitation is only marked as done.
+if omarchy-cmd-present voxtype; then
+  omarchy-done mark voxtype-install-invitation
+  exit 0
+fi
+
 if omarchy-done ensure voxtype-install-invitation; then
   omarchy-notification-send -u critical -g  "Install Dictation with Voxtype" \
     "Click to install voice dictation for Omarchy." \

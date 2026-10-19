@@ -25,6 +25,14 @@ case $terminal in
   ;;
 esac
 
+# An open shell panel (the WiFi panel, say) or the menu holds the keyboard as a layer surface,
+# and Hyprland maps a new window without focus and without its fullscreen rule while one does:
+# the screensaver came up in a small floating window with the pointer hidden (2026-10-19). Close
+# both first. A closed panel gives the keyboard back at once and fades out over 140 ms.
+omarchy-shell -q shell closePanels
+omarchy-menu close >/dev/null 2>&1 || true
+sleep 0.2
+
 hypr_focus_monitor() {
   hyprctl dispatch "hl.dsp.focus({ monitor = \"$1\" })" >/dev/null 2>&1 || hyprctl dispatch focusmonitor "$1" >/dev/null
 }

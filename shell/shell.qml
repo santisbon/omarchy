@@ -1206,6 +1206,23 @@ ShellRoot {
     return true
   }
 
+  // Closes whatever panel is open: the bar's popout (the WiFi, audio and other bar panels) and
+  // every panel opened through summon. An open panel holds the keyboard as a layer surface, and
+  // Hyprland then maps a new window without focus and without its fullscreen rule
+  // (src/desktop/view/Window.cpp at v0.56.2, "check LS focus grab"), so the screensaver closes
+  // panels before opening its windows. Returns how many it closed.
+  function closePanels() {
+    var closed = 0
+    var popout = shell.bar ? shell.bar.activePopout : null
+    if (popout && "close" in popout) {
+      popout.close()
+      closed++
+    }
+    var ids = Object.keys(openPanelIds)
+    for (var i = 0; i < ids.length; i++) if (shell.hide(ids[i])) closed++
+    return closed
+  }
+
   function isPluginOpen(pluginId) {
     var id = shell.pluginRegistry.resolveEnabledId(pluginId)
     if (shell.isBarWidgetPanelPlugin(id)) {
@@ -1718,6 +1735,10 @@ ShellRoot {
 
     function hide(id: string): void {
       shell.hide(id)
+    }
+
+    function closePanels(): string {
+      return String(shell.closePanels())
     }
 
     function toggle(id: string, payloadJson: string): void {
