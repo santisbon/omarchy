@@ -221,7 +221,7 @@ Omarchy's `install/omarchy-base.packages` (v4.0.4) names 97 packages that the po
 
 On 2026-10-16 the 62 shell test files that failed on this branch were sorted (`PORT.md`, "Tests"): a test of something the port deleted was deleted, a test of Arch behavior in a script the port kept was rewritten for the port's behavior. All of these are **Justified**: each tested a removal recorded above or in `migrations/README.md`.
 
-Deleted test files, each with what it tested and the port commit that deleted it (tests that came back with their feature are listed in [Restored](#restored)):
+Deleted test files, each with what it tested and the port commit that deleted it (tests that came back with their feature are listed in [Restored](#restored)). The rows for `c304e943` (Trim pre-installed software) and `4b680c26` (Remove features we provide through Ubuntu) are tests those two commits deleted with their features on 2026-10-10, before the sort; they were added to this table on 2026-10-19:
 
 | Test file | What it tested | Deleted by |
 |---|---|---|
@@ -243,6 +243,15 @@ Deleted test files, each with what it tested and the port commit that deleted it
 | `zram-migration-test.sh` | migration `1785013000` | `46dc3cdc` |
 | `provisioning-groups-test.sh` | the groups `install/config/docker.sh` and `browser-policy.sh` recorded for Omarchy's deferred provisioning; `docker.sh` was deleted with Docker (docs/6 choice 71), and the factory reset's own group handling is tested in `factory-reset-test.sh` | 2026-10-17 |
 | `launch-openclaw-test.sh`, `openclaw-onboard-test.sh` | `omarchy-launch-openclaw` and `omarchy-openclaw-onboard`, removed with OpenClaw (docs/6 choice 73) | 2026-10-16 |
+| `docker-group-migration-test.sh` | migration `1787580187` (takes the user out of the docker group) and `omarchy-remove-security-sudoless-docker`, deleted with Docker Engine (above) | `c304e943` (Trim pre-installed software) |
+| `sudo-docker-test.sh` | `omarchy-sudo-docker`, which tells Omarchy's Docker commands whether to prefix `sudo`; deleted with Docker Engine (above) | `c304e943` |
+| `sudoless-docker-toggle-test.sh` | `omarchy-setup-security-sudoless-docker` and `omarchy-remove-security-sudoless-docker`, deleted with Docker Engine (above) | `c304e943` |
+| `sudoless-docker-posture-test.sh` | that the factory reset's `user_groups` never grants docker and keeps input only with ydotool, with Arch's `pacman -Qq` stubbed, and that `omarchy-upgrade-to-quattro` (Upgrade to Quattro, above) never grants docker; the `user_groups` cases, rewritten for the port's `omarchy-provision-owner`, are in `factory-reset-test.sh` | `c304e943` |
+| `preinstalls-test.sh` | that `omarchy-install-preinstalls` and `omarchy-remove-preinstalls` cover the same packages, all in `install/omarchy-base.packages`; deleted with the preinstalls toggle (above) | `c304e943` |
+| `tmux-alert-removal-migration-test.sh` | migration `1785189600`, which removed Omarchy's tmux alert by restoring the shipped tmux configuration and reloading tmux once | `c304e943` |
+| `windows-vm-test.sh`, `windows-vm-compose-test.sh` | `omarchy-windows-vm` and its Docker Compose file writer; deleted with the Windows VM (above) | `c304e943` |
+| `dns-sudoers-test.sh` | the sudoers rule `etc/sudoers.d/omarchy-dns` and `omarchy-dns`'s use of it; the port's `omarchy-dns` sets DNS as the user through nmcli and D-Bus with no sudoers rule (The DNS and timezone sudoers rules, above), and the distro's boot test checks the DNS helper in a running system (`dns provider`, `dns reset`, `dns sudoers rule: 0`) | `4b680c26` (Remove features we provide through Ubuntu) |
+| `network-manager-transition-test.sh` | that `omarchy-dns` no longer restarts systemd-networkd, `install/hardware/network.sh`'s removal of archinstall's systemd-networkd state, and migration `1782002156`; Ubuntu's desktop has no networkd state to retire, and the distro's boot test covers `omarchy-dns` | `4b680c26` |
 
 Test cases deleted from files that stay: the OpenClaw cases in `default-agent-test.sh` (the launcher branch) and `remove-ai-test.sh` (the remover), and the `omarchy-install-font` cases in `desktop-entry-launch-test.sh` (2026-10-16, docs/6 choices 72 and 73); Bluetooth's `bt-agent.service` (`4b680c26`); migrations `1787515927`, `1787815267`, `1788724825`, `1785617047`, `1788577553`, `1785846769` (`46dc3cdc`); `omarchy-remove-preinstalls` (`c304e943`); the OpenClaw installer, the Zed and Heroic installers, Omarchy's CUPS hardening, the update's file- and package-conflict handler and its keyring and AUR steps, the hibernation setup, Remove > AI, and the omarchy-dev package channel (all `ef4c9211`).
 
@@ -268,6 +277,7 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | Share > Receive, Install > Service > Chromium Account | Omarchy's two menu lines | 49 |
 | `ic`, `ix`, `icx` aliases | `tdl c`, `tdl cx`, `tdl c cx` | 50 |
 | Voxtype's first-run invitation | the post-update hook, its line in `omarchy-provision-first-run`, and `voxtype-invitation-test.sh` | 51 |
+| The Download Video host's test | `test/shell.d/chromium-ytdlp-test.sh`, unchanged from v4.0.4 (26 cases), on 2026-10-19; the host (`omarchy-chromium-ytdlp-host`) and its installer came back on 2026-10-14 without it | 20 |
 | 1Password's Chromium extension | written and removed with 1Password | 52 |
 | Fingerprint skipped while the lid is closed | the port's own pam-auth-update profile, `omarchy-fprintd`: Ubuntu's line with Omarchy's `pam_exec` gate in front | 53 |
 | DNS for networks joined later | NetworkManager's global DNS over D-Bus as well as the profiles, granted by a polkit rule | 54 |
