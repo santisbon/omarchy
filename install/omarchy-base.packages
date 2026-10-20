@@ -43,6 +43,10 @@ inotify-tools
 network-manager
 jq
 less
+# libheif-plugin-libde265: the HEVC decoder libheif needs for HEIC photos, in imv and in Files'
+# thumbnails (glycin-heif). libheif1 only suggests it, so the image had just the AV1 plugins;
+# Arch's libheif depends on libde265, so Omarchy opens HEIC photos (2026-10-19)
+libheif-plugin-libde265
 libvips-tools
 man-db
 mpv
