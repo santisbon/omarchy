@@ -75,7 +75,7 @@ A PPA (Personal Package Archive) is an apt repository that a person or team publ
 
 The deleted test files and test cases are listed in `PORT-REMOVALS.md`, "Tests".
 
-What the tests need on the machine that runs them, beyond the build tools: `lua` (Ubuntu's `lua5.5`) for the Hyprland configuration tests, `rg` (`ripgrep`) for the plugin, power-profile and Codex usage tests, a UTF-8 locale that loads (a shell exporting `LOCPATH` breaks the locale test), and a checkout whose directories are not group-writable (a checkout made under umask 0002 fails the Plymouth publisher's ownership check, which guards the installed, root-owned tree).
+What the tests need on the machine that runs them, beyond the build tools: `lua` (Ubuntu's `lua5.5`) for the Hyprland configuration tests, `rg` (`ripgrep`) for the plugin, power-profile and Codex usage tests, `node` (Ubuntu's `nodejs`) for the 47 test files that run JavaScript through `run_node_test` or `require_command node`, a UTF-8 locale that loads (a shell exporting `LOCPATH` breaks the locale test), and a checkout whose directories are not group-writable (a checkout made under umask 0002 fails the Plymouth publisher's ownership check, which guards the installed, root-owned tree).
 
 ## Rebase
 
