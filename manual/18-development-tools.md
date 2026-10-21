@@ -30,8 +30,12 @@ _Remove > Development > Docker Desktop_ removes it with its containers, images a
 
 [The GitHub CLI](https://cli.github.com/) lets you authenticate with your GitHub account and clone private repositories using it. Install it from _Install > Development > GitHub CLI_ in the Omarchy menu: the installer follows [GitHub's instructions for Debian and Ubuntu](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian), adding GitHub's apt repository and installing the `gh` package, so `gh` updates with the rest of the system. If you already added GitHub's repository by hand from those instructions, the installer replaces your `github-cli.list` with its own source. _Remove > Development > GitHub CLI_ removes `gh` and GitHub's repository, and keeps your sign-in in `~/.config/gh`.
 
-`gh` is also wired up as one of the lazy-loading mise stubs, `~/.local/bin/gh`: without the package, the first time you run `gh`, mise installs it. With the package installed, `/usr/bin/gh` comes first on your `PATH` and the stub stays unused. To authenticate, run `gh auth login`. Then you can checkout private repositories using `gh repo clone org/repo`.
+`gh` is also wired up as one of the lazy-loading mise stubs, `~/.local/bin/gh`: without the package, the first time you run `gh`, mise installs it. With the package installed, `/usr/bin/gh` comes before the stub on your `PATH` and the stub stays unused. One exception: once the stub has run, mise has its own `gh`, and in a terminal mise's tools come before `/usr/bin` on your `PATH`, so that copy wins over the package. `mise ls gh` shows whether mise has one, and `mise unuse -g gh` removes it. To authenticate, run `gh auth login`. Then you can checkout private repositories using `gh repo clone org/repo`.
 
 You can also perform a bunch of other GitHub operations using this command. Just run `gh` to see everything that's possible.
 
 There's a lazy-installing stub for `ghui` for managing your pull requests in a TUI too. And [lazygit](https://github.com/jesseduffield/lazygit) is preinstalled, if you'd like to drive git itself from a TUI as well.
+
+## AWS CLI
+
+[The AWS CLI](https://aws.amazon.com/cli/) manages your Amazon Web Services resources from the terminal with the `aws` command. Install it from _Install > Development > AWS CLI_ in the Omarchy menu: the installer runs `snap install aws-cli --classic`, the snap Amazon Web Services publishes on the Snap Store, with classic confinement so `aws` can read your `~/.aws` profiles and any file you pass it. Snaps update themselves. To set up a profile, run `aws configure`. _Remove > Development > AWS CLI_ removes the snap and keeps `~/.aws`.
