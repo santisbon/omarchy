@@ -6,6 +6,8 @@ If you use Tmux, you may not mind, but if not, we fully support _Alacritty_, _Gh
 
 You start a new terminal using `Super + Return`. (This binding will automatically point to whichever Terminal you've installed via _Install > Terminal_, and you can switch between installed terminals under _Setup > Defaults > Terminal_.)
 
+You can also install [Wave](https://www.waveterm.dev/) under _Install > Terminal_, but Wave can't be the default terminal: the menu opens many of its tools by asking the default terminal to run a command, and Wave doesn't run a command it's given at launch. Open Wave from the app launcher; _Setup > Defaults > Terminal > Wave_ explains this instead of switching.
+
 ## Tmux
 
 Tmux provides a consistent, programmable interface for panes, windows (aka tabs), and resumable sessions regardless of your terminal. It even works on remote hosts, so when you're SSH'ing into a server, you can use the same approach.
