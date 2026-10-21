@@ -28,7 +28,9 @@ _Remove > Development > Docker Desktop_ removes it with its containers, images a
 
 ## GitHub CLI
 
-[The GitHub CLI](https://cli.github.com/) let's you authenticate with your GitHub account and clone private repositories using it. It's wired up as one of the lazy-loading mise stubs, so the first time you run `gh`, it installs itself. To authenticate, run `gh auth login`. Then you can checkout private repositories using `gh repo clone org/repo`.
+[The GitHub CLI](https://cli.github.com/) lets you authenticate with your GitHub account and clone private repositories using it. Install it from _Install > Development > GitHub CLI_ in the Omarchy menu: the installer follows [GitHub's instructions for Debian and Ubuntu](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian), adding GitHub's apt repository and installing the `gh` package, so `gh` updates with the rest of the system. If you already added GitHub's repository by hand from those instructions, the installer replaces your `github-cli.list` with its own source. _Remove > Development > GitHub CLI_ removes `gh` and GitHub's repository, and keeps your sign-in in `~/.config/gh`.
+
+`gh` is also wired up as one of the lazy-loading mise stubs, `~/.local/bin/gh`: without the package, the first time you run `gh`, mise installs it. With the package installed, `/usr/bin/gh` comes first on your `PATH` and the stub stays unused. To authenticate, run `gh auth login`. Then you can checkout private repositories using `gh repo clone org/repo`.
 
 You can also perform a bunch of other GitHub operations using this command. Just run `gh` to see everything that's possible.
 

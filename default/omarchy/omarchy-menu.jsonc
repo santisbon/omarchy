@@ -237,6 +237,7 @@
   "install.gaming.minecraft": {"icon":"󰍳","label":"Minecraft","when":"! omarchy-pkg-present minecraft-launcher","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-gaming-minecraft"},
   "install.gaming.retro-launcher": {"icon":"󰯉","label":"RetroArch Game Launcher","action":"omarchy-games-retro-install"},
   "install.development.docker-desktop": {"icon":"󰡨","label":"Docker Desktop","when":"! omarchy-pkg-present docker-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-dev-docker-desktop"},
+  "install.development.github-cli": {"icon":"","label":"GitHub CLI","when":"! omarchy-pkg-present gh","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-dev-github-cli"},
   "install.development.rails": {"icon":"󰫏","label":"Ruby on Rails","when":"omarchy-cmd-present mise && [[ ! -d $HOME/.local/share/mise/installs/ruby ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env ruby'"},
   "install.development.javascript": {"icon":"","label":"JavaScript"},
   "install.development.go": {"icon":"","label":"Go","when":"omarchy-cmd-present mise && [[ ! -d $HOME/.local/share/mise/installs/go ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-install-dev-env go'"},
@@ -314,6 +315,7 @@
   "remove.development.elixir.phoenix": {"icon":"","label":"Phoenix","when":"[[ -d $HOME/.local/share/mise/installs/elixir ]]","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-remove-dev-env phoenix'"},
   "remove.development.herdr": {"icon":"","label":"Herdr","when":"omarchy-cmd-present herdr","action":"omarchy-launch-floating-terminal-with-presentation 'mise unuse -g herdr'"},
   "remove.development.docker-desktop": {"icon":"󰡨","label":"Docker Desktop","when":"omarchy-pkg-present docker-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-dev-docker-desktop"},
+  "remove.development.github-cli": {"icon":"","label":"GitHub CLI","when":"omarchy-pkg-present gh","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-dev-github-cli"},
 
   // Update
   "update.omarchy": {"icon":"","iconFont":"omarchy","label":"Omarchy","action":"omarchy-launch-floating-terminal-with-presentation omarchy-update"},

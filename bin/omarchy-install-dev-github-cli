@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# omarchy:summary=Install the GitHub CLI (gh) from GitHub's own apt repository.
+# omarchy:requires-sudo=true
+
+set -e
+
+# The GitHub CLI's "Installing gh on Linux and BSD" page, Debian section (github.com/cli/cli,
+# docs/install_linux.md, read 2026-10-21): GitHub's keyring from
+# cli.github.com/packages/githubcli-archive-keyring.gpg, the source "https://cli.github.com/packages
+# stable main" for the machine's architecture, then apt installs gh. The suite is "stable" for
+# every Debian and Ubuntu release. On 2026-10-21 the keyring held the two keys the page lists:
+#   2C6106201985B60E6C7AC87323F3D4EA75716059  expired 2026-09-05
+#   7F38BBB59D064DBCB3D84D725612B36462313325  signs the repository's InRelease
+echo "Installing the GitHub CLI..."
+
+# The page writes its source as /etc/apt/sources.list.d/github-cli.list, signed by
+# /etc/apt/keyrings/githubcli-archive-keyring.gpg. apt refuses two entries for one repository
+# with different Signed-By keyrings, so a source made by hand from the page gives way to the
+# deb822 one below, and the page's keyring goes too once no other source names it.
+if grep -qs 'cli.github.com/packages' /etc/apt/sources.list.d/github-cli.list; then
+  sudo rm -f /etc/apt/sources.list.d/github-cli.list
+  if ! grep -rqs 'githubcli-archive-keyring.gpg' /etc/apt/sources.list /etc/apt/sources.list.d; then
+    sudo rm -f /etc/apt/keyrings/githubcli-archive-keyring.gpg
+  fi
+fi
+
+omarchy-pkg-repo-add github-cli https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+  https://cli.github.com/packages stable main "$(dpkg --print-architecture)"
+omarchy-pkg-add gh
+
+echo ""
+echo "The GitHub CLI is installed. To sign in to GitHub, run: gh auth login"

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# omarchy:summary=Remove the GitHub CLI installed from GitHub's apt repository, and the repository.
+# omarchy:requires-sudo=true
+
+set -e
+
+# gh's sign-in and settings in ~/.config/gh stay, for a later install or for the mise-backed
+# stub ~/.local/bin/gh, which runs once /usr/bin/gh is gone (~/.local/bin is last on PATH).
+omarchy-pkg-drop gh
+omarchy-pkg-repo-remove github-cli
+
+echo ""
+echo "The GitHub CLI has been removed. Your gh sign-in in ~/.config/gh is kept."
