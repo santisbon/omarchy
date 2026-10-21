@@ -666,9 +666,12 @@ Panel {
               width: parent.width
               implicitHeight: Math.max(textSizeHeader.implicitHeight, textSizePx.implicitHeight)
 
+              // Text size has no per-monitor form: the shell's base size, GTK's
+              // text scaling and the terminals' font size are each one value.
+              // Say so once SCALE names the one monitor it applies to.
               PanelSectionHeader {
                 id: textSizeHeader
-                text: "TEXT SIZE"
+                text: root.enabledDisplayCount > 1 ? "TEXT SIZE · ALL DISPLAYS" : "TEXT SIZE"
                 foreground: root.bar.foreground
                 fontFamily: root.bar.fontFamily
                 anchors.left: parent.left

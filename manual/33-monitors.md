@@ -18,7 +18,7 @@ local omarchy_monitor_scale = 1
 
 Changes to `GDK_SCALE` apply to applications started after the change (and GTK only honors whole numbers, so keep it at the nearest integer of your monitor scale). So make sure you quit the windows that you have that are oversized after the change (or close all windows with `Ctrl + Alt + Del`!).
 
-You can also quickly step through the major monitor scaling ratios (1x, 1.25x, 1.6x, 2x, 3x, 4x) using `Super + /` to go higher and `Super + Alt + /` to go lower. If you have the default configuration, these changes will also persist past reboot.
+You can also quickly step through the major monitor scaling ratios (1x, 1.25x, 1.6x, 2x, 3x, 4x) using `Super + /` to go higher and `Super + Alt + /` to go lower, or with the Scale buttons in the bar's Display panel. Either one changes only the focused monitor, so a laptop screen and an external screen can each keep their own scale. If you have the default configuration, the change persists past reboot as an `hl.monitor` rule for that monitor in `~/.config/hypr/monitors.lua`, and the catch-all rule keeps applying to every other monitor.
 
 ### Making text bigger or smaller
 
@@ -28,7 +28,7 @@ Monitor scaling changes the size of everything. If all you want is bigger or sma
 omarchy display text size 14
 ```
 
-That takes a pixel size between 9 and 20, and moves the Omarchy shell, GTK applications, and your terminal together, so the whole desktop stays in proportion. Run it without an argument to see where you're at, and `omarchy display text size reset` to go back to the default. Foot is the one straggler: it has no way to reload its config, so running terminals keep their old size until you open a new one.
+That takes a pixel size between 9 and 20, and moves the Omarchy shell, GTK applications, and your terminal together, so the whole desktop stays in proportion. Run it without an argument to see where you're at, and `omarchy display text size reset` to go back to the default. Foot is the one straggler: it has no way to reload its config, so running terminals keep their old size until you open a new one. Text size applies to all monitors at once, because GTK and the terminals each have a single font size; to make one monitor's text bigger than another's, change that monitor's scale instead.
 
 ### Extending and mirroring laptop displays
 
