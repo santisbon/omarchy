@@ -37,5 +37,10 @@ if [[ -n $NODE_PACKAGE_DIR ]]; then
     mise use -g node@"$NODE_VERSION"
   fi
 else
-  mise use -g node@latest
+  # mise downloads Node.js, and a new user's first login usually comes before Wi-Fi is set up.
+  # A failure here would stop the rest of the user's setup (mise.sh's tool stubs, the default
+  # browser, the finalize-user marker), which needs no network; Node.js can come later.
+  if ! mise use -g node@latest; then
+    echo "Node.js was not installed (no network?); install it later with: mise use -g node@latest" >&2
+  fi
 fi

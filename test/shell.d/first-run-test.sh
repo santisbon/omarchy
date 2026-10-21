@@ -73,3 +73,20 @@ run_first_run live
 ! grep -q '^welcome' "$test_tmp/live.steps" || fail "the live session skips the welcome" "$(cat "$test_tmp/live.steps")"
 grep -qx 'wifi live=1' "$test_tmp/live.steps" || fail "the Wi-Fi step learns it runs in the live session" "$(cat "$test_tmp/live.steps")"
 pass "the live session skips the keybinding lesson and tells the Wi-Fi step"
+
+# The user's setup fails (on 2026-10-20 the first login came before Wi-Fi, and Node's download
+# stopped it): the failure is logged, the other steps still run, and first-run is not marked
+# done, so the next login retries the setup.
+cat >"$mock_bin/omarchy-provision-user" <<'SH'
+#!/bin/bash
+exit 3
+SH
+printf '#!/bin/bash\n[[ $1 == "check" ]] && exit 1\necho "$*" >>"$OMARCHY_TEST_DONE_LOG"\n' >"$mock_bin/omarchy-done"
+chmod +x "$mock_bin"/*
+echo "BOOT_IMAGE=/vmlinuz root=UUID=x ro quiet splash" >"$test_tmp/cmdline"
+OMARCHY_TEST_DONE_LOG="$test_tmp/done.log" run_first_run offline
+log="$test_tmp/offline/.local/state/omarchy/first-run.log"
+grep -q "Failed: finish the user's setup (exit code: 3)" "$log" || fail "a failed user setup is logged" "$(cat "$log")"
+grep -qx 'wifi live=0' "$test_tmp/offline.steps" || fail "the other first-run steps still run" "$(cat "$test_tmp/offline.steps")"
+! grep -qx 'mark first-run-user' "$test_tmp/done.log" 2>/dev/null || fail "first-run is left for the next login to retry"
+pass "a failed user setup is logged and retried at the next login"

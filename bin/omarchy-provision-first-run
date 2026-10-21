@@ -56,8 +56,6 @@ if (( force == 0 )); then
   done
 fi
 
-omarchy-provision-user "${finalize_user_args[@]}" || true
-
 mkdir -p "$state_dir"
 
 # The live session (the installation medium, booted by casper, whose kernel command line
@@ -86,6 +84,14 @@ run_first_run_step() {
     log_first_run "Failed: $name (exit code: $status)"
   fi
 }
+
+# omarchy-provision-user is the user's own setup: mise's tool stubs, the default browser and the
+# finalize-user marker among it. Run as a step, so a failure lands in the log and the next login
+# retries it (the marker is still missing then), instead of passing unnoticed. On the laptop's
+# install of 2026-10-20 the user's first login came 100 s before Wi-Fi connected, mise-work.sh's
+# Node.js download failed, and the setup stopped there without a word.
+run_first_run_step "finish the user's setup" \
+  omarchy-provision-user "${finalize_user_args[@]}"
 
 run_first_run_step "install Voxtype post-update hook" \
   omarchy-hook-install post-update "$OMARCHY_PATH/install/user/first-run/install-voxtype.hook"
