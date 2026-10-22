@@ -1,5 +1,5 @@
-# mise is not part of the distro's base install. The Work directory and its
-# .mise.toml only mean something to mise, so skip the whole file without it.
+# mise is preinstalled (the distro's docs/6, choice 69) but can be removed. The Node.js install
+# below needs it, and the Work directory goes with it, so skip the whole file without mise.
 if omarchy-cmd-missing mise; then
   exit 0
 fi
@@ -7,13 +7,6 @@ fi
 # Setup default work directory (and tries)
 mkdir -p "$HOME/Work"
 mkdir -p "$HOME/Work/tries"
-
-cat >"$HOME/Work/.mise.toml" <<'EOF'
-[env]
-_.path = "{{ cwd }}/bin"
-EOF
-
-mise trust ~/Work/.mise.toml
 
 # Offline installs unpack a Node tarball bundled under /opt/packages in the
 # image build chroot. Omarchy's first-boot provisioning context is gone with

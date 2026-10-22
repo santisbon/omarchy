@@ -66,4 +66,6 @@ The full manual can be found via `man yt-dlp`.
 
 [try](https://github.com/tobi/try) makes it easy to manage programming experiments with date-stamped directories. All experiments live in `~/Work/tries` and you can access them via `try`.
 
+Omarchy does not add a project's `bin/` directory to `PATH` automatically. Run trusted project-local tools with an explicit relative path, such as `bin/rails` or `./bin/dev`.
+
 > **Oaxaca: removed.** Oaxaca does not ship try: Omarchy's `tobi-try` package has no Ubuntu build, and try needs Ruby, which Oaxaca does not preinstall. The shell still sets up `try` when try is installed another way (the distro's docs/6, choice 80).
