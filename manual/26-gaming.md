@@ -2,6 +2,8 @@
 
 Omarchy isn't just for _pRoDUcTiVItY_, it's also for having fun, and what's more fun than gaming? Omarchy ships with a whole suite of gaming options — Steam and RetroArch for native and retro play, Battle.net, Lutris, and Heroic for non-Steam stores, Xbox Cloud Gaming + NVIDIA GeForce NOW for cloud, plus the evergreen Minecraft.
 
+> **Oaxaca: removed.** Omarchy's version of this paragraph also names Moonlight for PC streaming, which Oaxaca does not preinstall (the distro's docs/6, choice 71). Battle.net, in the list above, is not in Oaxaca either.
+
 Thanks to Valve's incredible work on [the proton compatibility layer](https://en.wikipedia.org/wiki/Proton_(software)), there are now tens of thousands of playable modern games on Linux. Oh, and did you know that the [Steam Deck](https://store.steampowered.com/steamdeck/) actually runs Arch!
 
 All gaming installers live under _Install > Gaming_ in the Omarchy menu (`Super + Space`). If you ever want to undo one, use _Remove > Gaming_.
@@ -12,6 +14,8 @@ Install [Steam](https://store.steampowered.com/) by selecting _Install > Gaming 
 
 After you've installed it, you'll be able to launch Steam with `Super + Space`.
 
+> **Oaxaca: works differently.** The Steam installer enables 32-bit packages and installs Ubuntu's `steam-installer` package (from the archive's multiverse component) plus the 32-bit graphics drivers; the `steam-installer` package downloads Steam's client itself.
+
 Note that Steam can take 10-20 seconds to start up, and it's not going to provide any visual feedback that it's loading.
 
  ![gaming-steam](images/gaming-steam.webp)
@@ -21,6 +25,8 @@ Note that Steam can take 10-20 seconds to start up, and it's not going to provid
 Install [RetroArch](https://www.retroarch.com/) by selecting _Install > Gaming > RetroArch_ from the Omarchy menu (`Super + Space`). It comes with the full set of libretro cores, so all the classic systems are covered.
 
 RetroArch is fully preconfigured with the beautiful CRT Royale shader for that perfect retro look.
+
+> **Oaxaca: works differently.** Ubuntu 26.10 packages a smaller set of libretro cores than Arch and no shaders, so Oaxaca installs every libretro core Ubuntu packages and no CRT Royale shader. RetroArch's own Online Updater fetches shaders, overlays, the game database and joypad profiles once RetroArch is running.
 
 To get going:
 
@@ -50,6 +56,8 @@ Install the cloud-gaming service [NVIDIA GeForce NOW](https://www.nvidia.com/en-
 
 Install Minecraft by selecting _Install > Gaming > Minecraft_ from the Omarchy menu (`Super + Space`).
 
+> **Oaxaca: works differently.** The Minecraft installer downloads Mojang's own `Minecraft.deb` and installs that package with apt, after the distro's `oaxaca-gdk-pixbuf-compat` package, which provides an old library package name that Mojang's package still depends on and Ubuntu no longer provides (the distro's docs/6, choice 76).
+
 Like Steam, note that it can take a while after logging in or starting up for the next screen to appear, and you're not going to get any feedback while you're waiting.
 
  ![gaming-minecraft](images/gaming-minecraft.webp)
@@ -58,9 +66,15 @@ Like Steam, note that it can take a while after logging in or starting up for th
 
 Install support for Bluetooth Xbox controllers by selecting _Install > Gaming > Xbox Controllers_ from the Omarchy menu (`Super + Space`). Pair the controllers via Bluetooth (`Super + Ctrl + B`) and they'll work in all your games. You don't need this if you're just hardwiring your controller with a USB-C cable.
 
+> **Oaxaca: works differently.** The Xbox Controllers installer installs Ubuntu's `xpadneo-dkms`, a kernel module compiled on the machine, which needs a Secure Boot key (a Machine Owner Key) enrolled when Secure Boot is on. Ubuntu's kernel already runs Xbox controllers over USB and Bluetooth with its own drivers.
+
+> **Oaxaca: removed.** Omarchy's manual has a section here, "Moonlight (Game streaming from a PC)": Omarchy preinstalls the Moonlight client, and `omarchy install service sunshine` installs Sunshine, the streaming host, and opens Moonlight's streaming ports for the LAN and Tailscale. Oaxaca has neither; Moonlight and Sunshine (`dev.lizardbyte.app.Sunshine`) can be installed from Flathub with _Install > Flatpak_, without Omarchy's firewall rules (the distro's docs/6, choices 71 and 78).
+
 ## Battle.net
 
 Install [Battle.net](https://eu.shop.battle.net/en-us) by selecting _Install > Gaming > Battle.net_ from the Omarchy menu (`Super + Space`). This gives you titles like Diablo, Starcraft, and World of Warcraft as a standalone install running under GE-Proton — no Steam, Lutris, or Heroic needed.
+
+> **Oaxaca: removed.** Battle.net is not in the menu: Omarchy runs Blizzard's installer through umu-launcher, which is not in Ubuntu 26.10's archive.
 
  ![gaming-starcraft](images/gaming-starcraft.webp)
 
@@ -68,10 +82,14 @@ Install [Battle.net](https://eu.shop.battle.net/en-us) by selecting _Install > G
 
 Install [Lutris](https://lutris.net/) by selecting _Install > Gaming > Lutris_ from the Omarchy menu (`Super + Space`). Lutris is the way to play Windows games from stores like EA and Ubisoft Connect that don't have their own installer above.
 
+> **Oaxaca: works differently.** Lutris comes from Ubuntu's archive with Ubuntu's Wine, after the installer enables 32-bit packages. umu-launcher and wine-staging, which Omarchy installs with Lutris, are not in Ubuntu 26.10; Lutris downloads its own runners.
+
 Installation is a little janky and looks like nothing is happening at times — just be patient, it's working in the background.
 
 ## Heroic Launcher (Epic Games)
 
 Install the [Heroic Launcher](https://heroicgameslauncher.com/) by selecting _Install > Gaming > Heroic (Epic Games)_ from the Omarchy menu (`Super + Space`). Heroic lets you run Epic Games titles, like OddSparks, that don't rely on anti-cheat — plus games from GOG and Amazon Prime Gaming. Sadly, that means no Fortnite and no Rocket League — until Tim Sweeney comes to Linux, this is as close as it gets.
+
+> **Oaxaca: works differently.** The Heroic installer installs Flathub's `com.heroicgameslauncher.hgl`, published by Heroic's developers and marked verified, instead of Omarchy's own package, and Flatpak keeps Heroic updated. _Remove > Gaming > Heroic (Epic Games)_ deletes Heroic's data and `~/Games/Heroic`, as Omarchy's remover does (the distro's docs/6, choice 75).
 
 Like Lutris, it can feel slow and janky while installing games. Give it time.

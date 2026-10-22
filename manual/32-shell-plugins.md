@@ -16,6 +16,8 @@ That prints every discovered plugin with its id, whether it's enabled, whether i
 
 Plugin ids are namespaced. The built-ins all start with `omarchy.` — `omarchy.clock`, `omarchy.network`, `omarchy.notifications` — and that namespace is reserved, so a third-party plugin can never claim it.
 
+> **Oaxaca: added.** Plugins written for Omarchy work on Oaxaca. The built-in plugins keep their `omarchy.*` ids, `~/.config/omarchy` links to Oaxaca's configuration folder, and every `oaxaca-*` command has an `omarchy-*` link, so a plugin that names those still finds them. (the distro's docs/6, choice 86)
+
 ## Turning them on and off
 
 ```
@@ -42,6 +44,8 @@ Before it does anything, it tells you plainly that plugins run as arbitrary, uns
 A replacement bar can render installed widgets, but service-backed third-party widgets may have reduced functionality there because the bar is not allowed to request another plugin's live service object. Switch back to the built-in `omarchy.bar` if such a widget needs its companion service.
 
 Then it clones the repo into a staging directory, validates the manifest, refuses the install if another plugin already claims that id, and moves it into `~/.config/omarchy/plugins/<id>/`. Without `--enable` it asks whether you want it on now, and you can say no and go read the code first. It never runs anything from the plugin, never executes an install hook, and never asks for sudo — it clones files, checks the manifest, and flips a bit over IPC.
+
+> **Oaxaca: added.** After validating the manifest, Oaxaca's `omarchy plugin add` also scans the cloned plugin for Arch Linux's package tools (`pacman`, `yay`, `paru`, `makepkg` and Omarchy's AUR commands). When the scan finds any, the command shows the matching lines and asks "Add it anyway?", with "no" as the default, because those parts of the plugin may not work on a system that installs software with apt. (the distro's docs/6, choice 86)
 
 Updating is a fast-forward pull of that same checkout:
 

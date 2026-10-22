@@ -26,9 +26,13 @@ There are three entries in that menu:
 - **Set From Image** opens a file picker for a png or svg, converts it to ASCII, and shows you the result. Logos with a clear silhouette work far better than photos.
 - **Restore Default** puts the Omarchy logo back.
 
+> **Oaxaca: works differently.** Restore Default puts back Oaxaca's placeholder, the distro's name in a box as text art, which the desktop package generates from the build repository's `distro.conf` until the distro has artwork. A rendered image of the distro's name is likewise the default logo of the boot unlock screen and the login screen (the distro's docs/6, choice 7).
+
 ### About screen
 
 The same three options are under _Style > About_ for the _About_ screen you get from the Omarchy menu, and they work identically — the file is `~/.config/omarchy/branding/about.txt`, and the About window pops up after each change. The About art is converted to a smaller size than the screensaver's, since it has to fit in a window rather than fill your display.
+
+> **Oaxaca: works differently.** The About screen's OS line prints `PRETTY_NAME` from `/etc/os-release` ("Oaxaca 26.10"), where Omarchy prints "Omarchy" and Omarchy's release (the distro's docs/6, choice 36).
 
  ![branding-about](images/branding-about.webp)
 

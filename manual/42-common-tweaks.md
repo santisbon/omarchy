@@ -4,6 +4,8 @@ This is a collection of common tailorings to the Omarchy setup. Know that it mig
 
 If you screw something up, you can restore individual configs to their original setup via _Update > Config_ in the Omarchy menu. If you _really_ screw everything up, you can reset all configs via `omarchy-reinstall`.
 
+> **Oaxaca: works differently.** `omarchy-reinstall` reinstalls the default packages with apt instead of pacman: it installs the desktop metapackage, then reinstalls every package in `install/omarchy-base.packages` with `apt-get install --reinstall`. Its config reset refreshes the Plymouth theme but no Limine boot loader, which Oaxaca does not have.
+
 ### Reveal all tray icons all the time
 
 By default, tray icons, like Dropbox, 1password, or Steam, are hidden behind the tray expander arrow, which reveals them when you hover it. If you'd like to have them exposed all the time, right-click the expander arrow to open the tray icon manager, then pin the icons you want to keep visible (you can also hide the ones you never want to see).

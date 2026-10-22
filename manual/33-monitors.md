@@ -20,6 +20,8 @@ Changes to `GDK_SCALE` apply to applications started after the change (and GTK o
 
 You can also quickly step through the major monitor scaling ratios (1x, 1.25x, 1.6x, 2x, 3x, 4x) using `Super + /` to go higher and `Super + Alt + /` to go lower, or with the Scale buttons in the bar's Display panel. Either one changes only the focused monitor, so a laptop screen and an external screen can each keep their own scale. If you have the default configuration, the change persists past reboot as an `hl.monitor` rule for that monitor in `~/.config/hypr/monitors.lua`, and the catch-all rule keeps applying to every other monitor.
 
+> **Oaxaca: works differently.** The paragraph above describes Oaxaca. Omarchy applies the new scale to the focused monitor but saves the scale into the catch-all rule of `~/.config/hypr/monitors.lua` (`omarchy_monitor_scale`), and Hyprland reloads that file when the file changes, so every monitor without a rule of its own takes the new scale too. `GDK_SCALE` stays one setting on both, taken from the last scale chosen. (the distro's docs/6, choice 92)
+
 ### Making text bigger or smaller
 
 Monitor scaling changes the size of everything. If all you want is bigger or smaller _text_, there's a single knob for that:
@@ -29,6 +31,8 @@ omarchy display text size 14
 ```
 
 That takes a pixel size between 9 and 20, and moves the Omarchy shell, GTK applications, and your terminal together, so the whole desktop stays in proportion. Run it without an argument to see where you're at, and `omarchy display text size reset` to go back to the default. Foot is the one straggler: it has no way to reload its config, so running terminals keep their old size until you open a new one. Text size applies to all monitors at once, because GTK and the terminals each have a single font size; to make one monitor's text bigger than another's, change that monitor's scale instead.
+
+> **Oaxaca: added.** The last sentence of the paragraph above is Oaxaca's; Omarchy's manual does not say that text size covers every monitor. On Oaxaca the Display panel's text size header reads "TEXT SIZE · ALL DISPLAYS" when more than one monitor is on, where Omarchy's reads "TEXT SIZE". (the distro's docs/6, choice 92)
 
 ### Extending and mirroring laptop displays
 
@@ -41,6 +45,8 @@ When you're extending, closing the lid on the laptop will automatically turn off
 Hyprland works great with multiple screens. Read more about how to lay them out in [the Hyprland monitor documentation](https://wiki.hypr.land/Configuring/Basics/Monitors/). You can [bind specific workspaces to specific monitors](https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/) as well. In Omarchy, these rules go in `~/.config/hypr/monitors.lua` as `hl.monitor` entries — the file ships with commented examples for pinning a specific monitor to a resolution, position, and rotation.
 
 You can also checkout [Hyprmon](https://github.com/erans/hyprmon/), if you'd like a TUI to help you with the positioning of multiple screens.
+
+> **Oaxaca: added.** Oaxaca preinstalls nwg-displays 0.4.4, a graphical program that shows the connected monitors as boxes to drag around and writes their layout, resolution, scale and rotation to a Hyprland configuration file; the program has its own entry in the app launcher. Oaxaca's `~/.config/hypr/monitors.lua` also loads `~/.config/hypr/monitors-gui.lua` when that file exists, and the rules above that line win. (the distro's docs/6, choice 12)
 
 ### Controlling brightness
 

@@ -4,9 +4,15 @@ Omarchy comes with twenty-two beautiful themes. You can select between them via 
 
 Each theme styles the desktop, terminal, neovim, activity screen (btop), Chromium, and the entire Omarchy shell: top bar, menu, notifications, OSD, and the lock screen. (For Obsidian, you must manually select the Omarchy theme via _Appearance > Themes_ inside the app).
 
+> **Oaxaca: works differently.** Neovim is preinstalled without Omarchy's LazyVim configuration, and that configuration is what loads a theme's `neovim.lua` (a plugin list for lazy.nvim, the plugin manager LazyVim runs on), so a theme change does not restyle Neovim (the distro's docs/6, choices 26 and 71).
+
+> **Oaxaca: removed.** Obsidian is not preinstalled, and a theme change no longer runs Omarchy's Obsidian theme sync, `omarchy-theme-set-obsidian` (the distro's docs/6, choice 71).
+
 Themes have a set of background images that you can pick between using `Super + Ctrl + Space`.
 
 You can find even more themes on [the extra themes page](https://omarchy.org/themes/) or even [make your own theme](43-making-your-own-theme.md).
+
+> **Oaxaca: added.** Install > Style > Theme scans a theme's repository for Arch Linux's package tools (`pacman`, `yay`, `paru`, `makepkg`) and, when it finds any, shows the matching lines and asks "Install it anyway?" with no as the default, since such a theme may call tools Oaxaca does not have (the distro's docs/6, choice 86).
 
  ![tokyo-night](../themes/tokyo-night/preview.png)
 _Tokyo Night_
@@ -68,6 +74,8 @@ _White_
 ### Unlocks
 
 Themes can also have a custom unlock design, which is used for the boot decryption process. You can select one of these under _Style > Unlock_. They look like this:
+
+> **Oaxaca: works differently.** Style > Unlock selects the boot splash theme (Plymouth's) through Ubuntu's `update-alternatives` on `default.plymouth` and rebuilds the initramfs with `update-initramfs -u`, where Omarchy runs `plymouth-set-default-theme` and mkinitcpio or Limine's `limine-mkinitcpio` (the distro's docs/7, section "Plymouth").
 
  ![catppuccin](../themes/catppuccin/preview-unlock.png)
 _Catppuccin_

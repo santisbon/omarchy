@@ -4,6 +4,8 @@ Omarchy has built-in support for **Intel Macs**. There are a couple of known lim
 
 Please note that installing on an M-series Mac is not directly supported at this time. You can find out more about the state of this in #omarchy-on-other in our [Discord](https://discord.gg/tXFUdasqhY).
 
+> **Oaxaca: works differently.** Oaxaca is built only for 64-bit Intel and AMD processors (amd64), so M-series Macs are not supported at all. Omarchy's Discord channels are Omarchy's own: Oaxaca's bug reports go to the distro's GitHub issues (`DISTRO_BUG_URL` in the build repository's `distro.conf`). No Mac has run Oaxaca yet; of Apple's hardware, only the Apple Studio Display has been tried (the distro's docs/README.md, "Apple hardware").
+
 In a simple test, we were able to achieve 36% performance gains on a 2019 MacBook Pro just by installing Omarchy.
 
  ![macbook-omarchy](images/macbook-omarchy.webp)
@@ -13,6 +15,8 @@ In a simple test, we were able to achieve 36% performance gains on a 2019 MacBoo
 Omarchy only supports being the **only** OS installed at the moment. During the installation, the drive will be wiped and MacOS will no longer be bootable.
 
 You can still restore it later via Internet Recovery if you'd like.
+
+> **Oaxaca: works differently.** Oaxaca installs from its own ISO with Calamares, a graphical installer from Ubuntu's archive, whose partition page offers "Erase disk" and "Replace a partition" (see [Dual Boot Install](50-dual-boot-install.md)), instead of Omarchy's installer (the distro's docs/7, choice 1).
 
 For the sake of this part, we'll assume you've already reviewed [Getting Started](02-getting-started.md) and have your USB drive ready. If you don't go ahead and do that now.
 
@@ -28,6 +32,8 @@ It is necessary to disable Apple's Secure Boot in order to boot the bootable USB
 6. Choose "No Security" from the Secure Boot options
 7. Choose "Allow booting from external or removable media" from the External Boot options
 
+> **Oaxaca: works differently.** Oaxaca boots with Secure Boot on or off, through Ubuntu's signed chain (shim, then Canonical's GRUB and kernel), and never asks for a key to be enrolled (the distro's docs/README.md, "Secure Boot"). Which of Apple's Startup Security Utility settings that chain needs on a Mac has not been tested.
+
 #### Start the Installation
 
 1. Insert the USB drive
@@ -36,6 +42,8 @@ It is necessary to disable Apple's Secure Boot in order to boot the bootable USB
 4. Proceed with the [install as normal](02-getting-started.md)
 
 The installer detects Mac hardware and applies the needed fixes automatically: Broadcom Wi-Fi drivers and firmware, the SPI keyboard driver on the MacBook models that need it, and an NVMe suspend fix for those same models.
+
+> **Oaxaca: works differently.** Oaxaca's installer runs the same per-model fix scripts, written for Ubuntu. The BCM4331 Wi-Fi of 2012 and early 2013 MacBooks gets Ubuntu's `firmware-b43-installer`, which downloads Broadcom's firmware during installation and so needs a network connection. The BCM4360 Wi-Fi of 2013 to 2015 MacBooks is not supported: its only driver is built on the machine with DKMS, and under Secure Boot such a module loads only when signed with a Machine Owner Key (a key the owner enrolls in the firmware), which Oaxaca never asks for. The SPI keyboard runs on the signed driver in Ubuntu's kernel, with one module added to the initramfs on the MacBook8,1 only; the NVMe suspend fix and the fix for Broadcom's WPA handshake are Omarchy's scripts unchanged (the distro's docs/README.md, "Apple hardware").
 
 ### Known Limitations
 
@@ -69,3 +77,5 @@ The Apple T2 Security Chip was introduced in 2017. The T2 chip was discontinued 
 - MacBook Pro 15-inch (2020) – Model: A1990
 
 On these models, the installer automatically sets up the patched `linux-t2` kernel, the T2 audio configuration, Apple's Broadcom Wi-Fi/Bluetooth firmware, and fan control via `t2fanrd`. The Touch Bar runs on the kernel's built-in Boot Camp-style support.
+
+> **Oaxaca: removed.** Macs with Apple's T2 chip are not supported: Omarchy sets them up with the out-of-tree `linux-t2` kernel from that kernel's own pacman repository, and the port removed that setup script, `install/hardware/apple/fix-t2.sh` (the fork's `PORT-REMOVALS.md`, "Apple T2").

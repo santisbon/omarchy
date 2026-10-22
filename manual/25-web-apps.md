@@ -4,6 +4,8 @@ You can add your own web apps using _Install > Web App_ in the Omarchy menu (`Su
 
 They'll then be accessible through the app launcher (`Super + Space`), and use the beautiful frameless web-app window.
 
+> **Oaxaca: works differently.** Because Chromium can be removed in Oaxaca, a web app opens in the default browser when the default browser is Chromium-family, and otherwise in the first installed of Chromium, Chrome, Brave Origin, Brave, Edge and Vivaldi. With none of those installed, a notification points to _Install > Browser_ (the distro's docs/6, choice 18).
+
 If you wish to remove a web app, just go to _Remove > Web App_ in the Omarchy menu.
 
 It's best if you log into all your accounts using a regular browser before using the web app shortcuts. The thin wrapper frame doesn't work well with 1password, so just easier to be logged in directly first.
@@ -14,17 +16,23 @@ When you're in a web app, you can copy the current URL to the clipboard using `S
 
 By default, Omarchy already ships with an assortment of default apps:
 
+> **Oaxaca: works differently.** Oaxaca ships none of Omarchy's web-app launchers, so none of the apps below is in the app launcher until you add the app with _Install > Web App_. The keybindings below for ChatGPT, Grok, WhatsApp, Google Messages, Google Photos, Google Maps, X and YouTube still work: each binding opens its site as a web app without a launcher.
+
 ## HEY
 
 [HEY](https://www.hey.com/) is an email and calendar service that serves as a great alternative to people tired of Gmail, Outlook, or Apple Mail. It's made by [37signals](https://37signals.com/) where Omarchy originated.
 
 You can start HEY Email using `Super + Shift + E`, jump straight to composing a new email using `Super + Shift + Alt + E`, and start HEY Calendar using `Super + Shift + C`.
 
+> **Oaxaca: removed.** HEY's launcher, HEY's handler for email links and the `Super + Shift + E`, `Super + Shift + Alt + E` and `Super + Shift + C` bindings are gone; HEY can still be added with _Install > Web App_. While Thunderbird is installed from _Install > Service > Thunderbird_, `Super + Shift + E` opens Thunderbird instead (the distro's docs/6, choice 27).
+
 ## Basecamp
 
 [Basecamp](https://basecamp.com/) is a project management service that helps small teams move faster and make more progress. Instead of patching together a mishmash of Trello, Slack, Asana, Notion, or whatever, you can have it all in one place with Basecamp. It's made by [37signals](https://37signals.com/) where Omarchy originated.
 
 You can start Basecamp using the application launcher (`Super + Space`)
+
+> **Oaxaca: removed.** Oaxaca ships no Basecamp launcher; Basecamp can be added with _Install > Web App_ (the distro's docs/6, choice 27).
 
 ## ChatGPT
 
@@ -50,6 +58,8 @@ Google Messages, Google Photos, Google Maps, and Google Contacts are all include
 
 You can start Google Messages using `Super + Shift + Ctrl + G`, Google Photos using `Super + Shift + P`, and Google Maps using `Super + Shift + S`. Google Contacts is available through the app launcher (`Super + Space`).
 
+> **Oaxaca: removed.** Oaxaca ships no Google Contacts launcher; Google Contacts can be added with _Install > Web App_.
+
 ## X
 
 X is where news break.
@@ -68,8 +78,12 @@ You can start YouTube using `Super + Shift + Y`.
 
 You start Zoom using the application launcher (`Super + Space`).
 
+> **Oaxaca: removed.** Oaxaca ships no Zoom launcher, so Zoom is not in the app launcher and no application is registered to open Zoom meeting links. Zoom's web client can be added with _Install > Web App_.
+
 ## Discord
 
 [Discord](https://discord.com/) is where most gaming and open source communities hang out, including [Omarchy's own](https://discord.gg/tXFUdasqhY).
 
 You start Discord using the application launcher (`Super + Space`).
+
+> **Oaxaca: removed.** Oaxaca ships no Discord launcher; Discord can be added with _Install > Web App_.

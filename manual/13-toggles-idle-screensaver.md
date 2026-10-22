@@ -23,6 +23,8 @@ From the terminal, the same switches are `omarchy toggle <thing>`. Run `omarchy 
 
 The touchpad, touchscreen, and hybrid GPU switches live under _Trigger > Hardware_ (`Super + Ctrl + H`) rather than under Toggle, since they only show up when you actually have that hardware. The touchpad and touchscreen ones survive a Hyprland reload — the disabled device's name is saved to a small state file that Hyprland reads on startup to disable it again.
 
+> **Oaxaca: works differently.** _Trigger > Hardware > Hybrid GPU_ shows only on ASUS ROG laptops with two GPUs, where `omarchy toggle hybrid gpu` drives supergfxctl; Oaxaca builds supergfxctl and asusctl in its own apt repository (the distro's docs/6, choice 68).
+
 The Toggle menu also carries a few things that aren't `omarchy toggle` commands but behave the same: battery percentage in the bar, workspace layout (`Super + L`), window gaps (`Super + Shift + Backspace`), and the 1-window square aspect (`Super + Ctrl + Backspace`).
 
 Most of these are just a flag file under `~/.local/state/omarchy/toggles/`. If you want to branch on one in a script, `omarchy-toggle-enabled` gives you an exit code instead of making you go looking:
@@ -84,9 +86,13 @@ To stop locking on idle entirely, `Super + Ctrl + I` — or `omarchy toggle idle
 
 This is about locking and the screensaver, not power. Suspend and hibernation have their own setup in [system sleep](36-system-sleep.md).
 
+> **Oaxaca: removed.** Hibernation is not in Oaxaca's first release: the System menu has no Hibernate entry, and Omarchy's hibernation setup scripts are gone. Hibernation needs swap sized to RAM on the encrypted disk and resume wiring in Ubuntu's initramfs, and with Secure Boot on, the kernel's lockdown blocks hibernation.
+
 ### The screensaver
 
 Omarchy's screensaver is ASCII art running through random text effects, one instance per monitor. Any key or mouse movement exits it.
+
+> **Oaxaca: works differently.** The text effects come from ttfx, Omarchy's terminal text effects program, which Oaxaca's own apt repository builds from source because Ubuntu's archive has no ttfx package. Before opening its windows, the screensaver closes any open shell panel and the Oaxaca menu, which would otherwise keep the screensaver from going fullscreen (the distro's docs/6, choice 43).
 
 You can start it on demand from _System > Screensaver_ (`Super + Esc`), which forces it up even if you've turned the idle screensaver off. There's no hotkey bound to it by default.
 
@@ -97,5 +103,7 @@ The logo it draws is yours to change, under _Style > Screensaver_. Upload a png 
 ### The lock screen
 
 `Super + Ctrl + L` locks the machine. That runs the lock screen from the Omarchy shell, blanks the display, resets your keyboard layout to the first one so you're not typing your password in the wrong alphabet, and — if you have it running — locks 1Password on the way out.
+
+> **Oaxaca: works differently.** The lock screen's password check is a PAM stack written for Ubuntu: `pam_unix` with Ubuntu's `common-account`. Ubuntu's PAM stack has no `pam_faillock`, so Omarchy's lockout after 10 failed passwords for 120 seconds does not happen on Oaxaca.
 
 The lock screen takes a password, and it'll take a fingerprint too once you've set one up. That, and the other ways to authenticate, are covered in [hardware authentication](37-hardware-authentication.md).

@@ -10,6 +10,8 @@ The bar has three sections. On the left sits the Omarchy logo (the menu launcher
 
 A few of those only show up when they have something to say. The keyboard layout appears only if you've configured more than one layout. The update badge appears only when there's an Omarchy update waiting. And the agents icon appears the first time Omarchy finds AI coding usage on the machine (see [AI](17-ai.md)).
 
+> **Oaxaca: works differently.** The update badge reads apt's package lists, which Ubuntu's apt-daily timer refreshes, and appears when those lists name a newer version of one of the distro's desktop packages; Omarchy asks pacman's `checkupdates` about its `omarchy` package instead.
+
 ## Clicking around
 
 Nearly every widget does something on left, right, and middle click, and several respond to scrolling. This is the part people miss — the right and middle buttons are where a lot of the good stuff hides.
@@ -56,6 +58,10 @@ The panels aren't read-outs. They're where you actually do the thing:
 - **Display** carries a brightness slider, text size, monitor scaling presets, and — when you have more than one screen — per-monitor controls. See [monitors](33-monitors.md) for the deeper story.
 - **Clock** opens a month grid with ISO week numbers and month stepping.
 
+> **Oaxaca: works differently.** Until a power profile is chosen, Oaxaca uses balanced on AC as on battery, where Omarchy picks performance on AC; a profile chosen in the Power panel is still remembered per power source (`omarchy-powerprofiles-set` in the fork).
+
+> **Oaxaca: works differently.** The Display panel's scale presets (and `Super + /`) change only the focused monitor, written as a rule for that monitor alone in `~/.config/hypr/monitors.lua`; Omarchy writes the scale into the catch-all rule, which every monitor without a rule of its own follows. Text size stays one setting for all monitors, and its header reads "TEXT SIZE · ALL DISPLAYS" when more than one monitor is on (the distro's docs/6, choice 92).
+
 Every panel takes the keyboard as well as the mouse: arrows move, Return activates, Tab steps to the neighbouring panel, and Escape closes.
 
 `Super + Ctrl + 1-9` counts panels left to right in the right section, skipping the tray since it has no panel of its own. So the number matches the icon you'd point at.
@@ -69,6 +75,8 @@ The **Tailscale** panel connects and disconnects the tailnet, switches between a
 The **Dropbox** panel handles login, shows how much storage you've used, and lists recently synced files.
 
 Removing either service takes its widget back off the bar.
+
+> **Oaxaca: works differently.** Install > Service > Tailscale adds Tailscale's own apt repository and installs Tailscale from it, and Install > Service > Dropbox installs Ubuntu's `nautilus-dropbox` package (multiverse component), which downloads Dropbox's client on first run.
 
 ## Indicators
 

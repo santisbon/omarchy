@@ -16,6 +16,8 @@ Omarchy uses whatever DNS your network hands out over DHCP. You can override tha
 
 From the terminal, `omarchy dns` prints the current provider and `omarchy dns Cloudflare` sets one.
 
+> **Oaxaca: works differently.** Omarchy's `omarchy dns` writes a NetworkManager drop-in file as root through a sudoers rule. Oaxaca's runs as you with no sudoers rule: `omarchy dns` sets the servers on the existing Wi-Fi and Ethernet profiles with `nmcli`, with DNS over TLS where the provider offers it, and sets NetworkManager's global DNS over D-Bus, which a polkit rule that Oaxaca ships allows for users in the `sudo` or `netdev` group. Networks joined later get the servers through the global setting, without DNS over TLS. (the distro's docs/6, choice 54)
+
 ## Pinning the Wi-Fi band
 
 If your router puts 2.4GHz, 5GHz, and 6GHz on the same network name, your laptop will sometimes cling to the slow one. `omarchy network band` shows which band you're on, and `omarchy network band 5` pins it. Use `auto` to let it choose again.
@@ -32,6 +34,10 @@ The firewall is on by default and blocks all incoming traffic, with one exceptio
 
 SSH is off until you turn it on with _Setup > Security > SSHD_, which starts the daemon, opens port 22 rate-limited against brute force, and authorizes a key. Docker is locked down too, so containers can't accidentally expose themselves to the world. See [security](48-security.md) for the whole story.
 
+> **Oaxaca: works differently.** Oaxaca turns ufw on with Ubuntu's own policies (incoming dropped, outgoing allowed) plus LocalSend's port 53317, and adds none of Omarchy's Docker rules or the `ufw-docker` add-on, because Docker Engine is not preinstalled; _Install > Development > Docker Desktop_ installs Docker Desktop, which runs its engine in a virtual machine. (the distro's docs/6, choices 40 and 85)
+
+> **Oaxaca: works differently.** _Setup > Security > SSHD_ installs Ubuntu's `openssh-server` package and enables Ubuntu's `ssh.service`, where Omarchy installs Arch's `openssh` and enables `sshd.service`.
+
 ## Tailscale
 
 [Tailscale](https://tailscale.com/) is a mesh VPN that makes reaching all your computers and servers over the internet simple and secure. Install it with _Install > Service > Tailscale_.
@@ -39,6 +45,8 @@ SSH is off until you turn it on with _Setup > Security > SSHD_, which starts the
 That gives you a Tailscale panel in the bar, which connects and disconnects the tailnet, switches accounts, and picks an exit node — your own machines and Mullvad regions both show up in the list. It also browses your machines, and that's where Taildrop lives: select a machine and press `s` to send it files, or `c`, `n`, and `d` to copy its IP, name, or full DNS name. The terminal equivalent is `omarchy tailscale send <machine> [file...]`, and files sent to you land in `~/Downloads` automatically. The notification announcing an arrival waits until you click it open or dismiss it, so a file that turns up while you're away from the machine is still there to answer when you get back.
 
 Installing it also adds a web app for the Tailscale admin console.
+
+> **Oaxaca: works differently.** On Oaxaca, _Install > Service > Tailscale_ adds Tailscale's own apt repository for Ubuntu (`pkgs.tailscale.com/stable/ubuntu`) and installs the `tailscale` package from that repository. When Tailscale publishes no packages for the running Ubuntu release yet, the installer uses the suite for Ubuntu 26.04 ("resolute") instead.
 
 ## When it stops working
 

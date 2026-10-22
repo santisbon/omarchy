@@ -38,11 +38,17 @@ Windows folks: your Win + V clipboard history lives on `Super + Ctrl + V`, and i
 | App Store / downloading an installer | _Install_ in the menu, or `omarchy pkg add` — see [other packages](29-other-packages.md) |
 | System Settings / Control Panel | _Setup_ in the menu, which edits plain config files — see [dotfiles](31-dotfiles.md) |
 
+> **Oaxaca: works differently.** LocalSend is preinstalled from the distro's own apt repository, built from LocalSend's release (the distro's docs/6, choice 19). System snapshots are taken by Timeshift before each update, and only on installs whose root file system is btrfs, the installer's default; an ext4 or xfs install updates without a snapshot (the distro's docs/6, choice 38). `omarchy pkg add` installs Ubuntu packages with apt and translates Arch package names into Ubuntu's, and the menu's Install offers Package (Ubuntu's archive), Snap (the Snap Store) and Flatpak (Flathub) where Omarchy offers Package and AUR (the distro's docs/6, choices 22 and 86).
+
 ### Some things really are different
 
 A lot of settings live in text files you edit, not panels you click through. That sounds primitive until you realize it means every tweak can be seen, copied to your next machine, and put in version control. The _Setup_ menu drops you straight into the right file and restarts whatever needs restarting when you're done.
 
 Updates come through one command — _Update > Omarchy_ — that updates Omarchy itself and every package on the system, taking a snapshot first. No per-app updaters nagging you at random. See [updates](30-updates.md).
+
+> **Oaxaca: works differently.** Update > Omarchy upgrades the apt packages (`apt-get full-upgrade`) and the tools installed through mise, then runs the desktop's migrations; the snapshot before the upgrade happens only on btrfs installs (the distro's docs/6, choice 38). The update runs no `snap` or `flatpak` command, so apps from the Snap Store or Flathub are not part of Update > Omarchy.
+
+> **Oaxaca: added.** Ubuntu's unattended-upgrades installs security updates from Ubuntu's archive automatically, as on Ubuntu; the desktop's own packages move only through Update > Omarchy (the distro's docs/8, choice 2).
 
 Software comes from a package manager, not from downloaded installers.
 
@@ -51,6 +57,10 @@ And when you close a window, the app actually quits. There's no macOS limbo wher
 ### On Mac hardware
 
 Omarchy runs well on Intel Macs — see [Mac support](44-mac-support.md). And the keyboard is kind to you: Omarchy doesn't remap anything, and Linux treats the Command key as Super, so Super sits right where Cmd always was. Your thumb won't notice the move.
+
+> **Oaxaca: removed.** Oaxaca does not support Macs with Apple's T2 chip (most Macs from 2018 to 2020), whose setup in Omarchy needs an out-of-tree kernel from a pacman repository, nor the Broadcom BCM4360 Wi-Fi of 2013 to 2015 MacBooks, whose only driver is a DKMS module that Secure Boot would refuse without an enrolled key. No Mac has run Oaxaca yet (the distro's developer README, "Apple hardware").
+
+> **Oaxaca: works differently.** Omarchy does remap one key: Caps Lock becomes the Compose key, with Caps Lock moved to both Shift keys pressed together. Oaxaca keeps the keyboard exactly as chosen at installation, so Caps Lock stays Caps Lock (the distro's docs/6, choice 90).
 
 ### Give it two weeks
 

@@ -4,6 +4,8 @@ You're able to install Omarchy to a single partition alongside Windows or other 
 
 This installation method still comes with LUKS encryption for the partition by default so it's effectively no different than full drive and simply requires free space to be available on the disk.
 
+> **Oaxaca: works differently.** Oaxaca's installer is Calamares, from Ubuntu's archive. Encryption is checked by default, and an encrypted install keeps a separate unencrypted 4 GB `/boot` partition beside the LUKS2 root (the distro's docs/7, choices 9 and 32).
+
 ## Making Space on Windows
 
 To install alongside Windows, type `disk management` in the start menu and select the option for **Create and format hard disk partitions**.
@@ -26,6 +28,8 @@ When you're finished, you should see something like this where the 50GB section 
 
 The install process for Omarchy is effectively the same as normal. After you select your disk, you'll be given the option of **Free space install**. Select that option to prevent wiping the full disk.
 
+> **Oaxaca: works differently.** The **Free space install** option is Omarchy's installer's. On the partition page of Calamares, Oaxaca's installer, "Replace a partition" with the free space selected installs into that free space and leaves the rest of the disk alone (the distro's docs/7, choices 26 and 42). Unchecking "Encrypt system" on the same page gives an unencrypted install.
+
  ![dual-boot-5](images/dual-boot-5.webp)
 
 Confirm that everything looks good and wait for the install to finish like normal. This is also where you could elect to install unencrypted (not recommended) just like on a full-drive install.
@@ -36,6 +40,8 @@ Confirm that everything looks good and wait for the install to finish like norma
 When you finish your Omarchy install, you'll notice that the Limine bootloader is the default now. With this, you can also add options to Limine for your other installs such as Windows.
 
 In order to do that, run `limine-scan` and follow the prompts to add whichever items you'd like to your limine config. Then when you boot, you'll see your normal options for Omarchy, as well as Windows Boot Manager or others.
+
+> **Oaxaca: works differently.** Oaxaca boots with GRUB, not Limine, and has no `limine-scan`. The installer turns on os-prober, which adds other systems whose files GRUB can read to GRUB's menu, and the installer's `keep-previous-loader` step keeps a previous Linux system with its own `/boot` reachable from that menu (the installer's `grubcfg.conf`; the distro's docs/7, choices 21 and 38).
 
 ## Bitlocker
 

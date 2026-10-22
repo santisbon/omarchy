@@ -1,5 +1,7 @@
 # Windows VM
 
+> **Oaxaca: removed.** The Windows VM is not in Oaxaca: _Install > Windows_, _Remove > Windows_, the _Windows_ launcher and `omarchy-windows-vm` are gone. The VM runs in a Docker container, and Omarchy's Docker Engine stays out of Oaxaca (the distro's docs/6, choice 71). Docker Desktop, which Oaxaca can install, does not bring the VM back: the VM's container image, `dockurr/windows`, needs the host's `/dev/kvm`, which Docker Desktop on Linux does not give to containers.
+
 Omarchy offers an easy way to run Windows through a Docker VM. You can install it using _Install > Windows_ from the Omarchy menu (`Super + Space`).
 
 Your machine needs KVM virtualization for this, which most do — but it's sometimes switched off in the BIOS, and the installer will tell you if that's the case. You'll also want the disk space: whatever you give Windows, plus about 10GB for the image itself.

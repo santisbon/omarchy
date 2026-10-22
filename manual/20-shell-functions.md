@@ -2,6 +2,8 @@
 
 Omarchy comes with a set of shell functions to simplify common tasks and encapsulate convoluted parameter calls.
 
+> **Oaxaca: works differently.** Oaxaca keeps Ubuntu's own `~/.bashrc` as the bash package ships it, and loads Omarchy's shell setup, these functions included, from one line in `~/.bash_aliases`, which Ubuntu's `~/.bashrc` sources near its end. Removing that line from `~/.bash_aliases` turns the functions, aliases and prompt off.
+
 ## Compression
 
 - `compress [file/dir]`: Create a tar.gz archive from the file/dir.
@@ -22,6 +24,8 @@ Instant multi-pane development layouts for tmux:
 - `tsl [count] [command]`: Create a swarm of panes tiled in a grid, all running the same command (great for AI agents).
 
 The same layouts are available for Herdr as `hdl`, `hds`, `hdlm`, and `hsl`.
+
+> **Oaxaca: works differently.** Herdr is not preinstalled: _Install > Development > Herdr_ installs herdr per user through mise, and the Herdr layouts work once herdr is installed (the distro's docs/6, choice 80).
 
 ## Git worktrees
 

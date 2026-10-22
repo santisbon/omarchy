@@ -6,6 +6,8 @@
 
 You can run it directly, by going to any directory managed by git and running `lazygit`. Or you can run it inside Neovim where it can be started with `Space G G`.
 
+> **Oaxaca: works differently.** Neovim is preinstalled with its own defaults, without Omarchy's LazyVim configuration, so `Space G G` does not start Lazygit inside Neovim. Run `lazygit` in a terminal instead (the distro's docs/6, choice 71).
+
 You hop between the different panes using `Tab`. In the Files pane, you select files for staging using `Space`, and then you can create a new commit using `c`. You can see all the commands available using `?`.
 
 ## Lazydocker
@@ -13,6 +15,8 @@ You hop between the different panes using `Tab`. In the Files pane, you select f
 [Lazydocker](https://github.com/jesseduffield/lazydocker) is made in the same spirit like Lazygit, and also gives you a terminal interface for managing your containers and images.
 
 You can start it with `Super + Shift + D`.
+
+> **Oaxaca: removed.** Lazydocker and its `Super + Shift + D` binding are not in Oaxaca: Omarchy's preinstalled Docker Engine and its Docker TUI stay out, and Lazydocker is not in Ubuntu 26.10's archive. Docker Desktop, Docker's own app, can be installed from _Install > Development > Docker Desktop_ instead (the distro's docs/6, choices 71 and 85).
 
 You stop a container using `s` or start/restart it using `r`. See all commands using `?`.
 
@@ -28,6 +32,8 @@ Omarchy calls it Activity, and you start it by hitting `Super + Ctrl + T`. It op
 
 You start it (or reattach to your existing session) with `Super + Ctrl + Return`. Omarchy ships a Herdr configuration that mirrors its Tmux config, so the prefix key is `Ctrl + Space` here too. You can browse all the keybindings with `Super + Ctrl + K`.
 
+> **Oaxaca: works differently.** Herdr is not preinstalled. _Install > Development > Herdr_ in the menu installs Herdr for your user through mise, from Herdr's own release binaries, along with Omarchy's Herdr configuration. The bindings above work once Herdr is installed, and _Learn > Herdr_ appears in the menu then too (the distro's docs/6, choice 80).
+
 ## Fastfetch
 
 [Fastfetch](https://github.com/fastfetch-cli/fastfetch) shows system information, like kernel version, uptime, theme, CPU, memory, and more. It's a successor to the popular neofetch tool.
@@ -41,6 +47,8 @@ When the drive fills up and you have no idea what's eating it, launch _Disk Usag
 ## Cliamp
 
 [Cliamp](https://www.cliamp.stream/) is a retro terminal music player inspired by Winamp 2.x, complete with built-in radio stations for lo-fi beats. Launch it with `Super + Shift + Alt + M`, or from the Omarchy menu under _Apps_. Press `?` for the full keybinding list.
+
+> **Oaxaca: works differently.** Cliamp is not preinstalled. _Install > Service > cliamp (music)_ in the menu installs Cliamp for your user through mise, and `Super + Shift + Alt + M` opens Cliamp once Cliamp is installed (the distro's docs/6, choice 80).
 
 ## What about Wi-Fi and Bluetooth?
 
