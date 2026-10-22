@@ -285,6 +285,7 @@
   "remove.browser.firefox": {"icon":"","label":"Firefox","when":"omarchy-pkg-present firefox","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-remove-browser firefox'"},
   "remove.service.dropbox": {"icon":"","label":"Dropbox","when":"omarchy-pkg-present nautilus-dropbox","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-service-dropbox"},
   "remove.service.mullvad": {"icon":"󰖂","label":"Mullvad VPN","when":"omarchy-pkg-present mullvad-vpn","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-service-mullvad"},
+  "remove.service.signal": {"icon":"󰭹","label":"Signal","when":"omarchy-pkg-present signal-desktop","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-service-signal"},
   "remove.service.tailscale": {"icon":"","label":"Tailscale","when":"omarchy-pkg-present tailscale","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-service-tailscale"},
   "remove.service.thunderbird": {"icon":"","label":"Thunderbird","when":"omarchy-pkg-snap-present thunderbird","action":"omarchy-launch-floating-terminal-with-presentation 'omarchy-pkg-snap-drop thunderbird && omarchy-restart-hyprctl'"},
   "remove.service.cliamp": {"icon":"󰎆","label":"cliamp (music)","when":"omarchy-cmd-present cliamp","action":"omarchy-launch-floating-terminal-with-presentation 'mise unuse -g cliamp'"},
