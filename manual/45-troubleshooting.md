@@ -10,6 +10,8 @@ First try to [rollback your system](47-system-snapshots.md) the version before y
 
 Omarchy assumes a 2x high-resolution display, which requires setting `GDK_SCALE` to 2 in `~/.config/hypr/monitors.lua`. But if you're on a 1x display, you can change `local omarchy_gdk_scale = 2` to 1 (and then restart any app that's oversized). See [the manual on monitors](33-monitors.md).
 
+> **Oaxaca: works differently.** In Oaxaca's `~/.config/hypr/monitors.lua` the line is `local oaxaca_gdk_scale = 2`; _Setup > Config > Monitors_ opens the file in the text editor. (the distro's docs/6, choice 95)
+
 For Spotify, you can use `Ctrl + Minus` to shrink the UI (and `Ctrl + Plus` to make it bigger).
 
 ### Why isn't Caps Lock working?

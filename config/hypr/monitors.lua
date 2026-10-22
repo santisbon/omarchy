@@ -14,5 +14,6 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = omarchy
 -- hl.monitor({ output = "DP-2", mode = "preferred", position = "auto", scale = 1, transform = 1 })
 
 -- Layout saved by nwg-displays (Setup > Monitors in the menu): it writes
--- ~/.config/hypr/monitors-gui.lua, loaded here when it exists. Lines above it win.
+-- ~/.config/hypr/monitors-gui.lua, loaded here when it exists. Loaded last, its rule for a
+-- monitor replaces a rule above for the same monitor: Hyprland keeps the last rule per name.
 require("default.hypr.require_optional").module("hypr.monitors-gui")

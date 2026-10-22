@@ -4,6 +4,8 @@ Omarchy is primarily configured through the so-called dotfiles that live in `~/.
 
 The key configs can be edited straight from the Omarchy menu (`Super + Space`), like _Setup > Monitors_, _Setup > Keybindings_, _Setup > Input_, and _Setup > Config > [file]_. When you do it this way, any process that needs restarting after config edits automatically will be after you quit the editor (Neovim by default — `:wq`, remember! — but you can change that via _Setup > Defaults > Editor_).
 
+> **Oaxaca: works differently.** _Setup > Monitors_ opens nwg-displays, a graphical monitor layout program; `~/.config/hypr/monitors.lua` opens in the editor from _Setup > Config > Monitors_. (the distro's docs/6, choice 95)
+
 > **Oaxaca: works differently.** Oaxaca's default editor is nano, not Neovim. Neovim is preinstalled as Ubuntu ships it, without Omarchy's LazyVim configuration, and _Setup > Defaults > Editor > Neovim_ makes Neovim the default. (the distro's docs/6, choice 26)
 
 Here's a list of the key files in `~/.config` and what they control:

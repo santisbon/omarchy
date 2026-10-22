@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Displays Settings
+GenericName=Output configuration utility
+Comment=Arrange monitors, set their resolution, refresh rate and scale
+Exec=omarchy-launch-monitors
+Icon=nwg-displays
+Terminal=false
+Categories=Settings;DesktopSettings;

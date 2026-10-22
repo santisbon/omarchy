@@ -109,6 +109,42 @@ set_scale() {
     sed -i -E 's|^hl\.env\("GDK_SCALE", ".*"\)|hl.env("GDK_SCALE", "'"$new_gdk_scale"'")|' "$monitor_lua"
     persist_monitor_rule "$monitor_lua" "$active_monitor" "$new_scale"
   fi
+
+  persist_gui_scale "$HOME/.config/hypr/monitors-gui.lua" "$active_monitor" \
+    "$(echo "$monitor_info" | jq -r '.description')" "$new_scale"
+}
+
+# nwg-displays (Setup > Monitors) saves one hl.monitor({ ... }) block per monitor to
+# monitors-gui.lua, one key per line, naming the monitor by connector or by "desc:<description>".
+# monitors.lua loads that file last and Hyprland keeps the last rule per monitor, so the block's
+# scale is the one that survives a reload: change it there too, and leave the rest of the block.
+persist_gui_scale() {
+  local gui_lua="$1"
+  local monitor="$2"
+  local description="$3"
+  local scale="$4"
+  local tmp
+
+  [[ -f $gui_lua ]] || return 0
+  tmp="$(mktemp "$gui_lua.XXXXXX")"
+  awk -v name="$monitor" -v desc="desc:$description" -v scale="$scale" '
+    /^hl\.monitor\(\{/ { in_rule = 1; ours = 0 }
+    in_rule && /^[[:space:]]*output[[:space:]]*=/ {
+      output = $0
+      sub(/^[^"]*"/, "", output)
+      sub(/".*$/, "", output)
+      ours = (output == name || output == desc)
+    }
+    in_rule && ours && /^[[:space:]]*scale[[:space:]]*=/ { sub(/=[[:space:]]*[^,]*/, "= " scale) }
+    /^\}\)/ { in_rule = 0 }
+    { print }
+  ' "$gui_lua" >"$tmp"
+  if cmp -s "$tmp" "$gui_lua"; then
+    rm -f "$tmp"
+  else
+    cat "$tmp" >"$gui_lua"
+    rm -f "$tmp"
+  fi
 }
 
 # Write the monitor's own rule, in the one form this command writes: replace

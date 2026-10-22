@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Open nwg-displays, the monitor layout app, saving its layout to ~/.config/hypr/monitors-gui.lua
+
+# nwg-displays writes Hyprland's Lua beside its -m path, with a .conf suffix swapped for .lua,
+# and falls back to ~/.config/hypr/monitors.lua for any other path, so without -m it would write
+# over the hand-edited monitors.lua; monitors.lua loads monitors-gui.lua last (the distro's
+# docs/6, choice 12). -w does the same for its workspace rules, which nothing loads until a user
+# requires workspaces-gui.lua. nwg-displays creates both .conf files empty when it starts.
+exec setsid uwsm-app -- nwg-displays -m "$HOME/.config/hypr/monitors-gui.conf" -w "$HOME/.config/hypr/workspaces-gui.conf"
