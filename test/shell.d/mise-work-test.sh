@@ -22,3 +22,16 @@ grep -q 'mise use -g node@latest' "$work/err" || fail "mise-work says how to ins
 [[ -d $work/home/Work/tries ]] || fail "mise-work makes ~/Work/tries"
 [[ ! -e $work/home/Work/.mise.toml ]] || fail "mise-work puts no project bin/ directories on PATH (no ~/Work/.mise.toml)"
 pass "mise-work finishes when the Node.js download fails"
+
+# The port preinstalls mise, but it can be removed: the PATH migration must still finish (later
+# migrations wait on it) and delete the stock ~/Work/.mise.toml, with no mise to revoke trust in.
+nomise="$work/nomise"
+mkdir -p "$nomise/bin" "$nomise/home/Work"
+for tool in bash cat cp cut mkdir mktemp readlink rm rmdir sed sha256sum; do
+  ln -s "$(command -v "$tool")" "$nomise/bin/$tool"
+done
+printf '[env]\n_.path = "{{ cwd }}/bin"\n' >"$nomise/home/Work/.mise.toml"
+env -i HOME="$nomise/home" PATH="$nomise/bin" bash -euo pipefail "$ROOT/migrations/1789095456.sh" >"$nomise/out" 2>&1 ||
+  fail "the PATH migration finishes without mise" "$(cat "$nomise/out")"
+[[ ! -e $nomise/home/Work/.mise.toml ]] || fail "the PATH migration deletes the stock ~/Work/.mise.toml without mise"
+pass "the PATH migration finishes without mise and deletes the stock ~/Work/.mise.toml"

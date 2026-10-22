@@ -34,7 +34,9 @@ if [[ -d $work_dir ]]; then
     done
   fi
 
-  if [[ $was_ignored == "false" ]]; then
+  # The port: mise is preinstalled but can be removed, and without mise there is no trust to
+  # revoke; the file below is still repaired or deleted.
+  if [[ $was_ignored == "false" ]] && command -v mise >/dev/null; then
     # Normal Mise trust is recorded against the config-root directory, while
     # paranoid trust is recorded against the file and its contents. Stage an
     # empty, inert config when the legacy file is gone so either trust mode can
@@ -87,7 +89,7 @@ fi
 if [[ -f $mise_config ]]; then
   if [[ $was_ignored == "true" ]]; then
     printf '\n%s\n' "This custom config remains ignored by Mise."
-  else
+  elif command -v mise >/dev/null; then
     printf '\n%s\n  %s\n' \
       "Mise trust for this custom config was revoked. Review it before trusting it again:" \
       "mise trust $mise_config"
