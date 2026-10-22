@@ -2,6 +2,8 @@
 -- replace Omarchy's defaults.
 
 -- Keyboard layout and options.
+-- Setup > Keyboard in the Omarchy menu saves your layouts to ~/.config/hypr/keyboard-gui.conf
+-- instead of this file. A kb_layout set here wins over that file's layouts.
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/#input
 -- hl.config({
 --   input = {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Choose your keyboard layouts for Hyprland in a fuzzy-finder TUI, or set them directly.
+# omarchy:summary=Add, remove or reorder your keyboard layouts for Hyprland
 # omarchy:args=[<layouts> [<variants> [<options>]] | --reset]
 # omarchy:examples=omarchy setup keyboard | omarchy setup keyboard us,es | omarchy setup keyboard us,es , grp:ctrls_toggle | omarchy setup keyboard --reset
 
@@ -10,16 +10,27 @@ set -euo pipefail
 gui_file="$HOME/.config/hypr/keyboard-gui.conf"
 # xkb-data's list of layouts and variants, each with its English description.
 rules="/usr/share/X11/xkb/rules/evdev.lst"
+# The only switching key this picker adds; removing the second-to-last layout takes it out again.
+switch_key="grp:ctrls_toggle"
 
+# One KEY="value" line of a file in /etc/default/keyboard's format, quotes optional.
+keyboard_value() {
+  sed -n "s/^$2=\"\{0,1\}\([^\"]*\)\"\{0,1\}\$/\1/p" "$1" 2>/dev/null | tail -n 1 || true
+}
+
+# The file input.lua takes the layout chosen at installation from: /etc/vconsole.conf when it
+# names a layout (Arch's place), /etc/default/keyboard otherwise (Ubuntu's).
+system_file=/etc/default/keyboard
+[[ -n $(keyboard_value /etc/vconsole.conf XKBLAYOUT) ]] && system_file=/etc/vconsole.conf
 # The options the installer wrote (usually none), kept under any switching key chosen here.
-system_options=$(sed -n 's/^XKBOPTIONS="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' /etc/default/keyboard 2>/dev/null || true)
+system_options=$(keyboard_value "$system_file" XKBOPTIONS)
 
 write_layouts() {
   local layouts="$1" variants="$2" options="$3"
 
   if ! xkbcli compile-keymap --layout "$layouts" --variant "$variants" --options "$options" >/dev/null 2>&1; then
     echo "xkbcommon cannot build a keymap from layouts \"$layouts\", variants \"$variants\", options \"$options\"." >&2
-    exit 1
+    return 1
   fi
 
   mkdir -p "${gui_file%/*}"
@@ -39,6 +50,19 @@ reset_layouts() {
   hyprctl reload >/dev/null
 }
 
+case "${1:-}" in
+  --reset)
+    reset_layouts
+    exit 0
+    ;;
+  "")
+    ;;
+  *)
+    write_layouts "$1" "${2:-}" "${3:-$system_options}" || exit 1
+    exit 0
+    ;;
+esac
+
 section() {
   awk -v name="! $1" '$0 == name { found = 1; next } /^!/ { found = 0 } found && NF' "$rules"
 }
@@ -48,79 +72,149 @@ pick() {
     --color 'pointer:green,marker:green' | cut -f1
 }
 
-case "${1:-}" in
-  --reset)
-    reset_layouts
-    exit 0
-    ;;
-  "")
-    ;;
-  *)
-    write_layouts "$1" "${2:-}" "${3:-$system_options}"
-    exit 0
-    ;;
-esac
-
 layout_list=$(section layout | awk '{ code = $1; $1 = ""; sub(/^ +/, ""); printf "%s\t%s (%s)\n", code, $0, code }')
+variant_section=$(section variant)
 
-if [[ -f $gui_file ]]; then
-  first_line=$'reset\tThe layout chosen at installation (removes your own layouts)'
-else
-  first_line=""
-fi
+# "Spanish (es), Spanish (dead tilde)" for layout es with variant deadtilde.
+describe() {
+  local text variant_text
+  text=$(awk -F'\t' -v code="$1" '$1 == code { print $2; exit }' <<<"$layout_list")
+  text=${text:-$1}
+  if [[ -n $2 ]]; then
+    variant_text=$(awk -v variant="$2" -v layout="$1:" '$1 == variant && $2 == layout { $1 = ""; $2 = ""; sub(/^ +/, ""); print; exit }' <<<"$variant_section")
+    text+=", ${variant_text:-$2}"
+  fi
+  printf '%s' "$text"
+}
 
-layouts=()
-variants=()
-while :; do
-  if (( ${#layouts[@]} == 0 )); then
-    header="Your main layout: Hyprland matches keyboard shortcuts against it (Esc cancels)"
-    choices=$( { [[ -n $first_line ]] && echo "$first_line"; echo "$layout_list"; } )
+# The layouts in effect now, from keyboard-gui.conf when it names any, as input.lua reads them.
+load_layouts() {
+  local source_file="$system_file" i
+  [[ -n $(keyboard_value "$gui_file" XKBLAYOUT) ]] && source_file="$gui_file"
+  IFS=, read -ra layouts <<<"$(keyboard_value "$source_file" XKBLAYOUT)"
+  IFS=, read -ra variants <<<"$(keyboard_value "$source_file" XKBVARIANT)"
+  options=$(keyboard_value "$source_file" XKBOPTIONS)
+  ((${#layouts[@]})) || layouts=(us)
+  for i in "${!layouts[@]}"; do variants[i]=${variants[i]:-}; done
+  variants=("${variants[@]:0:${#layouts[@]}}")
+}
+
+save_layouts() {
+  local joined_layouts joined_variants
+  joined_layouts=$(IFS=,; echo "${layouts[*]}")
+  joined_variants=$(IFS=,; echo "${variants[*]}")
+  if write_layouts "$joined_layouts" "$joined_variants" "$options" 2>/dev/null; then
+    changed=1
+    notice=""
   else
-    header="Add layout $(( ${#layouts[@]} + 1 )), after ${layouts[*]} (Esc when done)"
-    choices=$(grep -v -E "^($(IFS='|'; echo "${layouts[*]}"))"$'\t' <<<"$layout_list")
+    notice="xkbcommon cannot build a keymap from $joined_layouts ($joined_variants): nothing changed."
+    load_layouts
   fi
+}
 
-  layout=$(pick "$header" <<<"$choices" || true)
-  [[ -n $layout ]] || break
+# Each current layout as "<position>\t<description>", for the remove and main-layout lists.
+numbered_layouts() {
+  local i
+  for i in "${!layouts[@]}"; do
+    printf '%s\t%s\n' "$i" "$(describe "${layouts[i]}" "${variants[i]}")"
+  done
+}
 
-  if [[ $layout == "reset" ]]; then
-    reset_layouts
-    echo "Your keyboard uses the layout chosen at installation again."
-    omarchy-show-done
-    exit 0
-  fi
+add_layout() {
+  local layout variant variant_list i key
+  layout=$(pick "Add a layout after your $(( ${#layouts[@]} )) (Esc goes back)" <<<"$layout_list" || true)
+  [[ -n $layout ]] || return 0
 
-  variant_list=$(section variant | awk -v layout="$layout:" '$2 == layout { code = $1; $1 = ""; $2 = ""; sub(/^ +/, ""); printf "%s\t%s\n", code, $0 }')
   variant=""
+  variant_list=$(awk -v layout="$layout:" '$2 == layout { code = $1; $1 = ""; $2 = ""; sub(/^ +/, ""); printf "%s\t%s\n", code, $0 }' <<<"$variant_section")
   if [[ -n $variant_list ]]; then
-    variant=$( { printf '\t%s\n' "The standard $layout layout"; echo "$variant_list"; } | pick "Variant of $layout" || true)
+    # Esc here cancels the whole add; the standard layout is a choice of its own.
+    variant=$( { printf '\t%s\n' "The standard $layout layout"; echo "$variant_list"; } | pick "Variant of $layout (Esc goes back)") || return 0
   fi
+
+  for i in "${!layouts[@]}"; do
+    if [[ ${layouts[i]} == "$layout" && ${variants[i]} == "$variant" ]]; then
+      notice="$(describe "$layout" "$variant") is already one of your layouts."
+      return 0
+    fi
+  done
 
   layouts+=("$layout")
   variants+=("$variant")
+
+  if [[ $options != *grp:* ]]; then
+    # Both keys were checked with xkbcli compile-keymap: grp:ctrls_toggle changes only the two
+    # Ctrl keys, so AltGr and every other key stay as each layout has them. grp:alts_toggle, the
+    # example in input.lua, would turn AltGr into a plain Right Alt on the other layouts.
+    key=$(printf '%s\t%s\n' \
+      "none" "Click the layout in the top bar to switch (no key)" \
+      "$switch_key" "Left Ctrl + Right Ctrl together, or click the top bar" |
+      pick "How to switch layouts" || true)
+    [[ $key == "$switch_key" ]] && options="${options:+$options,}$switch_key"
+  fi
+
+  save_layouts
+}
+
+remove_layout() {
+  local position
+  position=$(numbered_layouts | pick "Remove which layout? (Esc goes back)" || true)
+  [[ -n $position ]] || return 0
+
+  layouts=("${layouts[@]:0:position}" "${layouts[@]:position+1}")
+  variants=("${variants[@]:0:position}" "${variants[@]:position+1}")
+  # One layout has nothing to switch to, so the switching key this picker added goes too.
+  if ((${#layouts[@]} == 1)) && [[ ,$system_options, != *,$switch_key,* ]]; then
+    options=$(tr ',' '\n' <<<"$options" | grep -vx "$switch_key" | paste -sd, || true)
+  fi
+
+  save_layouts
+}
+
+main_layout() {
+  local position layout variant
+  position=$(numbered_layouts | tail -n +2 | pick "Make which layout the main one? (Esc goes back)" || true)
+  [[ -n $position ]] || return 0
+
+  layout=${layouts[position]} variant=${variants[position]}
+  layouts=("$layout" "${layouts[@]:0:position}" "${layouts[@]:position+1}")
+  variants=("$variant" "${variants[@]:0:position}" "${variants[@]:position+1}")
+  save_layouts
+}
+
+changed=0
+notice=""
+load_layouts
+while :; do
+  header="Your keyboard layouts. The first is the main one: keyboard shortcuts follow it."
+  for i in "${!layouts[@]}"; do
+    header+=$'\n'"  $((i + 1)). $(describe "${layouts[i]}" "${variants[i]}")"
+  done
+  [[ -n $notice ]] && header+=$'\n\n'"$notice"
+  header+=$'\n\n'"Esc when done."
+
+  actions=$'add\tAdd a layout'
+  if ((${#layouts[@]} > 1)); then
+    actions+=$'\nremove\tRemove a layout'
+    actions+=$'\nmain\tChange the main layout'
+  fi
+  if [[ -f $gui_file ]]; then
+    actions+=$'\nreset\tGo back to the layout chosen at installation: '"$(describe "$(keyboard_value "$system_file" XKBLAYOUT)" "$(keyboard_value "$system_file" XKBVARIANT)")"
+  fi
+
+  action=$(pick "$header" <<<"$actions" || true)
+  case $action in
+    add) add_layout ;;
+    remove) remove_layout ;;
+    main) main_layout ;;
+    reset) reset_layouts; changed=1; notice=""; load_layouts ;;
+    *) break ;;
+  esac
 done
 
-if (( ${#layouts[@]} == 0 )); then
-  exit 0
-fi
+((changed)) || exit 0
 
-options="$system_options"
-if (( ${#layouts[@]} > 1 )) && [[ $system_options != *grp:* ]]; then
-  # Both keys were checked with xkbcli compile-keymap: grp:ctrls_toggle changes only the two
-  # Ctrl keys, so AltGr and every other key stay as each layout has them. grp:alts_toggle, the
-  # example in input.lua, would turn AltGr into a plain Right Alt on the other layouts.
-  key=$(printf '%s\t%s\n' \
-    "" "Click the layout in the top bar to switch (no key)" \
-    "grp:ctrls_toggle" "Left Ctrl + Right Ctrl together, or click the top bar" |
-    pick "How to switch layouts" || true)
-  [[ -n $key ]] && options="${options:+$options,}$key"
-fi
-
-joined_layouts=$(IFS=,; echo "${layouts[*]}")
-joined_variants=$(IFS=,; echo "${variants[*]}")
-write_layouts "$joined_layouts" "$joined_variants" "$options"
-
-echo "Your keyboard layouts are now: $joined_layouts"
+echo "Your keyboard layouts are now: $(IFS=,; echo "${layouts[*]}")"
 if grep -q '^[[:space:]]*kb_layout' "$HOME/.config/hypr/input.lua" 2>/dev/null; then
   echo "~/.config/hypr/input.lua sets kb_layout too, and wins over these layouts: comment that line out to use them."
 fi
