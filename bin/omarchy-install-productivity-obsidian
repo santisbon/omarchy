@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# omarchy:summary=Install Obsidian from the Snap Store and launch it.
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+# Obsidian's own snap, published by obsidianmd, uses classic confinement: it runs outside the
+# snap sandbox and reads ~/.config/obsidian, where omarchy-theme-set-obsidian finds the vaults.
+omarchy-pkg-snap-add obsidian --classic
+
+echo "Opening Obsidian..."
+setsid uwsm-app -- /snap/bin/obsidian >/dev/null 2>&1 &
+
+echo ""
+echo "Obsidian has been installed."

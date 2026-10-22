@@ -14,6 +14,7 @@ if o.preinstalled_bindings_enabled() then
   o.bind("SUPER + SHIFT + M", "Music", { omarchy = "spotify" })
   o.bind("SUPER + SHIFT + ALT + M", "Music TUI", { tui = "cliamp", focus = true })
   o.bind("SUPER + SHIFT + G", "Signal", { omarchy = "signal" })
+  o.bind("SUPER + SHIFT + O", "Obsidian", { omarchy = "obsidian" })
   o.bind("SUPER + SHIFT + SLASH", "Passwords", { omarchy = "1password" })
 
   o.bind("SUPER + SHIFT + A", "ChatGPT", { webapp = "https://chatgpt.com" })

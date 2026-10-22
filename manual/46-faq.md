@@ -76,7 +76,7 @@ Remember that you have built-in brightness control in Omarchy for the Apple Disp
 
 If you don't want programs like Obsidian or LibreOffice or any of the other preinstalled stuff, you can very easily remove it.
 
-> **Oaxaca: works differently.** Oaxaca preinstalls neither Obsidian nor LibreOffice: Install > Productivity > LibreOffice installs Canonical's snap, and Obsidian is available through Install > Snap or Install > Flatpak (the fork's `PORT.md`, "The Applications"; the distro's docs/6, choice 71).
+> **Oaxaca: works differently.** Oaxaca preinstalls neither Obsidian nor LibreOffice: Install > Productivity > LibreOffice installs Canonical's snap, and Install > Productivity > Obsidian installs Obsidian's own snap (the fork's `PORT.md`, "The Applications"; the distro's docs/6, choices 71 and 97).
 
 Run _Remove > Package_ to see every package that's installed. Then you can select any package you'd like to remove with tab, and start removing everything you've selected with return.
 

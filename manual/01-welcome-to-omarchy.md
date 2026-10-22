@@ -4,7 +4,7 @@ Omarchy is an [omakase](https://manuals.omamix.org/3/omacom/76/omakase-computing
 
 > **Oaxaca: works differently.** Oaxaca is built on Ubuntu 26.10 ("stonking") with apt for packages, instead of Arch Linux with pacman, and keeps Hyprland, Quickshell and Omarchy's shell, themes and fonts on top. Of the applications named above, Chromium and Neovim are preinstalled (Neovim without Omarchy's LazyVim configuration), while LibreOffice (Canonical's snap), Kdenlive and OBS Studio (both from Flathub) are installed on demand from Install > Productivity, and the Winamp-style player, cliamp, from Install > Service (the distro's docs/6, choices 26, 71, 80, 83 and 84).
 
-> **Oaxaca: removed.** Obsidian is not preinstalled and has no menu entry of its own; Obsidian stays installable through Install > Snap or Install > Flatpak (the distro's docs/6, choice 71).
+> **Oaxaca: works differently.** Obsidian is not preinstalled: Install > Productivity > Obsidian installs Obsidian's own snap from the Snap Store (the distro's docs/6, choices 71 and 97).
 
 > **Oaxaca: works differently.** On Oaxaca the commands are named `oaxaca-*` (with `oaxaca` as the command dispatcher), the user's folders are `~/.config/oaxaca`, `~/.local/state/oaxaca` and `~/.local/share/oaxaca`, and the menu calls itself the Oaxaca menu. Links under Omarchy's names (`omarchy-*`, `omarchy`, `~/.config/omarchy` and the other two folders) point to Oaxaca's, so the `omarchy` commands and paths this manual uses still work (the distro's docs/6, choice 86).
 

@@ -128,7 +128,7 @@ You can see all the main keyboard bindings with `Super + K` (Tmux bindings with 
 | `Super + Shift + Alt + X`           | X Compose |
 | `Super + Shift + Y`           | YouTube |
 
-> **Oaxaca: removed.** `Super + Shift + C` (HEY Calendar) and `Super + Shift + Alt + E` (new HEY email) are gone with HEY (the distro's docs/6, choice 27). `Super + Shift + D` (LazyDocker) and `Super + Shift + O` (Obsidian) are gone with Omarchy's Docker setup and preinstalled Obsidian (the distro's docs/6, choice 71), and `Super + Shift + W` with Omawrite (the distro's docs/6, choice 80).
+> **Oaxaca: removed.** `Super + Shift + C` (HEY Calendar) and `Super + Shift + Alt + E` (new HEY email) are gone with HEY (the distro's docs/6, choice 27). `Super + Shift + D` (LazyDocker) is gone with Omarchy's Docker setup (the distro's docs/6, choice 71), and `Super + Shift + W` with Omawrite (the distro's docs/6, choice 80).
 
 > **Oaxaca: works differently.** `Super + Shift + E` opens Thunderbird instead of HEY, and is bound only while Thunderbird, from Install > Service (the Snap Store), is installed (the distro's docs/6, choice 27). `Super + Shift + N` opens the default editor, which is nano until Setup > Defaults > Editor picks another, such as Neovim (the distro's docs/6, choice 26). `Super + Ctrl + Return` (Herdr) and `Super + Shift + Alt + M` (cliamp) need Install > Development > Herdr and Install > Service > cliamp first, since neither program is preinstalled (the distro's docs/6, choice 80).
 

@@ -6,7 +6,7 @@ Each theme styles the desktop, terminal, neovim, activity screen (btop), Chromiu
 
 > **Oaxaca: works differently.** Neovim is preinstalled without Omarchy's LazyVim configuration, and that configuration is what loads a theme's `neovim.lua` (a plugin list for lazy.nvim, the plugin manager LazyVim runs on), so a theme change does not restyle Neovim (the distro's docs/6, choices 26 and 71).
 
-> **Oaxaca: removed.** Obsidian is not preinstalled, and a theme change no longer runs Omarchy's Obsidian theme sync, `omarchy-theme-set-obsidian` (the distro's docs/6, choice 71).
+> **Oaxaca: works differently.** Obsidian is not preinstalled: Install > Productivity > Obsidian installs its snap, and a theme change then themes it as above (the distro's docs/6, choices 71 and 97).
 
 Themes have a set of background images that you can pick between using `Super + Ctrl + Space`.
 

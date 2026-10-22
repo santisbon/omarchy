@@ -20,7 +20,7 @@ Obsidian also offers a [commercial add-on for syncing](https://obsidian.md/sync)
 
 You start Obsidian with `Super + Shift + O`. To use theme syncing, you must select the `Omarchy` theme under settings.
 
-> **Oaxaca: removed.** Obsidian is not preinstalled, and the `Super + Shift + O` binding and Obsidian's theme syncing are gone with Obsidian (the distro's docs/6, choice 71). Obsidian can still be installed, without Omarchy's setup, from the Snap Store with _Install > Snap_ (published as `obsidianmd`) or from Flathub with _Install > Flatpak_.
+> **Oaxaca: works differently.** Obsidian is not preinstalled. _Install > Productivity > Obsidian_ installs Obsidian's own snap from the Snap Store, and _Remove > Productivity > Obsidian_ removes it, leaving your vaults. Before the snap is installed, `Super + Shift + O` opens that installer (the distro's docs/6, choices 71 and 97).
 
 ## Omawrite
 

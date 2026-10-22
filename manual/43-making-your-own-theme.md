@@ -4,7 +4,7 @@ You can add your own themes to `~/.config/omarchy/themes`. Just copy one of the 
 
 The main file you have to tweak is `colors.toml`. That defines the color set that's then used to generate configurations for the terminal (Foot/Alacritty/Ghostty/Kitty), btop, Chromium, Hyprland, Neovim, Helix, VSCode, Obsidian, and the entire Omarchy shell (top bar, menu, notifications, OSD, and lock screen).
 
-> **Oaxaca: removed.** Obsidian theming: Oaxaca does not preinstall Obsidian (the distro's docs/6, choice 71) and dropped Omarchy's Obsidian theme script, `omarchy-theme-set-obsidian`. Obsidian can still be installed with Install > Snap or Install > Flatpak, without Omarchy's theme sync.
+> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian (the distro's docs/6, choice 71). Once Install > Productivity > Obsidian has installed its snap, `omarchy-theme-set-obsidian` themes it as on Omarchy (choice 97).
 
 You can also use the included Aether application to create a new theme using a lovely GUI interface to play with colors and search for backgrounds. Just start it via the apps menu on `Super + Alt + Space`.
 

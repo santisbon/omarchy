@@ -78,7 +78,7 @@ hl.unbind("SUPER + SHIFT + O")
 o.bind("SUPER + SHIFT + O", "Joplin", "joplin-desktop")
 ```
 
-> **Oaxaca: removed.** Oaxaca does not preinstall Obsidian and has no `Super + Shift + O` binding, so the example's `hl.unbind` line unbinds nothing. (the distro's docs/6, choice 71)
+> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian: `Super + Shift + O` opens Obsidian once Install > Productivity > Obsidian has installed its snap, and opens that installer before then (the distro's docs/6, choice 97). The example's `hl.unbind` line removes the binding either way.
 
 > **Oaxaca: works differently.** `omarchy-pkg-add` installs Ubuntu packages with apt. `joplin-bin` is a package from Arch's AUR, and Ubuntu 26.10's archive has no package of that name (checked with `rmadison` on 2026-10-21), so the example's install command fails on Oaxaca.
 

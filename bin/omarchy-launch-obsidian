@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# omarchy:summary=Launch Obsidian, focus its open window, or start its installer when missing.
+
+set -e
+
+# The snap's command is /snap/bin/obsidian, named in full: Thunderbird's binding does the same,
+# for a session whose PATH lacks /snap/bin. Obsidian's windows have the class "obsidian".
+if omarchy-pkg-snap-present obsidian; then
+  exec omarchy-launch-or-focus "^obsidian$" "uwsm-app -- /snap/bin/obsidian"
+else
+  exec omarchy-launch-floating-terminal-with-presentation omarchy-install-productivity-obsidian
+fi
