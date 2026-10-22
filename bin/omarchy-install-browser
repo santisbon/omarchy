@@ -5,8 +5,9 @@
 # omarchy:examples=omarchy install browser firefox | omarchy install browser chromium
 # omarchy:requires-sudo=true
 
-# Ubuntu's archive carries firefox and chromium only as placeholders that pull
-# in snapd, and the distro pins snapd out. Firefox comes from Mozilla's own apt
+# Ubuntu's archive carries firefox and chromium only as placeholders that install
+# the snaps, and the distro installs the browsers as .deb packages instead
+# (snapd itself is preinstalled for Install > Snap). Firefox comes from Mozilla's own apt
 # repository and Brave Origin from Brave's; Chromium has no vendor repository
 # for Ubuntu, so it comes from the xtradeb PPA on Launchpad, a community build
 # of upstream Chromium for each Ubuntu series, pinned below Ubuntu's archive so

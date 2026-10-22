@@ -19,12 +19,10 @@ if command -v try &> /dev/null; then
 fi
 
 if command -v fzf &> /dev/null; then
-  if [[ -f /usr/share/fzf/completion.bash ]]; then
-    source /usr/share/fzf/completion.bash
-  fi
-  if [[ -f /usr/share/fzf/key-bindings.bash ]]; then
-    source /usr/share/fzf/key-bindings.bash
-  fi
+  # Ubuntu's fzf keeps completion.bash and key-bindings.bash under /usr/share/doc/fzf/examples,
+  # not Arch's /usr/share/fzf, so Ctrl+R and ** completion never loaded from those paths;
+  # fzf --bash (fzf 0.48 and later; stonking has 0.74.1) prints both scripts.
+  eval "$(fzf --bash)"
 fi
 
 source "$OMARCHY_PATH/default/bash/completions"
