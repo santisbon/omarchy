@@ -13,7 +13,7 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = omarchy
 -- Portrait/rotated secondary monitor (transform: 1 = 90°, 3 = 270°).
 -- hl.monitor({ output = "DP-2", mode = "preferred", position = "auto", scale = 1, transform = 1 })
 
--- Layout saved by nwg-displays (Setup > Monitors in the menu): it writes
+-- Layout saved by nwg-displays (Displays Settings in the app launcher): it writes
 -- ~/.config/hypr/monitors-gui.lua, loaded here when it exists. Loaded last, its rule for a
 -- monitor replaces a rule above for the same monitor: Hyprland keeps the last rule per name.
 require("default.hypr.require_optional").module("hypr.monitors-gui")

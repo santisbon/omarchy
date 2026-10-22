@@ -16,7 +16,7 @@ local omarchy_gdk_scale = 1
 local omarchy_monitor_scale = 1
 ```
 
-> **Oaxaca: works differently.** On Oaxaca, _Setup > Config > Monitors_ opens `~/.config/hypr/monitors.lua` in the text editor; _Setup > Monitors_ starts nwg-displays instead (see "Arranging multiple screens" below). In Oaxaca's `monitors.lua` the two settings are named `oaxaca_gdk_scale` and `oaxaca_monitor_scale`. `oaxaca_monitor_scale` is the scale of the catch-all rule, `hl.monitor({ output = "", ... })`, which Hyprland applies only to monitors that have no `hl.monitor` rule of their own: once `Super + /` or a scale button has saved a rule for a monitor, changing `oaxaca_monitor_scale` no longer changes that monitor. (the distro's docs/6, choices 92 and 95)
+> **Oaxaca: works differently.** In Oaxaca's `monitors.lua` the two settings are named `oaxaca_gdk_scale` and `oaxaca_monitor_scale`. `oaxaca_monitor_scale` is the scale of the catch-all rule, `hl.monitor({ output = "", ... })`, which Hyprland applies only to monitors that have no `hl.monitor` rule of their own: once `Super + /` or a scale button has saved a rule for a monitor, changing `oaxaca_monitor_scale` no longer changes that monitor. (the distro's docs/6, choice 92)
 
 Changes to `GDK_SCALE` apply to applications started after the change (and GTK only honors whole numbers, so keep it at the nearest integer of your monitor scale). So make sure you quit the windows that you have that are oversized after the change (or close all windows with `Ctrl + Alt + Del`!).
 
@@ -48,7 +48,7 @@ Hyprland works great with multiple screens. Read more about how to lay them out 
 
 You can also checkout [Hyprmon](https://github.com/erans/hyprmon/), if you'd like a TUI to help you with the positioning of multiple screens.
 
-> **Oaxaca: added.** Oaxaca preinstalls nwg-displays 0.4.4, a graphical program that shows the connected monitors as boxes to drag around and writes their layout, resolution, scale and rotation to `~/.config/hypr/monitors-gui.lua`. _Setup > Monitors_ opens nwg-displays, and so does its entry in the app launcher, _Displays Settings_; _Setup > Config > Monitors_ opens `~/.config/hypr/monitors.lua` in the editor, where Omarchy's _Setup > Monitors_ does. `monitors.lua` loads `monitors-gui.lua` last, and Hyprland keeps the last rule for each monitor, so a layout saved in nwg-displays wins over a rule for the same monitor in `monitors.lua`; the scale buttons and `Super + /` change the scale in both files. (the distro's docs/6, choices 12 and 95)
+> **Oaxaca: added.** Oaxaca preinstalls nwg-displays 0.5.0, a graphical program that shows the connected monitors as boxes to drag around and writes their layout, resolution, scale and rotation to `~/.config/hypr/monitors-gui.lua`. The app launcher's _Displays Settings_ entry starts nwg-displays; _Setup > Monitors_ opens `~/.config/hypr/monitors.lua` in the editor, as on Omarchy. `monitors.lua` loads `monitors-gui.lua` last, and Hyprland keeps the last rule for each monitor, so a layout saved in nwg-displays wins over a rule for the same monitor in `monitors.lua`; the scale buttons and `Super + /` change the scale in both files. (the distro's docs/6, choices 12 and 95)
 
 ### Controlling brightness
 

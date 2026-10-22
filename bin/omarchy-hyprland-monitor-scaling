@@ -114,7 +114,7 @@ set_scale() {
     "$(echo "$monitor_info" | jq -r '.description')" "$new_scale"
 }
 
-# nwg-displays (Setup > Monitors) saves one hl.monitor({ ... }) block per monitor to
+# nwg-displays (Displays Settings in the app launcher) saves one hl.monitor({ ... }) block per monitor to
 # monitors-gui.lua, one key per line, naming the monitor by connector or by "desc:<description>".
 # monitors.lua loads that file last and Hyprland keeps the last rule per monitor, so the block's
 # scale is the one that survives a reload: change it there too, and leave the rest of the block.
