@@ -116,6 +116,8 @@
 
   // Setup
   "setup.monitors": {"icon":"󰍹","label":"Monitors","action":"omarchy-launch-config-editor \"$HOME/.config/hypr/monitors.lua\""},
+  "setup.displays": {"icon":"󰍺","label":"Displays","action":"omarchy-launch-monitors"},
+  "setup.keyboard": {"icon":"󰌌","label":"Keyboard","action":"omarchy-launch-floating-terminal-with-presentation omarchy-setup-keyboard"},
   "setup.keybindings": {"icon":"","label":"Keybindings","when":"[[ -f ~/.config/hypr/bindings.lua ]]","action":"omarchy-launch-config-editor \"$HOME/.config/hypr/bindings.lua\""},
   "setup.input": {"icon":"","label":"Input","when":"[[ -f ~/.config/hypr/input.lua ]]","action":"omarchy-launch-config-editor \"$HOME/.config/hypr/input.lua\""},
   "setup.network": {"icon":"󰛳","label":"Network","aliases":["network"]},

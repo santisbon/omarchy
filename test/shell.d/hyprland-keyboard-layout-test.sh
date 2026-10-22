@@ -4,8 +4,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/base-test.sh"
 
 require_command lua
 
+# Setup > Keyboard's file is read from $HOME, so every case runs with a home of its own.
+test_home=$(mktemp -d)
+trap 'rm -rf "$test_home"' EXIT
+
 resolved_input() {
-  OMARCHY_PATH="$ROOT" OMARCHY_VCONSOLE="${1-}" OMARCHY_DEFAULT_KEYBOARD="${2-}" lua <<'LUA'
+  HOME="$test_home" OMARCHY_PATH="$ROOT" OMARCHY_VCONSOLE="${1-}" OMARCHY_DEFAULT_KEYBOARD="${2-}" lua <<'LUA'
 package.path = os.getenv("OMARCHY_PATH") .. "/?.lua;" .. package.path
 
 local vconsole = os.getenv("OMARCHY_VCONSOLE")
@@ -98,4 +102,18 @@ XKBOPTIONS=ctrl:nocaps
 '
 assert_input "the installer's switching key replaces Left Alt + Right Alt" "[us,ru] [,] [grp:alt_shift_toggle]" 'XKBLAYOUT=ru
 XKBOPTIONS=grp:alt_shift_toggle
+'
+
+# Setup > Keyboard (omarchy-setup-keyboard) writes ~/.config/hypr/keyboard-gui.conf.
+mkdir -p "$test_home/.config/hypr"
+printf 'XKBLAYOUT="us,es"\nXKBVARIANT=",deadtilde"\nXKBOPTIONS="grp:ctrls_toggle"\n' >"$test_home/.config/hypr/keyboard-gui.conf"
+assert_input "Setup > Keyboard's layouts replace the system's" "[us,es] [,deadtilde] [grp:ctrls_toggle]" 'XKBMODEL=pc105
+XKBLAYOUT=de
+XKBOPTIONS=ctrl:nocaps
+'
+printf 'XKBLAYOUT="ru"\nXKBVARIANT=""\nXKBOPTIONS=""\n' >"$test_home/.config/hypr/keyboard-gui.conf"
+assert_input "a non-latin main layout from Setup > Keyboard gains us in front" "[us,ru] [,] [$toggle_options]" 'XKBLAYOUT=de
+'
+rm "$test_home/.config/hypr/keyboard-gui.conf"
+assert_input "without Setup > Keyboard's file the system's layout is back" "[de] [] [$base_options]" 'XKBLAYOUT=de
 '

@@ -33,6 +33,17 @@ if not vconsole.XKBLAYOUT then
   vconsole = read_keyboard_file("/etc/default/keyboard")
 end
 
+-- Setup > Keyboard (omarchy-setup-keyboard) writes the user's own layouts, variants and
+-- options to ~/.config/hypr/keyboard-gui.conf, in the same KEY=value format. They replace the
+-- system's for this user's Hyprland only: the login screen and the disk encryption passphrase
+-- prompt keep reading /etc/default/keyboard. The model stays the system's.
+local gui = read_keyboard_file((os.getenv("HOME") or "") .. "/.config/hypr/keyboard-gui.conf")
+if gui.XKBLAYOUT and gui.XKBLAYOUT ~= "" then
+  vconsole.XKBLAYOUT = gui.XKBLAYOUT
+  vconsole.XKBVARIANT = gui.XKBVARIANT
+  vconsole.XKBOPTIONS = gui.XKBOPTIONS
+end
+
 local kb_layout = vconsole.XKBLAYOUT or "us"
 local kb_variant = vconsole.XKBVARIANT or ""
 -- The keyboard works as on any other system: the model and options the installer wrote
