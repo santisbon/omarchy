@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Disable the OpenSSH server, close the firewall port, and optionally remove authorized keys
+# omarchy:summary=Disable the OpenSSH server, remove standard firewall rules, and optionally remove authorized keys
 # omarchy:requires-sudo=true
 
 set -e
@@ -14,9 +14,17 @@ echo "Stopping and disabling the OpenSSH server..."
 sudo systemctl disable --now ssh.service 2>/dev/null || true
 
 if omarchy-cmd-present ufw; then
-  echo "Closing the SSH port in the firewall..."
-  sudo ufw --force delete limit 22/tcp >/dev/null 2>&1 || true
+  echo "Removing standard SSH firewall rules..."
+  sudo ufw --force delete limit 22/tcp >/dev/null
+  sudo ufw --force delete allow 22/tcp >/dev/null
+  sudo ufw --force delete allow ssh >/dev/null
+  sudo ufw --force delete limit ssh >/dev/null
+  # Ubuntu's openssh-server names its ufw app profile OpenSSH (Arch's is SSH), and ufw fails on
+  # a profile it cannot find, which happens once openssh-server is removed.
+  sudo ufw --force delete allow to any app OpenSSH >/dev/null 2>&1 || true
+  sudo ufw --force delete limit to any app OpenSSH >/dev/null 2>&1 || true
   sudo ufw reload >/dev/null
+  echo "Standard SSH firewall rules removed. Review custom firewall rules separately."
 fi
 
 if [[ -s $AUTHORIZED_KEYS ]]; then
@@ -29,5 +37,5 @@ if [[ -s $AUTHORIZED_KEYS ]]; then
   fi
 fi
 
-echo -e "\e[32m\nThe SSH server has been disabled and its firewall port closed.\e[0m"
+echo -e "\e[32m\nThe SSH server has been disabled.\e[0m"
 echo "The openssh-server package stays installed; only its service is disabled."

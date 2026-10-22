@@ -21,13 +21,13 @@ if omarchy-pkg-missing "$@"; then
   fi
   # --no-install-recommends keeps a request for one tool from dragging in the
   # archive's suggestions around it; callers name everything they need.
-  "${as_root[@]}" apt-get install -y --no-install-recommends "$@" || exit 1
+  "${as_root[@]}" apt-get install -y --no-install-recommends -- "$@" || exit 1
 fi
 
 for pkg in "$@"; do
   # Secondary check: apt-get can exit 0 while dpkg left a package half
   # configured, and dpkg's status field is what says the install finished.
-  if [[ $(dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null) != "installed" ]]; then
+  if [[ $(dpkg-query -W -f='${db:Status-Status}' -- "$pkg" 2>/dev/null) != "installed" ]]; then
     echo -e "\033[31mError: Package '$pkg' did not install\033[0m" >&2
     exit 1
   fi

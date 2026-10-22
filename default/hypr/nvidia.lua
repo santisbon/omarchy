@@ -1,6 +1,7 @@
 local paths = require("default.hypr.paths")
 
 local nvidia = paths.omarchy_path .. "/bin/omarchy-hw-nvidia"
+local nvidia_display = paths.omarchy_path .. "/bin/omarchy-hw-nvidia-display"
 local nvidia_gsp = paths.omarchy_path .. "/bin/omarchy-hw-nvidia-gsp"
 local nvidia_without_gsp = paths.omarchy_path .. "/bin/omarchy-hw-nvidia-without-gsp"
 
@@ -12,12 +13,20 @@ local nvidia_without_gsp = paths.omarchy_path .. "/bin/omarchy-hw-nvidia-without
 -- Mesa so they do not wake the NVIDIA GPU; these NVIDIA-everywhere variables would undo that.
 -- omarchy-launch-nvidia runs one application on the NVIDIA GPU instead.
 if os.getenv("OMARCHY_GPU_OFFLOAD") ~= "nvidia" and o.shell_succeeds(o.shell_quote(nvidia)) then
+  -- On hybrid laptops the display is wired to the iGPU, so forcing NVIDIA's
+  -- VA-API/GLX drivers globally breaks Chromium-based browsers (black video).
+  -- Only apply those when NVIDIA actually drives the display.
+  local nvidia_is_display = o.shell_succeeds(o.shell_quote(nvidia_display))
   if o.shell_succeeds(o.shell_quote(nvidia_gsp)) then
     hl.env("NVD_BACKEND", "direct")
-    hl.env("LIBVA_DRIVER_NAME", "nvidia")
-    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+    if nvidia_is_display then
+      hl.env("LIBVA_DRIVER_NAME", "nvidia")
+      hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+    end
   elseif o.shell_succeeds(o.shell_quote(nvidia_without_gsp)) then
     hl.env("NVD_BACKEND", "egl")
-    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+    if nvidia_is_display then
+      hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+    end
   end
 end

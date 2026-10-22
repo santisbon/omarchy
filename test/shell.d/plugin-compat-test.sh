@@ -68,7 +68,8 @@ pass "pacman, yay and the AUR commands explain apt and change nothing; queries a
 installed="$work/installed"
 stub apt-cache "case \$4 in bluez-obexd|python3-requests|zip) exit 0 ;; *) exit 100 ;; esac"
 stub sudo "\"\$@\""
-stub apt-get "shift 3; printf '%s\n' \"\$@\" >>'$installed'"
+# apt-get install -y --no-install-recommends -- <packages>: four arguments before the names.
+stub apt-get "shift 4; printf '%s\n' \"\$@\" >>'$installed'"
 stub dpkg-query "grep -qx \"\${@: -1}\" '$installed' 2>/dev/null && printf installed"
 out=$(OMARCHY_PATH="$ROOT" PATH="$stubs:$ROOT/bin:$PATH" omarchy-pkg-add bluez-obex python-requests zip 2>&1) ||
   fail "pkg add installs translated names" "$out"

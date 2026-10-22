@@ -295,3 +295,27 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | Omarchy's AUR commands, as stand-ins | `omarchy-pkg-aur-add` and `-install` say that the distro installs software with apt and change nothing, and `-accessible` answers no, so plugins written for Omarchy that call them fail clearly; part of the compatibility with Omarchy's plugins and themes, with the `omarchy-*` links, the kept internal names, and stand-ins for `pacman`, `yay`, `paru` and `makepkg` | 86 |
 | The PATH for `ssh host command` | `install/config/ssh-command-path.sh` appends mise's shims and `~/.local/bin` to PAM's PATH in `/etc/security/pam_env.conf` (`PATH DEFAULT=${PATH}:...`, after Ubuntu's PATH from `/etc/environment`, where Omarchy's line set a PATH without `/usr/sbin`, `/sbin` and `/bin`), so commands run over SSH find the tools installed through mise; `oaxaca-config`'s postinst adds the line once on existing installs | 91 |
 | Obsidian | Install and Remove > Productivity > Obsidian, from Obsidian's own snap (`obsidian`, publisher `obsidianmd`, classic confinement), one of the Linux downloads Obsidian's site links; Super+Shift+O (`omarchy-launch-obsidian`: Obsidian's window, the snap, or its installer) and the theme sync (`omarchy-theme-set-obsidian`, in `omarchy-theme-set`'s list again). Omarchy preinstalls it, the port offers it instead. `config/obsidian/user-flags.conf` stays out: the Arch package's wrapper reads it, and the snap has no such wrapper | 97 |
+
+## Left out of the merge of Omarchy v4.0.6
+
+The branch merged Omarchy's `v4.0.6` tag on 2026-10-22: the 49 commits from `v4.0.4`, through
+`v4.0.5`. These parts of them are not on the branch, each for the reason given:
+
+| What | Omarchy's commits | Why it is left out |
+|---|---|---|
+| Hermes installed through Hermes Desktop's installer into `~/.hermes`, and the migration that retires the Hermes mise built | `4fd781d5`, `c13da44c` | The new `omarchy-install-hermes-cli` installs Omarchy's Arch package `hermes-desktop` and runs its `/usr/share/hermes-desktop/install.sh`; neither exists for Ubuntu, so choosing Hermes as the default agent would fail, and the migration would remove the Hermes that works. The branch keeps v4.0.4's Hermes through mise (`omarchy-install-hermes-cli`, `omarchy-default-agent`, `omarchy-agent`, `omarchy-theme-set-hermes`, `install/user/mise.sh`, `manual/17-ai.md` and their tests as they were). |
+| OpenClaw's move to a self-updating install, and its migrations | `c13da44c`, `907f1868`, `237f1b40` | The port removed OpenClaw. |
+| Omarchy's package repository priority, the keyring refresh, the Limine console fix and the non-Latin `vconsole.conf` initramfs fix, with their migrations and tests | `e4ba01a7`, `551f35f0`, `27743133`, `92299248`, `048f9220`, `8864d97e`, `1ee5ebac` | pacman, Limine and mkinitcpio, which Ubuntu does not use. |
+| The Dell XPS 13 Panther Lake (DX13260) speaker firmware | `2846a7da`, `09b4d4a2` | `linux-firmware-cirrus-dx13260` is Omarchy's own package; Ubuntu's archive has no package of that name, so the install, and the migration with it, would fail. |
+| The Apple T2 firmware fetcher | `1c42580e` | The port removed `install/hardware/apple/fix-t2.sh`. |
+| The remote Neovim clipboard repair | `2b9ed8ca` | The repaired file comes from Omarchy's Neovim configuration, `omarchy-nvim`, which the port does not install. |
+| The RetroArch database in the remove list | `9f4d40a8` | Ubuntu has no `libretro-database` package. |
+
+Changed on the way in, rather than left out:
+
+- **The account scrub of a factory reset** (`4b7bb8f3`): the port's own `scrub_accounts_and_identity` takes Omarchy's two fixes, replacing root's password hash instead of only locking it, and deleting the backups of the account files (`/etc/shadow-` and the others) that keep removed users' hashes.
+- **The SSH firewall cleanup** (`afcea4ba`): Ubuntu's `openssh-server` names its ufw app profile `OpenSSH`, not `SSH`, and the two app-profile deletions tolerate a missing profile.
+- **The hybrid NVIDIA video fix** (`77d5ab8d`): `nvidia.lua` keeps the port's `OMARCHY_GPU_OFFLOAD` guard around Omarchy's display-GPU check, and the migration asks for a reboot only in a session without that variable.
+- **Browser launching** (`3d1d4567`, `652e8c48`, `94a8fbc2`): `omarchy-launch-webapp` keeps the port's fallback to any installed Chromium-family browser around Omarchy's handoff to the running browser; `omarchy-remove-browser` keeps the port's browsers and deletes the new `omarchy.json` policy file with each.
+- **The `--` before package names** (`aeb551cf`): the port's `apt-get install` and `dpkg-query` calls take it, and `command-operand-boundaries-test.sh` checks them instead of pacman and yay.
+- **The mise PATH fix** (`6ae40920`) was already on the branch, taken ahead of the merge; its migration keeps the port's check for a missing mise.

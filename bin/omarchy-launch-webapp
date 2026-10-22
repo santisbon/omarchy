@@ -10,7 +10,7 @@
 # When no Chromium-family browser is installed, a notification says how to get one.
 exec_of() { sed -n 's/^Exec=\([^ ]*\).*/\1/p' {~/.local,~/.nix-profile,/usr}/share/applications/"$1" 2>/dev/null | head -1; }
 
-browser=$(xdg-settings get default-web-browser)
+browser=$(omarchy-cmd-default-browser)
 case $browser in
 chromium* | google-chrome* | brave* | microsoft-edge* | opera* | vivaldi* | helium*) ;;
 *) browser="" ;;
@@ -29,4 +29,8 @@ if [[ -z $browser ]]; then
   exit 1
 fi
 
-exec setsid uwsm-app -- $(exec_of "$browser") --app="$1" "${@:2}"
+browser_exec=$(exec_of "$browser")
+
+if ! omarchy-cmd-browser-handoff "$browser_exec" --app="$1" "${@:2}"; then
+  exec setsid uwsm-app -- $browser_exec --app="$1" "${@:2}"
+fi

@@ -275,7 +275,12 @@ scrub_accounts_and_identity() {
       fail "could not remove user $user from $what (see $LOG_FILE)"
     rm -rf "${root:?}/home/$user"
   done
-  passwd --root "$root" --lock root >>"$LOG_FILE" 2>&1 || true
+  # passwd --lock only prefixes root's hash with "!" and keeps it: replace the hash instead
+  # (Omarchy 4.0.5, #10379). userdel and usermod leave backups of the account files that still
+  # hold the removed users' hashes, so those go too.
+  usermod --root "$root" --password '!' root >>"$LOG_FILE" 2>&1 ||
+    fail "could not clear root's password in $what (see $LOG_FILE)"
+  rm -f "$root/etc/"{shadow-,gshadow-,passwd-,group-,subuid-,subgid-}
   rm -f "$root"/etc/ssh/ssh_host_*
   rm -f "$root"/etc/NetworkManager/system-connections/*
   rm -rf "$root"/var/lib/NetworkManager/* "$root/var/lib/tailscale"

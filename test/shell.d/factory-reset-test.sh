@@ -102,16 +102,26 @@ cat >"$tmp/bin/userdel" <<'SH'
 #!/bin/bash
 [[ $1 == --root ]] && sed -i "/^$3:/d" "$2/etc/passwd"
 SH
-printf '#!/bin/bash\nexit 0\n' >"$tmp/bin/passwd"
+# usermod --root <dir> --password '!' root: replace root's hash in the fake shadow file.
+cat >"$tmp/bin/usermod" <<'SH'
+#!/bin/bash
+[[ $1 == --root && $3 == --password && $5 == root ]] && sed -i "s/^root:[^:]*:/root:$4:/" "$2/etc/shadow"
+SH
 chmod +x "$tmp/bin"/*
+printf 'root:$y$roothash:20000::::::\nana:$y$anahash:20000::::::\n' >"$fake/etc/shadow"
+for backup in shadow- gshadow- passwd- group- subuid- subgid-; do
+  printf 'ana:$y$anahash\n' >"$fake/etc/$backup"
+done
 scrub_accounts_and_identity "$fake" "the test root"
+grep -qx 'root:!:20000::::::' "$fake/etc/shadow" || fail "root's password hash is replaced, not only locked" "$(cat "$fake/etc/shadow")"
+[[ -z $(ls "$fake"/etc/*- 2>/dev/null) ]] || fail "the account files' backups, which keep removed users' hashes, go" "$(ls "$fake"/etc)"
 ! grep -q '^ana:' "$fake/etc/passwd" || fail "the user is removed"
 grep -q '^sddm:' "$fake/etc/passwd" && grep -q '^nobody:' "$fake/etc/passwd" || fail "system accounts stay"
 [[ ! -e $fake/home/ana && ! -e $fake/var/lib/fprint/ana ]] || fail "the user's home and fingerprints go"
 [[ ! -e $fake/etc/ssh/ssh_host_ed25519_key && -e $fake/etc/ssh/sshd_config ]] || fail "host keys go, sshd's config stays"
 [[ -z $(ls "$fake/etc/NetworkManager/system-connections") ]] || fail "network connections go"
 [[ ! -e $fake/var/lib/sddm/state.conf && ! -e $fake/etc/sddm.conf.d/autologin.conf ]] || fail "the login manager forgets the user"
-pass "the reset removes users, homes, fingerprints, host keys, connections and the last login"
+pass "the reset removes users, homes, fingerprints, root's hash, account file backups, host keys, connections and the last login"
 
 # --- the new owner's groups: sudo, plus the old user's, without docker or a stale input
 load omarchy-provision-owner user_groups

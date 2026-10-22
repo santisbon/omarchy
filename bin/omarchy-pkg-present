@@ -8,7 +8,7 @@
 mapfile -t packages < <(omarchy-pkg-translate "$@")
 
 for pkg in "${packages[@]}"; do
-  [[ $(dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null) == "installed" ]] || exit 1
+  [[ $(dpkg-query -W -f='${db:Status-Status}' -- "$pkg" 2>/dev/null) == "installed" ]] || exit 1
 done
 
 exit 0

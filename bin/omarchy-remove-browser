@@ -10,7 +10,7 @@
 # resolves it to and the user is told to pick another.
 note_default_browser_removed() {
   local current_browser
-  current_browser=$(env -u BROWSER xdg-settings get default-web-browser 2>/dev/null)
+  current_browser=$(omarchy-cmd-default-browser)
 
   if [[ $current_browser == "$1" ]]; then
     echo ""
@@ -25,7 +25,7 @@ chrome)
   # The deb wrote these on install; purge leaves them behind.
   sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/trusted.gpg.d/google-chrome.gpg
   rm -f ~/.config/chrome-flags.conf
-  sudo rm -f /etc/opt/chrome/policies/managed/color.json
+  sudo rm -f /etc/opt/chrome/policies/managed/color.json /etc/opt/chrome/policies/managed/omarchy.json
   note_default_browser_removed google-chrome.desktop
   ;;
 chromium)
@@ -33,7 +33,7 @@ chromium)
   omarchy-pkg-drop chromium
   omarchy-pkg-repo-remove xtradeb
   rm -f ~/.config/chromium-flags.conf
-  sudo rm -f /etc/chromium/policies/managed/color.json
+  sudo rm -f /etc/chromium/policies/managed/color.json /etc/chromium/policies/managed/omarchy.json
   note_default_browser_removed chromium.desktop
   ;;
 brave-origin)
