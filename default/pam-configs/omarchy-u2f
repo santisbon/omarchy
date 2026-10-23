@@ -3,4 +3,5 @@ Default: no
 Priority: 264
 Auth-Type: Primary
 Auth:
+	[success=1 default=ignore]	pam_succeed_if.so quiet service notin sudo:sudo-i:polkit-1
 	[success=end default=ignore]	pam_u2f.so cue authfile=/etc/fido2/fido2

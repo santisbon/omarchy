@@ -6,9 +6,10 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/base-test.sh"
 
 profile="$ROOT/default/pam-configs/omarchy-fprintd"
 mapfile -t auth < <(sed -n '/^Auth:/,$p' "$profile" | tail -n +2)
-[[ ${auth[0]} == *"[success=1 default=ignore]"*"pam_exec.so quiet /usr/bin/omarchy-hw-laptop-closed" ]] ||
-  fail "the gate comes first and skips exactly one module when the lid is closed"
-[[ ${auth[1]} == *"pam_fprintd.so max-tries=1 timeout=10" ]] || fail "the module it skips is pam_fprintd, with Ubuntu's options"
+# auth[0] is the service gate, checked by security-pam-scope-test.sh.
+[[ ${auth[1]} == *"[success=1 default=ignore]"*"pam_exec.so quiet /usr/bin/omarchy-hw-laptop-closed" ]] ||
+  fail "the lid gate comes right after the service gate and skips exactly one module when the lid is closed"
+[[ ${auth[2]} == *"pam_fprintd.so max-tries=1 timeout=10" ]] || fail "the module it skips is pam_fprintd, with Ubuntu's options"
 grep -qx 'Conflicts: fprintd' "$profile" || fail "the profile conflicts with Ubuntu's fprintd profile"
 
 stub_dir=$(mktemp -d)

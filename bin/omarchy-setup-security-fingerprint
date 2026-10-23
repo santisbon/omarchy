@@ -5,12 +5,14 @@
 
 set -e
 
-# Ubuntu manages the common-* PAM stacks with pam-auth-update, which sudo,
-# polkit, SDDM and this desktop's lock screen all include, so no PAM file is
-# edited by hand here. The profile enabled is the desktop's own
-# (/usr/share/pam-configs/omarchy-fprintd, from default/pam-configs/): Ubuntu's
-# fprintd profile (pam_fprintd.so max-tries=1 timeout=10) with Omarchy's
-# clamshell gate in front of it, a pam_exec of omarchy-hw-laptop-closed that
+# Ubuntu manages the common-* PAM stacks with pam-auth-update, and sudo, polkit
+# and SDDM all include common-auth, so no PAM file is edited by hand here. The
+# profile enabled is the desktop's own (/usr/share/pam-configs/omarchy-fprintd,
+# from default/pam-configs/): Ubuntu's fprintd profile (pam_fprintd.so
+# max-tries=1 timeout=10) behind two gates. The first skips the reader for every
+# service other than sudo, sudo -i and polkit, Omarchy's scope, so the login
+# screen stays a password login and that password unlocks the login keyring.
+# The second is Omarchy's clamshell gate, a pam_exec of omarchy-hw-laptop-closed that
 # skips the reader (success=1) when the lid is shut, so a docked, closed laptop
 # goes straight to the password instead of waiting 10 seconds on a reader
 # nobody can touch. The two profiles conflict, so Ubuntu's is disabled first

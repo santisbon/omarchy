@@ -9,8 +9,12 @@ set -o pipefail
 # Ubuntu manages the common-* PAM stacks with pam-auth-update. libpam-u2f ships
 # no profile for it, so the settings package installs one
 # (/usr/share/pam-configs/omarchy-u2f, from default/pam-configs/, off by
-# default); enabling it puts pam_u2f into common-auth, which sudo, polkit, SDDM
-# and the lock screen include. No PAM file is edited by hand.
+# default); enabling it puts pam_u2f into common-auth. Every service that
+# includes common-auth, SDDM's login screen among them, would then take a touch
+# instead of the password, so the profile's first line skips the key for every
+# service other than sudo, sudo -i and polkit, Omarchy's scope. The login screen
+# stays a password login, and that password unlocks the login keyring. No PAM
+# file is edited by hand.
 check_fido2_hardware() {
   tokens=$(fido2-token -L 2>/dev/null)
   if [[ -z $tokens ]]; then

@@ -9,7 +9,7 @@ set -e
 remove_pam_config() {
   # The setup enabled the desktop's omarchy-fprintd profile (Ubuntu's fprintd
   # profile on systems set up earlier); disabling both takes pam_fprintd back
-  # out of common-auth for every service at once.
+  # out of common-auth at once.
   echo "Disabling the fingerprint PAM profiles (pam-auth-update --disable omarchy-fprintd fprintd)..."
   sudo pam-auth-update --package --disable omarchy-fprintd fprintd
 }
