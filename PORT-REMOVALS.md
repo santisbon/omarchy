@@ -1,6 +1,6 @@
 # What the port removed from Omarchy
 
-This document lists every feature of Omarchy v4.0.4 that the port does not have today, why it was removed, whether that reason holds on Ubuntu, and what restoring it would take. The audit behind it was written on 2026-10-16, after three removals turned out to be wrong: the agent skills (deleted as Omarchy's contributing workflow, though seven of their nine files are help for users), the update snapshots (deleted with Limine, though only the boot menu needed Limine), and the launcher's handling of desktop ids that end in `.desktop`. Features restored since then are not in the sections about removals: they are listed once, in [Restored](#restored), at the end, with the choice that records each.
+This document lists every feature of Omarchy that the port does not have, why it was removed, whether that reason holds on Ubuntu, and what restoring it would take. The audit behind it was written on 2026-10-16, after three removals turned out to be wrong: the agent skills (deleted as Omarchy's contributing workflow, though seven of their nine files are help for users), the update snapshots (deleted with Limine, though only the boot menu needed Limine), and the launcher's handling of desktop ids that end in `.desktop`. Features restored since then are not in the sections about removals: they are listed once, in [Restored](#restored), at the end, with the choice that records each.
 
 The port follows the rule the distro's Ubuntu base follows: nothing is installed and then removed. The port starts from a minimal base, Ubuntu's own configuration plus the parts of Omarchy the desktop needs to run, and adds each further Omarchy feature by a recorded choice that gives a reason that holds on Ubuntu. "Omarchy does it on Arch" is not such a reason by itself: some of Omarchy's fixes exist because of how Arch builds the system (mkinitcpio leaves modules out of the initramfs unless told; Ubuntu's initramfs-tools does not). Restoring an item below is such an addition: it is written for Ubuntu, recorded as a choice in the build repository's `docs/6 - omarchy-port.md`, and is not a revert of the commit that removed Omarchy's version.
 
@@ -10,7 +10,7 @@ Each entry uses only terms defined above it.
 
 ### Omarchy and the port
 
-Omarchy is the Arch Linux desktop the Oaxaca distro follows, at its release tag `v4.0.4`. The port is this branch, `oaxaca`, which rewrites Omarchy for Ubuntu (`PORT.md`). The distro's build repository, `santisbon/oaxaca`, packages it (`packages/desktop`) and holds the distro's design documents under `docs/`.
+Omarchy is the Arch Linux desktop the Oaxaca distro follows, at its release tag `v4.0.6`. The sections before [Left out of the merge of Omarchy v4.0.6](#left-out-of-the-merge-of-omarchy-v406) are the audit of the port against `v4.0.4` and what was restored since; that last section covers what `v4.0.5` and `v4.0.6` added. The port is this branch, `oaxaca`, which rewrites Omarchy for Ubuntu (`PORT.md`). The distro's build repository, `santisbon/oaxaca`, packages it (`packages/desktop`) and holds the distro's design documents under `docs/`.
 
 ### stonking
 

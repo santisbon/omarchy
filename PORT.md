@@ -1,11 +1,10 @@
 # The `oaxaca` branch
 
 This branch is Omarchy ported from Arch Linux and pacman to Ubuntu and apt, for the distro
-whose build repository is `santisbon/oaxaca`. It starts at Omarchy's release tag named in that
-repository's `distro.conf` (`OMARCHY_TAG`, `v4.0.6` today). Each new Omarchy tag the distro
-adopts is merged into the branch, never rebased onto: the branch's commit hashes are recorded in
-published package versions. It started at `v4.0.4`; `v4.0.6` was merged on 2026-10-22, and what
-that merge left out is at the end of `PORT-REMOVALS.md`.
+whose build repository is `santisbon/oaxaca`. It follows Omarchy's release tag named in that
+repository's `distro.conf` (`OMARCHY_TAG`, `v4.0.6`). Each new Omarchy tag the distro adopts is
+merged into the branch, never rebased onto: the branch's commit hashes are recorded in published
+package versions. What each merge left out is at the end of `PORT-REMOVALS.md`.
 
 ## What the branch holds
 
@@ -13,7 +12,7 @@ that merge left out is at the end of `PORT-REMOVALS.md`.
   rewritten from pacman to apt, Arch-only scripts and files deleted, Ubuntu paths and names
   (PAM stacks, the `sudo` group, package names in `install/omarchy-base.packages`).
 - `port/rename.sh`, the rename script. The branch keeps Omarchy's names (`omarchy-*` commands,
-  `OMARCHY_PATH`, `/usr/share/omarchy`), so that a rebase onto the next Omarchy tag meets the
+  `OMARCHY_PATH`, `/usr/share/omarchy`), so that a merge of the next Omarchy tag meets the
   same names on both sides. The distro's packaging copies the tree and runs the script on the
   copy with `DISTRO_ID` and `DISTRO_NAME` from `distro.conf`, which is what makes every command
   `oaxaca-*`, every path `/usr/share/oaxaca` and the Lua module `oaxaca`. Since 2026-10-17 the
@@ -69,7 +68,7 @@ A PPA (Personal Package Archive) is an apt repository that a person or team publ
 
 ## Removals
 
-`PORT-REMOVALS.md`, next to this file, lists everything the port removed from Omarchy v4.0.4 (files, menu entries, packages, features cut inside kept files, and tests), the reason recorded for each, whether that reason holds, and a ranked restore list (audit of 2026-10-16).
+`PORT-REMOVALS.md`, next to this file, lists everything the port removed from Omarchy (files, menu entries, packages, features cut inside kept files, and tests), the reason recorded for each, whether that reason holds, and a ranked restore list (audit of 2026-10-16).
 
 ## Tests
 
@@ -79,21 +78,29 @@ The deleted test files and test cases are listed in `PORT-REMOVALS.md`, "Tests".
 
 What the tests need on the machine that runs them, beyond the build tools: `lua` (Ubuntu's `lua5.5`) for the Hyprland configuration tests, `rg` (`ripgrep`) for the plugin, power-profile and Codex usage tests, `node` (Ubuntu's `nodejs`) for the 47 test files that run JavaScript through `run_node_test` or `require_command node`, a UTF-8 locale that loads (a shell exporting `LOCPATH` breaks the locale test), and a checkout whose directories are not group-writable (a checkout made under umask 0002 fails the Plymouth publisher's ownership check, which guards the installed, root-owned tree).
 
-## Rebase
+## Merging a new Omarchy tag
 
 ```
 git fetch upstream --tags
-git rebase <new tag> oaxaca
+git switch oaxaca
+git merge <new tag>
 DISTRO_ID=x DISTRO_NAME=X port/rename.sh --tree <a copy>   # proves the rename still applies
+git push origin oaxaca <new tag>
 ```
 
-Then rebuild `packages/desktop` in `santisbon/oaxaca` and run its boot test and its upgrade test
-(`make upgrade-test`, which upgrades the published packages to the new build in a chroot and runs
-the migrations for a seeded user).
+`git push` sends the tag to the fork, `santisbon/omarchy`, as well as the branch: the build
+repository's `build.sh` fetches `refs/tags/<OMARCHY_TAG>` from the fork to count the branch's
+commits since the tag. Then
+set `OMARCHY_TAG` in `santisbon/oaxaca`'s `distro.conf` to the new tag, rebuild
+`packages/desktop`, and run the boot test and the upgrade test (`make upgrade-test`, which
+upgrades the published packages to the new build in a chroot and runs the migrations for a seeded
+user). What the merge does not take goes into a section of its own at the end of
+`PORT-REMOVALS.md`, with the reason for each.
 
 - Migrations: `migrations/` holds only the port's own (its README says why Omarchy's 106 were
-  deleted). Every migration the new tag adds is ported or deleted during the rebase, never kept
-  as it comes, because Omarchy's call pacman, limine and snapper. A change on this branch that
+  deleted). Every migration the new tag adds is read before it can run on an installed system,
+  and ported or deleted during the merge, never kept as it comes, because Omarchy's call pacman,
+  limine and snapper. A change on this branch that
   moves a user's files gets a migration of its own through `omarchy-dev-add-migration`.
 
 - Ubuntu components keep Ubuntu's configuration (stonking's packages, not another release's) unless a reason specific to this desktop, or to hardware it runs on, is written down; see the distro repository's `docs/6 - omarchy-port.md`, section "Ubuntu's configuration, not Omarchy's".
