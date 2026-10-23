@@ -10,9 +10,11 @@
 #      alone (omarchy.org, the omacom/basecamp GitHub organisations, omarchy-pkgs, the
 #      Omarchy manual), because they still point at Omarchy; with DISTRO_BUG_URL and
 #      DISTRO_HOME_URL set, the support pointers (omarchy.org/discord, omarchy.org) in
-#      user-facing messages become the distro's; with DISTRO_FORK_REPO set (owner/name of
-#      this fork on GitHub, such as santisbon/omarchy), that repository's name is kept too,
-#      because the agent skills send bug reports there;
+#      user-facing messages become the distro's; with DISTRO_MANUAL_URL set, the address of
+#      Omarchy's online manual (omarchy.org/manual/, opened by Learn > Omarchy) becomes the
+#      distro's manual; with DISTRO_FORK_REPO set (owner/name of this fork on GitHub, such as
+#      santisbon/omarchy), that repository's name is kept too, because the agent skills send
+#      bug reports there;
 #   3. renames every file and directory whose name contains "omarchy" or "Omarchy", except
 #      Chromium's native-messaging host files, which are named after the host they declare.
 # The result is what the distro's packages install: bin/<id>-*, /usr/share/<id>/..., the
@@ -33,8 +35,8 @@
 #   - the icon font's family, "omarchy", which menu entries and plugins name in iconFont and
 #     fontFamily (the font file itself moves to default/fonts/<id>/<id>.ttf).
 #
-# This script never runs on a git checkout (the port is kept un-renamed in git so that it
-# rebases onto Omarchy's tags); the packaging copies the tree first. --force overrides
+# This script never runs on a git checkout (the port is kept un-renamed in git so that
+# Omarchy's tags merge into it); the packaging copies the tree first. --force overrides
 # that check for experiments.
 #
 # Usage: DISTRO_ID=<id> DISTRO_NAME=<Name> [DISTRO_ID_UPPER=<ID>] port/rename.sh --tree <dir> [--force]
@@ -70,6 +72,7 @@ find themes -path '*/backgrounds/*' -type f -iname '*omarchy*' -print -delete 2>
 #    omarchy.org and the names of Omarchy's other repositories.
 export RENAME_ID="$id" RENAME_NAME="$name" RENAME_UPPER="$upper"
 export RENAME_BUG_URL="${DISTRO_BUG_URL:-}" RENAME_HOME_URL="${DISTRO_HOME_URL:-}"
+export RENAME_MANUAL_URL="${DISTRO_MANUAL_URL:-}"
 export RENAME_FORK_REPO="${DISTRO_FORK_REPO:-}"
 # The built-in plugins' IDs without the omarchy. prefix, as one alternation: clock|menu|...
 RENAME_KEEP_IDS=$(grep -rhoE '"id"[[:space:]]*:[[:space:]]*"omarchy\.[a-z0-9-]+"' shell |
@@ -95,6 +98,7 @@ KEEP='
 grep -rIlZ --exclude-dir=.git -E 'omarchy|Omarchy|OMARCHY' . | xargs -0 -r perl -pi -e "$KEEP"'
   # Support pointers in user-facing messages go to the distro, when the build says where.
   if ($ENV{RENAME_BUG_URL} ne q{}) { s#https://omarchy\.org/discord#$ENV{RENAME_BUG_URL}#g; }
+  if ($ENV{RENAME_MANUAL_URL} ne q{}) { s#https://omarchy\.org/manual/?#$ENV{RENAME_MANUAL_URL}#g; }
   if ($ENV{RENAME_HOME_URL} ne q{}) { s#https://omarchy\.org(?![/\w])#$ENV{RENAME_HOME_URL}#g; }
   s/OMARCHY/$ENV{RENAME_UPPER}/g;
   s/Omarchy(?!\.org)/$ENV{RENAME_NAME}/g;

@@ -43,17 +43,11 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 
 ## Open work
 
-What is left from this audit, the one candidate still to restore (Learn > Omarchy, whose facts are in [Commands, launchers and menu entries](#commands-launchers-and-menu-entries)) and the checks still open, is in the build repository's developer README, [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do), the one list of open work for the distro and this fork.
+What is left from this audit, the checks still open, is in the build repository's developer README, [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do), the one list of open work for the distro and this fork.
 
 ## Commands, launchers and menu entries
 
 85 deleted files under `bin/` and `applications/` and 70 removed menu entries, grouped by feature. The commits that deleted them, `ef4c9211` (47 files), `c304e943` (37) and `963b196e` (the HEY handler), give no reason per item; the reasons are from docs/6, docs/1, docs/0 and `PORT.md`.
-
-### Partly restore
-
-| Feature | Files and menu entries | What it did | Removed because | Checked facts | Verdict |
-|---|---|---|---|---|---|
-| Learn > Omarchy | `learn.omarchy` | Omarchy's manual | none recorded | parts of the manual do not apply (the firewall's Docker rules, pacman, Limine), most does | **Partial**: with a caveat, or a page of the port's own |
 
 ### Replaced
 
@@ -295,6 +289,7 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | Omarchy's AUR commands, as stand-ins | `omarchy-pkg-aur-add` and `-install` say that the distro installs software with apt and change nothing, and `-accessible` answers no, so plugins written for Omarchy that call them fail clearly; part of the compatibility with Omarchy's plugins and themes, with the `omarchy-*` links, the kept internal names, and stand-ins for `pacman`, `yay`, `paru` and `makepkg` | 86 |
 | The PATH for `ssh host command` | `install/config/ssh-command-path.sh` appends mise's shims and `~/.local/bin` to PAM's PATH in `/etc/security/pam_env.conf` (`PATH DEFAULT=${PATH}:...`, after Ubuntu's PATH from `/etc/environment`, where Omarchy's line set a PATH without `/usr/sbin`, `/sbin` and `/bin`), so commands run over SSH find the tools installed through mise; `oaxaca-config`'s postinst adds the line once on existing installs | 91 |
 | Obsidian | Install and Remove > Productivity > Obsidian, from Obsidian's own snap (`obsidian`, publisher `obsidianmd`, classic confinement), one of the Linux downloads Obsidian's site links; Super+Shift+O (`omarchy-launch-obsidian`: Obsidian's window, the snap, or its installer) and the theme sync (`omarchy-theme-set-obsidian`, in `omarchy-theme-set`'s list again). Omarchy preinstalls it, the port offers it instead. `config/obsidian/user-flags.conf` stays out: the Arch package's wrapper reads it, and the snap has no such wrapper | 97 |
+| Learn > Omarchy | `learn.omarchy`, as in Omarchy's menu; the build points it at the distro's manual site (`DISTRO_MANUAL_URL`, through `port/rename.sh`), where the manual from this branch's `manual/` is published with Oaxaca's notes, so the label reads Learn > Oaxaca | 102 |
 
 ## Left out of the merge of Omarchy v4.0.6
 

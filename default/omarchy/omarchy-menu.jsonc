@@ -37,6 +37,7 @@
 
   // Learn
   "learn.keybindings": {"icon":"","label":"Keybindings","action":"omarchy-menu-keybindings"},
+  "learn.omarchy": {"icon":"","label":"Omarchy","action":"omarchy-launch-webapp 'https://omarchy.org/manual/'"},
   "learn.hyprland": {"icon":"","label":"Hyprland","action":"omarchy-launch-webapp 'https://wiki.hypr.land/'"},
   "learn.ubuntu": {"icon":"","label":"Ubuntu","action":"omarchy-launch-webapp 'https://help.ubuntu.com/'"},
   "learn.neovim": {"icon":"","label":"Neovim","action":"omarchy-launch-webapp 'https://neovim.io/doc/user/quickref.html'"},
