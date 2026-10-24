@@ -1,4 +1,6 @@
-# Welcome to Omarchy!
+# Welcome to Oaxaca!
+
+> **Oaxaca: about this manual.** Oaxaca adopts the Omarchy desktop: Hyprland's tiling windows and Omarchy's bar, menus, key bindings and themes, on Ubuntu instead of Arch Linux. This manual is Omarchy's own, so it speaks of Omarchy throughout, and it guides you through the same desktop on Oaxaca. Where Oaxaca works differently, a note like this one, marked **Oaxaca:**, says how.
 
 Omarchy is an [omakase](https://manuals.omamix.org/3/omacom/76/omakase-computing) Linux distribution based on [Arch](https://archlinux.org/), the tiling window manager [Hyprland](https://hypr.land/), and the desktop construction-kit [Quickshell](https://quickshell.org/). It ships with everything a modern, savvy computer user needs to be productive immediately. From [Neovim](https://neovim.io/) (btw) to Chromium, [Obsidian](https://obsidian.md/) to LibreOffice, and Kdenlive to OBS Studio. Hell, even a retro Winamp-style music player is there!
 
