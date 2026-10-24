@@ -2,7 +2,7 @@
 
 The private-use glyphs in `omarchy.ttf` are:
 
-- `U+E900` — Omarchy
+- `U+E900` — the distro's mark, a stepped fret (xicalcoliuhqui) from the Zapotec mosaics at Mitla, drawn on an 8 by 8 grid by the distro's build repository (scripts/branding.py)
 - `U+E901` — Pi, from <https://pi.dev/logo-auto.svg>
 - `U+E902` — OpenCode, from <https://opencode.ai/favicon-96x96-v3.png>
 - `U+E903` — omp, from <https://omp.sh/favicon.svg>

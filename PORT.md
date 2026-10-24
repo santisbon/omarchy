@@ -103,5 +103,13 @@ user). What the merge does not take goes into a section of its own at the end of
   limine and snapper. A change on this branch that
   moves a user's files gets a migration of its own through `omarchy-dev-add-migration`.
 
+- The icon font: `default/fonts/omarchy/omarchy.ttf` holds the distro's mark at `U+E900`, where
+  Omarchy's has Omarchy's mark (the distro's docs/6, choice 104). git cannot merge two versions
+  of a binary font, so when a tag changes the font, take the tag's version and draw the mark
+  into it again, from the build repository's `make branding` output: in this checkout,
+  `git checkout --theirs default/fonts/omarchy/omarchy.ttf`, then
+  `OMARCHY_PATH=$PWD bin/omarchy-dev-font replace U+E900 <build repository>/build/branding/mark.svg --name distro --label "<the line the README had>"`.
+  The command keeps the tag's other glyphs and rewrites the README's `U+E900` line.
+
 - Ubuntu components keep Ubuntu's configuration (stonking's packages, not another release's) unless a reason specific to this desktop, or to hardware it runs on, is written down; see the distro repository's `docs/6 - omarchy-port.md`, section "Ubuntu's configuration, not Omarchy's".
 - The port supports other hardware, not only the Legion (since 2026-10-16; docs/6, choice 48): Omarchy's fixes for other machines in `install/hardware/` are kept or restored, each gated on Omarchy's own device check and written for Ubuntu (`/etc/modprobe.d` options instead of Limine kernel parameters, Ubuntu package names), within the distro's policy (no DKMS, Ubuntu's kernel and GRUB). A fix that cannot meet it is listed in `PORT-REMOVALS.md` with the reason.
