@@ -18,6 +18,8 @@ After you've installed it, you'll be able to launch Steam with `Super + Space`.
 
 Note that Steam can take 10-20 seconds to start up, and it's not going to provide any visual feedback that it's loading.
 
+> **Oaxaca: added.** Steam's windows float, so Steam's main window stays above a game that opens in a window. Click the game and press `Super + F` to make it full screen, or click Steam's window and press `Super + W` to close it; Steam and the game keep running.
+
  ![gaming-steam](images/gaming-steam.webp)
 
 ## RetroArch
