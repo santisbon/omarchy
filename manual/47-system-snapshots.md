@@ -2,7 +2,7 @@
 
 We create snapshots automatically on every Omarchy update, but should you want to create your own, you can use `omarchy-snapshot create`.
 
-> **Oaxaca: works differently.** Oaxaca's `omarchy-snapshot` drives Timeshift, a snapshot tool from Ubuntu's archive, instead of Snapper, and only on btrfs installs, which Oaxaca's installer makes by default; an install on ext4 or xfs has no snapshots. `omarchy-update` takes a snapshot before every update, and each `omarchy-snapshot create` keeps the newest five of the snapshots it took and deletes older ones; snapshots taken in Timeshift's own window are never pruned (the distro's docs/6, choice 38; docs/7, choice 52).
+> **Oaxaca: works differently.** Oaxaca's `omarchy-snapshot` drives Timeshift, a snapshot tool from Ubuntu's archive, instead of Snapper, and only on btrfs installs, which Oaxaca's installer makes by default; an install on ext4 or xfs has no snapshots. `omarchy-update` takes a snapshot before every update, and each `omarchy-snapshot create` keeps the newest five of the snapshots it took and deletes older ones; snapshots taken in Timeshift's own window are never pruned (the distro's docs/6, choice 38; docs/7, choice 52). The factory snapshot that _Setup > Reset Computer_ restores, `@factory`, is not a Timeshift snapshot but a read-only btrfs subvolume the installer makes, so Timeshift's window doesn't list it and the update never deletes it (the distro's docs/6, choice 87).
 
 To boot and restore a snapshot, you select it from the Limine boot loader. (If you're currently booting straight into the Omarchy decryption screen, you'll need to select Limine as a boot option via the BIOS first).
 
