@@ -4,7 +4,9 @@ Omarchy is installed using an ISO. You can choose between a full-disk install, w
 
 > **Oaxaca: works differently.** Oaxaca's ISO boots an Ubuntu live session (casper) that opens Calamares, a graphical installer, instead of Omarchy's installer (the distro's docs/7, choice 1). Calamares's partition page offers modes such as "Erase disk" and "Replace a partition"; its "Encrypt system" box starts checked (LUKS2, with a separate unencrypted 4 GB `/boot`), and btrfs is the default file system, with ext4 and xfs also offered (the distro's docs/7, choices 9, 32 and 52).
 
-[Download the Omarchy ISO](https://omarchy.org/) first, put it on a USB stick (use [balenaEtcher](https://etcher.balena.io/) on Mac/Windows or [caligula](https://github.com/ifd3f/caligula) on Linux), and boot off the stick.
+Download the ISO first, put it on a USB stick (use [balenaEtcher](https://etcher.balena.io/) on Mac/Windows or [caligula](https://github.com/ifd3f/caligula) on Linux), and boot off the stick.
+
+> **Oaxaca: added.** The website's front page, under _Check the download_, has the commands that check the ISO. gpg's "WARNING: This key is not certified with a trusted signature!" only means you haven't signed Oaxaca's key yourself; the ISO is genuine when gpg reports "Good signature" with the fingerprint shown on that page and `sha256sum` prints OK.
 
 _You must turn off Secure Boot and/or TPM in the BIOS. You have to turn these off to be able to install Omarchy. They're Microsoft security schemes meant for Windows and Microsoft-affiliated Linux distributions._
 
