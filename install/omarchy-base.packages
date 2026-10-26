@@ -143,6 +143,16 @@ whois
 # Restored 2026-10-16 (docs/6, choice 70): dua-cli, the disk usage viewer behind Omarchy's
 # "Disk Usage" launcher (applications/Disk Usage.desktop).
 dua-cli
+# Build tools (docs/6, choice 106): what a plugin's own setup script expects from Omarchy's Arch
+# base. build-essential is the compiler and make (Arch's base-devel); the five -dev packages are the
+# headers and CMake files that Arch ships inside the library packages a script names, and that
+# Ubuntu splits out (qt6-base-dev and qt6-l10n-tools come in as their dependencies).
+build-essential
+libssl-dev
+qt6-declarative-dev
+qt6-connectivity-dev
+qt6-tools-dev
+libpulse-dev
 # snapd: the Snap Store, its socket enabled by the package, decided 2026-10-10 (step 4 had pinned it out)
 snapd
 socat
@@ -240,7 +250,7 @@ ca-certificates
 # libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls (each is in the
 #   menu instead: LibreOffice from the Snap Store, the others from Flathub; Install > Productivity)
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
-# build-essential, tree-sitter-cli: command-line preferences (dua-cli came back on 2026-10-16; yt-dlp, removed with
+# tree-sitter-cli: a command-line preference (dua-cli came back on 2026-10-16; yt-dlp, removed with
 #   them, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
 #   starship, zoxide and eza came back on 2026-10-16, listed above)
 # wf-recorder, libsecret-tools: nothing in the port calls them (unzip and whois came back 2026-10-16, listed above)
