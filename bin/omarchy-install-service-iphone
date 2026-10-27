@@ -5,8 +5,11 @@
 
 set -euo pipefail
 
-echo "This sets up your iPhone's messages, contacts, notifications, calls and media"
-echo -e "controls. Keep the iPhone unlocked and nearby until this finishes.\n"
+# What the user has to do is yellow; everything else is information they can let scroll by.
+action() { echo -e "\e[33m$*\e[0m"; }
+
+echo "This sets up your iPhone's messages, contacts, notifications, calls and media controls."
+action "Keep the iPhone unlocked and nearby until this finishes.\n"
 
 # iphonebridge comes from Oaxaca's repository, which publishes the project's release .deb unchanged.
 # Its package installs the daemon's AppArmor profile; oFono carries the calls.
@@ -32,12 +35,14 @@ want=$'[Service]\nExecStart=\nExecStart=/usr/libexec/bluetooth/bluetoothd -E --n
 if [[ $(cat "$dropin" 2>/dev/null) != "$want" ]]; then
   echo -e "\nTurning on BlueZ's experimental interfaces..."
   echo "Bluetooth restarts: other Bluetooth devices disconnect for up to a minute."
-  # Bluetooth keyboards and mice, as "<address> <name>" lines. A Bluetooth keyboard reconnected
-  # 29 seconds after the restart on 2026-10-27, and the pairing below needs the keyboard to confirm
-  # the iPhone's code before the iPhone gives up.
+  # Bluetooth keyboards and mice, as "<address> <icon> <name>" lines, <icon> being BlueZ's
+  # input-keyboard, input-mouse and the like. The pairing below needs the keyboard to confirm the
+  # iPhone's code before the iPhone gives up, and a Bluetooth keyboard reconnected after the restart
+  # on 2026-10-27 only once a key was pressed on it.
   inputs=()
   while read -r _ input_address input_name; do
-    bluetoothctl info "$input_address" | grep -q 'Icon: input-' && inputs+=("$input_address $input_name")
+    input_icon=$(bluetoothctl info "$input_address" | sed -n 's/^[[:space:]]*Icon: \(input-.*\)/\1/p')
+    [[ -n $input_icon ]] && inputs+=("$input_address $input_icon $input_name")
   done < <(bluetoothctl devices Connected 2>/dev/null)
   sudo mkdir -p "${dropin%/*}"
   printf '%s\n' "$want" | sudo tee "$dropin" >/dev/null
@@ -45,9 +50,15 @@ if [[ $(cat "$dropin" 2>/dev/null) != "$want" ]]; then
   sudo systemctl restart bluetooth
   sleep 2
   for input in "${inputs[@]}"; do
-    echo "Waiting up to a minute for ${input#* } to reconnect..."
+    read -r input_address input_icon input_name <<<"$input"
+    case $input_icon in
+      input-keyboard) action "Press a key on $input_name so it reconnects." ;;
+      input-mouse | input-tablet) action "Move $input_name so it reconnects." ;;
+      *) action "Use $input_name so it reconnects." ;;
+    esac
+    echo "Waiting up to a minute for $input_name..."
     for (( waited = 0; waited < 60; waited++ )); do
-      bluetoothctl devices Connected 2>/dev/null | grep -q "^Device ${input%% *} " && break
+      bluetoothctl devices Connected 2>/dev/null | grep -q "^Device $input_address " && break
       sleep 1
     done
   done
@@ -108,8 +119,8 @@ fi
 
 if [[ -z $address ]]; then
   name=$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)
-  echo -e "\nOn the iPhone, open Settings > Bluetooth. If \"$name\" is under My Devices, tap the (i) next to it and"
-  echo "tap Forget This Device. Then tap \"$name\" under Other Devices and confirm the code on both screens."
+  action "\nOn the iPhone, open Settings > Bluetooth. If \"$name\" is under My Devices, tap the (i) next to it and"
+  action "tap Forget This Device. Then tap \"$name\" under Other Devices and confirm the code on both screens."
   echo "The pairing has to start on the iPhone: that is what gives it the Low Energy keys notifications need."
   echo -e "\nWaiting up to 5 minutes for the iPhone to pair..."
   result=$(mktemp)
@@ -258,8 +269,8 @@ if [[ $label != "iphonebridge (enforce)" ]]; then
 fi
 
 computer=$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)
-echo -e "\nOn the iPhone, in Settings > Bluetooth, tap the (i) next to \"$computer\" and turn on"
-echo "Show Message Notifications, Sync Contacts and Share System Notifications."
+action "\nOn the iPhone, in Settings > Bluetooth, tap the (i) next to \"$computer\" and turn on"
+action "Show Message Notifications, Sync Contacts and Share System Notifications."
 echo "Some of the toggles can take a minute to appear: if you see only one, wait for the others."
 
 # The features the daemon reports as working, from its GetStatus answer: a space-separated list
@@ -308,4 +319,5 @@ while true; do
 done
 
 echo -e "\nEverything works: messages, contacts, per-app notifications, calls and media controls."
-echo "The iPhone daemon runs confined by its AppArmor profile. Open iPhone from the app launcher."
+echo "The iPhone daemon runs confined by its AppArmor profile."
+action "Open iPhone from the app launcher."

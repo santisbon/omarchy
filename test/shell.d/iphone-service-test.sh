@@ -91,12 +91,13 @@ LABEL_OK=1 STATUS="map pbap ancs avrcp" run_installer
   fail "the installer does not finish while calls do not work" "$(cat "$work/out")"
 pass "the installer does not finish while calls do not work"
 
-# A Bluetooth keyboard connected before the restart: the installer waits for it to reconnect.
+# A Bluetooth keyboard connected before the restart: the installer asks, in yellow, for a key
+# press on it, which is what reconnects it, and waits for it.
 NO_DROPIN=1 KEYBOARD=1 run_installer
-grep -q '^Waiting up to a minute for Keyboard to reconnect' "$work/out" &&
+grep -q $'^\e\[33mPress a key on Keyboard so it reconnects.' "$work/out" &&
   (( $(grep -c '^bluetoothctl devices Connected$' "$TEST_LOG") == 2 )) ||
-  fail "the installer waits for a Bluetooth keyboard to reconnect after restarting Bluetooth" "$(cat "$work/out")"
-pass "the installer waits for a Bluetooth keyboard to reconnect after restarting Bluetooth"
+  fail "the installer asks for a key press on a Bluetooth keyboard after restarting Bluetooth, and waits for it" "$(cat "$work/out")"
+pass "the installer asks for a key press on a Bluetooth keyboard after restarting Bluetooth, and waits for it"
 
 # A pairing without Low Energy keys: the installer offers to pair again.
 LE_KEYS=0 run_installer
