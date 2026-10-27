@@ -24,13 +24,18 @@ stub omarchy-pkg-drop
 stub iphonebridge
 stub journalctl
 # The pairing agent pairs 22:22:22:22:22:22 and writes its address to the file named last.
-stub python3 'echo 22:22:22:22:22:22 >"${@: -1}"'
+# python3 -c '<code>' <file> is the pairing agent: it pairs 22:22:22:22:22:22 and writes the address
+# to <file>. python3 -c '<code>' alone parses GetStatus: it prints the working features, STATUS.
+stub python3 '[[ $1 == -c && $# == 3 ]] && echo 22:22:22:22:22:22 >"$3"; [[ $1 == -c && $# == 2 ]] && echo "${STATUS-map pbap ancs hfp avrcp}"; exit 0'
+stub busctl
+# The daemon's AppArmor label, read from /proc/<pid>/attr/current: confined only with LABEL_OK=1.
+stub cat '[[ $1 == /proc/*/attr/current ]] && { [[ ${LABEL_OK:-0} == 1 ]] && echo "iphonebridge (enforce)"; exit 0; }; exec /usr/bin/cat "$@"'
 # A paired iPhone answers bluetoothctl, in bluetoothctl 5.87's formats, unless NO_PHONE=1.
 stub bluetoothctl '[[ $1 == devices && ${NO_PHONE:-0} == 0 ]] && echo "Device 11:11:11:11:11:11 iPhone"; [[ $1 == info ]] && printf "Device $2 (public)\n\tIcon: phone\n"; [[ $1 == show ]] && printf "Controller AA:AA:AA:AA:AA:AA (public)\n\tAlias: laptop\n"; exit 0'
 
 run_installer() {
   : >"$TEST_LOG"
-  PATH="$work/bin:$PATH" bash "$ROOT/bin/omarchy-install-service-iphone" >/dev/null 2>&1 || true
+  PATH="$work/bin:$PATH" timeout 10 bash "$ROOT/bin/omarchy-install-service-iphone" >"$work/out" 2>&1 || true
 }
 
 run_installer
@@ -49,7 +54,7 @@ pass "the installer restarts oFono after hfp-enable"
   fail "the installer writes the paired iPhone's address to local.env, readable only by the user"
 pass "the installer writes the paired iPhone's address to local.env, readable only by the user"
 
-! grep -qE '^(python3|gum)' "$TEST_LOG" ||
+! grep -qE '^(python3 -c|gum)' "$TEST_LOG" ||
   fail "the installer skips pairing when the iPhone's pairing has Low Energy keys" "$(cat "$TEST_LOG")"
 pass "the installer skips pairing when the iPhone's pairing has Low Energy keys"
 
@@ -58,12 +63,24 @@ pass "the installer skips pairing when the iPhone's pairing has Low Energy keys"
   fail "the installer waits up to 10 seconds for the daemon's AppArmor label" "$(cat "$TEST_LOG")"
 pass "the installer waits up to 10 seconds for the daemon's AppArmor label"
 
-# After ancs-enable, the installer connects the iPhone's Hands-Free and AV Remote Control profiles,
+# After ancs-enable, the installer connects the iPhone over classic Bluetooth (the Python step),
 # then restarts the daemon.
-order=$(grep -oE '^(iphonebridge ancs-enable|bluetoothctl connect [0-9A-F:]+ [0-9a-f]{8}|systemctl --user restart iphonebridge)' "$TEST_LOG" | tail -4 | sed 's/ [0-9A-F:]\{17\} / /' | tr '\n' ',')
-[[ $order == "iphonebridge ancs-enable,bluetoothctl connect 0000111f,bluetoothctl connect 0000110e,systemctl --user restart iphonebridge," ]] ||
-  fail "the installer connects calls and media control after ancs-enable, then restarts the daemon" "$(cat "$TEST_LOG")"
-pass "the installer connects calls and media control after ancs-enable, then restarts the daemon"
+order=$(grep -oE '^(iphonebridge ancs-enable|python3 - [0-9A-F:]+|systemctl --user restart iphonebridge)' "$TEST_LOG" | tail -3 | sed 's/ [0-9A-F:]\{17\}$//' | tr '\n' ',')
+[[ $order == "iphonebridge ancs-enable,python3 -,systemctl --user restart iphonebridge," ]] ||
+  fail "the installer connects the iPhone over classic Bluetooth after ancs-enable, then restarts the daemon" "$(cat "$TEST_LOG")"
+pass "the installer connects the iPhone over classic Bluetooth after ancs-enable, then restarts the daemon"
+
+# A confined daemon with every feature working: the installer reports each one and finishes.
+LABEL_OK=1 run_installer
+grep -q '^Everything works' "$work/out" && (( $(grep -c '^  Working: ' "$work/out") == 5 )) ||
+  fail "the installer finishes once all five features work, reporting each" "$(cat "$work/out")"
+pass "the installer finishes once all five features work, reporting each"
+
+# Calls missing: the installer keeps waiting instead of finishing.
+LABEL_OK=1 STATUS="map pbap ancs avrcp" run_installer
+! grep -q '^Everything works' "$work/out" && grep -q '^  Working: Media controls' "$work/out" ||
+  fail "the installer does not finish while calls do not work" "$(cat "$work/out")"
+pass "the installer does not finish while calls do not work"
 
 # A pairing without Low Energy keys: the installer offers to pair again.
 LE_KEYS=0 run_installer

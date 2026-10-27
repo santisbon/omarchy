@@ -29,6 +29,13 @@ if [[ -f $dropin ]]; then
   sudo systemctl restart bluetooth
 fi
 
+ofono_dropin=/etc/systemd/system/ofono.service.d/iphonebridge.conf
+if [[ -f $ofono_dropin ]]; then
+  sudo rm -f "$ofono_dropin"
+  sudo rmdir --ignore-fail-on-non-empty "${ofono_dropin%/*}"
+  sudo systemctl daemon-reload
+fi
+
 wireplumber_conf=$HOME/.config/wireplumber/wireplumber.conf.d/51-bluez-hfp-hf.conf
 if [[ -f $wireplumber_conf ]]; then
   # iphonebridge hfp-enable backs up a file it replaces as 51-bluez-hfp-hf.conf.bak.<time>.

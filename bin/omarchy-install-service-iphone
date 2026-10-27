@@ -5,9 +5,18 @@
 
 set -euo pipefail
 
+echo "This sets up your iPhone's messages, contacts, notifications, calls and media"
+echo -e "controls. Keep the iPhone unlocked and nearby until this finishes.\n"
+
 # iphonebridge comes from Oaxaca's repository, which publishes the project's release .deb unchanged.
 # Its package installs the daemon's AppArmor profile; oFono carries the calls.
 omarchy-pkg-add iphonebridge ofono wl-clipboard ibus-data fonts-noto-color-emoji
+# The wait at the end asks the daemon for calls and media control, which it reports from 0.20.4 on,
+# and from 0.20.5 on the daemon picks oFono up again after oFono restarts; omarchy-pkg-add leaves an
+# installed older version as it is.
+if dpkg --compare-versions "$(dpkg-query -W -f='${Version}' iphonebridge)" lt 0.20.5; then
+  sudo apt-get install -y --only-upgrade iphonebridge
+fi
 
 # Per-app notifications need BlueZ's experimental PreferredBearer control. A drop-in turns it on
 # with bluetoothd's -E flag, so BlueZ's own /etc/bluetooth/main.conf stays as the package ships it.
@@ -16,7 +25,8 @@ omarchy-pkg-add iphonebridge ofono wl-clipboard ibus-data fonts-noto-color-emoji
 dropin=/etc/systemd/system/bluetooth.service.d/iphonebridge.conf
 want=$'[Service]\nExecStart=\nExecStart=/usr/libexec/bluetooth/bluetoothd -E --noplugin=hfp'
 if [[ $(cat "$dropin" 2>/dev/null) != "$want" ]]; then
-  echo -e "\nTurning on BlueZ's experimental interfaces (this restarts Bluetooth)..."
+  echo -e "\nTurning on BlueZ's experimental interfaces..."
+  echo "Bluetooth restarts: other Bluetooth devices disconnect for a few seconds."
   sudo mkdir -p "${dropin%/*}"
   printf '%s\n' "$want" | sudo tee "$dropin" >/dev/null
   sudo systemctl daemon-reload
@@ -25,9 +35,17 @@ if [[ $(cat "$dropin" 2>/dev/null) != "$want" ]]; then
 fi
 
 # Calls: WirePlumber hands the Hands-Free profile to oFono, and oFono has to start after
-# WirePlumber to claim it.
+# WirePlumber to claim it. oFono 2.19 aborted (SIGABRT) right after finding the iPhone's modem on
+# 2026-10-27, and Ubuntu's unit doesn't restart it, so a drop-in does.
 echo -e "\nSetting up calls..."
 iphonebridge hfp-enable >/dev/null
+ofono_dropin=/etc/systemd/system/ofono.service.d/iphonebridge.conf
+ofono_want=$'[Service]\nRestart=on-failure\nRestartSec=2'
+if [[ $(cat "$ofono_dropin" 2>/dev/null) != "$ofono_want" ]]; then
+  sudo mkdir -p "${ofono_dropin%/*}"
+  printf '%s\n' "$ofono_want" | sudo tee "$ofono_dropin" >/dev/null
+  sudo systemctl daemon-reload
+fi
 sudo systemctl enable ofono >/dev/null 2>&1
 sudo systemctl restart ofono
 
@@ -74,6 +92,7 @@ if [[ -z $address ]]; then
   echo -e "\nOn the iPhone, open Settings > Bluetooth. If \"$name\" is under My Devices, tap the (i) next to it and"
   echo "tap Forget This Device. Then tap \"$name\" under Other Devices and confirm the code on both screens."
   echo "The pairing has to start on the iPhone: that is what gives it the Low Energy keys notifications need."
+  echo -e "\nWaiting up to 5 minutes for the iPhone to pair..."
   result=$(mktemp)
   trap 'rm -f "$result"' EXIT
   # A Bluetooth agent for this one pairing, since the desktop runs none: it confirms the code
@@ -166,19 +185,46 @@ mkdir -p "$HOME/.config/iphonebridge"
 (umask 077 && echo "IPHONEBRIDGE_MAC=$address" >"$HOME/.config/iphonebridge/local.env")
 bluetoothctl trust "$address" >/dev/null
 
-echo -e "\nConnecting to the iPhone over Bluetooth Low Energy for per-app notifications..."
-iphonebridge ancs-enable || echo "Per-app notifications aren't set up yet: run iphonebridge ancs-enable to try again." >&2
+# Per-app notifications travel over Bluetooth Low Energy: ancs-enable reconnects the iPhone over it.
+enable_notifications() {
+  iphonebridge ancs-enable >/dev/null 2>&1 || true
+}
 
-# ancs-enable leaves the iPhone on Bluetooth Low Energy, and when the iPhone comes back over
-# classic Bluetooth it brings neither the Hands-Free link (calls) nor media control. Connect both
-# profiles on the iPhone, Hands-Free Audio Gateway and AV Remote Control, then restart the daemon,
-# which doesn't notice a modem that powers on after its own attempt failed.
-echo -e "\nConnecting the iPhone for calls and media control..."
-for uuid in 0000111f-0000-1000-8000-00805f9b34fb 0000110e-0000-1000-8000-00805f9b34fb; do
-  bluetoothctl connect "$address" "$uuid" >/dev/null 2>&1 || true
-done
+# ancs-enable leaves the iPhone on Bluetooth Low Energy, and the iPhone's classic Bluetooth
+# services (Hands-Free for calls, AV Remote Control for media) can be missing from BlueZ's record of
+# the iPhone: BlueZ aborted its service search during a pairing ("error updating services"). A
+# classic Bluetooth connection with PreferredBearer set to bredr makes BlueZ search for them. When
+# the iPhone is already connected over classic Bluetooth, that connection does nothing, so the two
+# profiles on the iPhone, Hands-Free Audio Gateway and AV Remote Control, are connected by name.
+# PreferredBearer goes back to le for per-app notifications.
+connect_classic() {
+  python3 - "$address" <<'PYTHON' || true
+import sys
+import dbus
+
+bus = dbus.SystemBus()
+objects = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager").GetManagedObjects()
+path = next(p for p, i in objects.items() if str(i.get("org.bluez.Device1", {}).get("Address", "")) == sys.argv[1])
+props = dbus.Interface(bus.get_object("org.bluez", path), "org.freedesktop.DBus.Properties")
+device = dbus.Interface(bus.get_object("org.bluez", path), "org.bluez.Device1")
+props.Set("org.bluez.Device1", "PreferredBearer", "bredr")
+try:
+    for connect in (lambda: device.Connect(timeout=60),
+                    lambda: device.ConnectProfile("0000111f-0000-1000-8000-00805f9b34fb", timeout=30),
+                    lambda: device.ConnectProfile("0000110e-0000-1000-8000-00805f9b34fb", timeout=30)):
+        try:
+            connect()
+        except dbus.DBusException:
+            pass
+finally:
+    props.Set("org.bluez.Device1", "PreferredBearer", "le")
+PYTHON
+}
+
+echo -e "\nConnecting to the iPhone. This can take up to 3 minutes..."
+enable_notifications
+connect_classic
 sleep 5
-since=$(date '+%Y-%m-%d %H:%M:%S')
 systemctl --user restart iphonebridge
 # The unit is Type=simple, so systemctl restart returns before the new process
 # has executed the daemon; until then the process is still systemd's, unconfined.
@@ -192,15 +238,55 @@ if [[ $label != "iphonebridge (enforce)" ]]; then
   exit 1
 fi
 
-for (( waited = 0; waited < 30; waited++ )); do
-  journalctl --user -u iphonebridge --since "$since" -o cat | grep -q 'HFP call control ready' && break
-  sleep 2
-done
-journalctl --user -u iphonebridge --since "$since" -o cat | grep -q 'HFP call control ready' ||
-  echo -e "\nCalls aren't ready yet: turn the iPhone's Bluetooth off and on, then run systemctl --user restart iphonebridge." >&2
-
-echo -e "\nThe iPhone daemon is running, confined by its AppArmor profile."
-echo "On the iPhone, in Settings > Bluetooth, tap the (i) next to \"$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)\" and turn on"
+computer=$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)
+echo -e "\nOn the iPhone, in Settings > Bluetooth, tap the (i) next to \"$computer\" and turn on"
 echo "Show Message Notifications, Sync Contacts and Share System Notifications."
 echo "Some of the toggles can take a minute to appear: if you see only one, wait for the others."
-echo "Then open iPhone from the app launcher."
+
+# The features the daemon reports as working, from its GetStatus answer: a space-separated list
+# of map (messages), pbap (contacts), ancs (per-app notifications), hfp (calls) and avrcp (media).
+working() {
+  busctl --user --json=short call me.santisbon.iphonebridge /me/santisbon/iphonebridge \
+    me.santisbon.iphonebridge.Messages1 GetStatus 2>/dev/null |
+    python3 -c 'import json, sys; s = json.loads(json.load(sys.stdin)["data"][0]); print(" ".join(k for k, v in s.items() if v))' 2>/dev/null || true
+}
+
+# The installer finishes only when everything works. Messages and contacts wait for the iPhone's
+# toggles. Once both work, the toggles are on, and a minute without notifications, calls or media
+# control gets the connection that brings them up again.
+echo -e "\nWaiting for each feature to work. Messages and contacts start once their"
+echo "toggles take effect on the iPhone, which can take a few minutes."
+features=("map:Messages" "pbap:Contacts" "ancs:Per-app notifications" "hfp:Calls" "avrcp:Media controls")
+declare -A reported=()
+started=$SECONDS
+last_fix=$SECONDS
+next_report=60
+while true; do
+  up=" $(working) "
+  missing=()
+  for feature in "${features[@]}"; do
+    key=${feature%%:*} name=${feature#*:}
+    if [[ $up == *" $key "* ]]; then
+      [[ -n ${reported[$key]:-} ]] || echo "  Working: $name"
+      reported[$key]=1
+    else
+      missing+=("$name")
+    fi
+  done
+  (( ${#missing[@]} == 0 )) && break
+  waiting_for=$(IFS=,; echo "${missing[*]}" | sed 's/,/, /g')
+  if (( SECONDS - started >= next_report )); then
+    echo "  Still waiting for $waiting_for (waited $(( (SECONDS - started) / 60 )) min so far)"
+    next_report=$(( next_report + 60 ))
+  fi
+  if [[ $up == *" map "* && $up == *" pbap "* ]] && (( SECONDS - last_fix >= 60 )); then
+    echo "  Reconnecting the iPhone to bring up $waiting_for..."
+    [[ $up == *" ancs "* ]] || enable_notifications
+    connect_classic
+    last_fix=$SECONDS
+  fi
+  sleep 5
+done
+
+echo -e "\nEverything works: messages, contacts, per-app notifications, calls and media controls."
+echo "The iPhone daemon runs confined by its AppArmor profile. Open iPhone from the app launcher."
