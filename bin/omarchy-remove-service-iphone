@@ -44,6 +44,8 @@ if [[ -f $wireplumber_conf ]]; then
   systemctl --user restart wireplumber
 fi
 
+rm -f "$HOME/.local/share/icons/hicolor/scalable/apps/me.santisbon.iphonebridge.UI.svg"
+
 # ~/.local/state/iphonebridge holds the message history and the contacts.
 rm -rf "$HOME/.config/iphonebridge" "$HOME/.local/state/iphonebridge"
 

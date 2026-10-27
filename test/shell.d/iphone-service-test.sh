@@ -29,9 +29,14 @@ stub journalctl
 stub python3 '[[ $1 == -c && $# == 3 ]] && echo 22:22:22:22:22:22 >"$3"; [[ $1 == -c && $# == 2 ]] && echo "${STATUS-map pbap ancs hfp avrcp}"; exit 0'
 stub busctl
 # The daemon's AppArmor label, read from /proc/<pid>/attr/current: confined only with LABEL_OK=1.
-stub cat '[[ $1 == /proc/*/attr/current ]] && { [[ ${LABEL_OK:-0} == 1 ]] && echo "iphonebridge (enforce)"; exit 0; }; exec /usr/bin/cat "$@"'
-# A paired iPhone answers bluetoothctl, in bluetoothctl 5.87's formats, unless NO_PHONE=1.
-stub bluetoothctl '[[ $1 == devices && ${NO_PHONE:-0} == 0 ]] && echo "Device 11:11:11:11:11:11 iPhone"; [[ $1 == info ]] && printf "Device $2 (public)\n\tIcon: phone\n"; [[ $1 == show ]] && printf "Controller AA:AA:AA:AA:AA:AA (public)\n\tAlias: laptop\n"; exit 0'
+# The bluetooth drop-in reads as missing with NO_DROPIN=1, so the installer restarts Bluetooth.
+stub cat '[[ $1 == /proc/*/attr/current ]] && { [[ ${LABEL_OK:-0} == 1 ]] && echo "iphonebridge (enforce)"; exit 0; }; [[ $1 == */bluetooth.service.d/iphonebridge.conf && ${NO_DROPIN:-0} == 1 ]] && exit 1; exec /usr/bin/cat "$@"'
+# A paired iPhone answers bluetoothctl, in bluetoothctl 5.87's formats, unless NO_PHONE=1. With
+# KEYBOARD=1, a connected keyboard 33:33:33:33:33:33 is also listed.
+stub bluetoothctl '[[ $1 == devices && ${NO_PHONE:-0} == 0 ]] && echo "Device 11:11:11:11:11:11 iPhone"; [[ $1 == devices && ${KEYBOARD:-0} == 1 ]] && echo "Device 33:33:33:33:33:33 Keyboard"; [[ $1 == info && $2 == 33:* ]] && { printf "Device $2 (public)\n\tIcon: input-keyboard\n"; exit 0; }; [[ $1 == info ]] && printf "Device $2 (public)\n\tIcon: phone\n"; [[ $1 == show ]] && printf "Controller AA:AA:AA:AA:AA:AA (public)\n\tAlias: laptop\n"; exit 0'
+
+export OMARCHY_PATH=$ROOT
+icon=$HOME/.local/share/icons/hicolor/scalable/apps/me.santisbon.iphonebridge.UI.svg
 
 run_installer() {
   : >"$TEST_LOG"
@@ -42,6 +47,10 @@ run_installer
 grep -qx 'omarchy-pkg-add iphonebridge ofono wl-clipboard ibus-data fonts-noto-color-emoji' "$TEST_LOG" ||
   fail "the installer installs iphonebridge and oFono" "$(cat "$TEST_LOG")"
 pass "the installer installs iphonebridge and oFono"
+
+cmp -s "$icon" "$ROOT/default/iphone/iphone.svg" ||
+  fail "the installer gives the iPhone app the menu's phone glyph as its icon"
+pass "the installer gives the iPhone app the menu's phone glyph as its icon"
 
 # oFono claims the Hands-Free profile only if it starts after WirePlumber, which hfp-enable restarts.
 order=$(grep -oE '^(iphonebridge hfp-enable|sudo systemctl restart ofono)' "$TEST_LOG" | tr '\n' ',')
@@ -82,6 +91,13 @@ LABEL_OK=1 STATUS="map pbap ancs avrcp" run_installer
   fail "the installer does not finish while calls do not work" "$(cat "$work/out")"
 pass "the installer does not finish while calls do not work"
 
+# A Bluetooth keyboard connected before the restart: the installer waits for it to reconnect.
+NO_DROPIN=1 KEYBOARD=1 run_installer
+grep -q '^Waiting up to a minute for Keyboard to reconnect' "$work/out" &&
+  (( $(grep -c '^bluetoothctl devices Connected$' "$TEST_LOG") == 2 )) ||
+  fail "the installer waits for a Bluetooth keyboard to reconnect after restarting Bluetooth" "$(cat "$work/out")"
+pass "the installer waits for a Bluetooth keyboard to reconnect after restarting Bluetooth"
+
 # A pairing without Low Energy keys: the installer offers to pair again.
 LE_KEYS=0 run_installer
 grep -q '^gum confirm Pair the iPhone again?' "$TEST_LOG" ||
@@ -103,8 +119,8 @@ PATH="$work/bin:$PATH" bash "$ROOT/bin/omarchy-remove-service-iphone" >/dev/null
 grep -qx 'bluetoothctl remove 22:22:22:22:22:22' "$TEST_LOG" && grep -qx 'omarchy-pkg-drop iphonebridge ofono' "$TEST_LOG" ||
   fail "the remover forgets the iPhone and purges iphonebridge and oFono" "$(cat "$TEST_LOG")"
 [[ ! -e $HOME/.config/iphonebridge && ! -e $HOME/.local/state/iphonebridge &&
-  -z $(ls -A "$HOME/.config/wireplumber/wireplumber.conf.d") ]] ||
-  fail "the remover deletes the settings, the data and the WirePlumber config"
+  -z $(ls -A "$HOME/.config/wireplumber/wireplumber.conf.d") && ! -e $icon ]] ||
+  fail "the remover deletes the settings, the data, the WirePlumber config and the icon"
 pass "the remover forgets the iPhone, purges the packages and deletes the settings and the data"
 
 menu="$ROOT/default/omarchy/omarchy-menu.jsonc"

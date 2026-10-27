@@ -1,0 +1,12 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6FB5FF"/>
+      <stop offset="1" stop-color="#2E6BE6"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="27" fill="url(#field)"/>
+  <!-- Nerd Fonts' md-cellphone (U+F011C), the glyph of the menu's iPhone entries -->
+  <path transform="translate(40.47 92.24) scale(0.0784 -0.0784)" fill="#ffffff"
+        d="M509 69H91V651H509ZM509 819H91Q58 819 33.5 794.5Q9 770 9 735V-15Q9 -50 33.5 -74.5Q58 -99 91 -99H509Q542 -99 566.5 -74.5Q591 -50 591 -15V735Q591 770 566.5 794.5Q542 819 509 819Z"/>
+</svg>

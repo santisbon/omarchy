@@ -18,6 +18,11 @@ if dpkg --compare-versions "$(dpkg-query -W -f='${Version}' iphonebridge)" lt 0.
   sudo apt-get install -y --only-upgrade iphonebridge
 fi
 
+# The app launcher shows the menu's phone glyph for the iPhone app: an icon in the user's icon
+# theme takes precedence over the one iphonebridge installs in /usr/share/icons.
+install -D -m 0644 "$OMARCHY_PATH/default/iphone/iphone.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/me.santisbon.iphonebridge.UI.svg"
+
 # Per-app notifications need BlueZ's experimental PreferredBearer control. A drop-in turns it on
 # with bluetoothd's -E flag, so BlueZ's own /etc/bluetooth/main.conf stays as the package ships it.
 # -E also turns on BlueZ's own Hands-Free client (the plugin "hfp", experimental in BlueZ 5.87),
@@ -26,12 +31,26 @@ dropin=/etc/systemd/system/bluetooth.service.d/iphonebridge.conf
 want=$'[Service]\nExecStart=\nExecStart=/usr/libexec/bluetooth/bluetoothd -E --noplugin=hfp'
 if [[ $(cat "$dropin" 2>/dev/null) != "$want" ]]; then
   echo -e "\nTurning on BlueZ's experimental interfaces..."
-  echo "Bluetooth restarts: other Bluetooth devices disconnect for a few seconds."
+  echo "Bluetooth restarts: other Bluetooth devices disconnect for up to a minute."
+  # Bluetooth keyboards and mice, as "<address> <name>" lines. A Bluetooth keyboard reconnected
+  # 29 seconds after the restart on 2026-10-27, and the pairing below needs the keyboard to confirm
+  # the iPhone's code before the iPhone gives up.
+  inputs=()
+  while read -r _ input_address input_name; do
+    bluetoothctl info "$input_address" | grep -q 'Icon: input-' && inputs+=("$input_address $input_name")
+  done < <(bluetoothctl devices Connected 2>/dev/null)
   sudo mkdir -p "${dropin%/*}"
   printf '%s\n' "$want" | sudo tee "$dropin" >/dev/null
   sudo systemctl daemon-reload
   sudo systemctl restart bluetooth
   sleep 2
+  for input in "${inputs[@]}"; do
+    echo "Waiting up to a minute for ${input#* } to reconnect..."
+    for (( waited = 0; waited < 60; waited++ )); do
+      bluetoothctl devices Connected 2>/dev/null | grep -q "^Device ${input%% *} " && break
+      sleep 1
+    done
+  done
 fi
 
 # Calls: WirePlumber hands the Hands-Free profile to oFono, and oFono has to start after
