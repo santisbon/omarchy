@@ -16,6 +16,8 @@ stub() {
   chmod +x "$work/bin/$1"
 }
 stub sudo
+# The installer's waits log instead of sleeping.
+stub sleep
 stub gum 'exit 1'
 stub systemctl '[[ $* == *MainPID* ]] && echo $$; exit 0'
 stub omarchy-plugin-remove "rm -rf \"$dir\""
@@ -76,6 +78,11 @@ run_installer
 grep -q '^gum choose' "$TEST_LOG" && grep -qx 'bluetoothctl pair 44:44:44:44:44:44' "$TEST_LOG" ||
   fail "the installer pairs the AirPods the user picks" "$(cat "$TEST_LOG")"
 pass "the installer pairs the AirPods the user picks"
+
+# systemctl restart returns before the daemon has executed, so the label check waits for it.
+(( $(grep -c '^sleep 1$' "$TEST_LOG") == 10 )) ||
+  fail "the installer waits up to 10 seconds for the daemon's AppArmor label" "$(cat "$TEST_LOG")"
+pass "the installer waits up to 10 seconds for the daemon's AppArmor label"
 
 # The remover deletes what setup installed, the settings and the plugin.
 mkdir -p "$dir/daemon/build" "$HOME/.local/bin" "$HOME/.config/AirPodsTrayApp" "$HOME/.local/state/librepods"

@@ -94,7 +94,13 @@ fi
 echo -e "\nBuilding the AirPods daemon and loading its AppArmor profile..."
 "$dir/setup"
 
-label=$(cat "/proc/$(systemctl --user show -p MainPID --value librepods.service)/attr/current" 2>/dev/null || true)
+# The unit is Type=simple, so systemctl restart returns before the new process
+# has executed the daemon; until then the process is still systemd's, unconfined.
+for (( waited = 0; waited < 10; waited++ )); do
+  label=$(cat "/proc/$(systemctl --user show -p MainPID --value librepods.service)/attr/current" 2>/dev/null || true)
+  [[ $label != "librepods (enforce)" ]] || break
+  sleep 1
+done
 if [[ $label == "librepods (enforce)" ]]; then
   echo -e "\nThe AirPods daemon is running, confined by its AppArmor profile."
 else
