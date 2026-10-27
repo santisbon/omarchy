@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# omarchy:summary=Install the AirPods bar plugin from Oaxaca's fork of omarchy-pods, with its daemon confined by AppArmor.
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+# The fork keeps upstream's plugin ID, so the two can't be installed at once.
+# Its README (https://github.com/santisbon/omarchy-pods) documents these steps.
+id=io.github.thisisgm.omapods
+repo=https://github.com/santisbon/omarchy-pods
+dir="$HOME/.config/omarchy/plugins/$id"
+
+# AirPods paired over classic Bluetooth carry the Audio Sink profile; a Low
+# Energy record of the same AirPods, trusted or not, does not.
+airpods_paired() {
+  local address
+  while read -r _ address _; do
+    bluetoothctl info "$address" | grep -q 'UUID: Audio Sink' && return 0
+  done < <(bluetoothctl devices Paired | grep -i airpods)
+  return 1
+}
+
+if [[ -d $dir ]] && [[ $(git -C "$dir" remote get-url origin 2>/dev/null) != "$repo"* ]]; then
+  echo -e "\nRemoving the upstream AirPods plugin..."
+  omarchy-plugin-remove "$id" --yes
+fi
+
+if ! airpods_paired && gum confirm "Pair AirPods with this computer now?"; then
+  # The daemon's Low Energy scan interferes with pairing.
+  daemon_was_active=0
+  if systemctl --user is-active --quiet librepods.service; then
+    daemon_was_active=1
+    systemctl --user stop librepods.service
+  fi
+
+  echo -e "\nPut the AirPods in the case with the lid open, then make the status light flash white:"
+  echo "on AirPods Pro 3, double-tap the front of the case; on a case with a setup button on the back, press and hold it."
+  gum confirm "Is the light flashing white?" || exit 1
+  echo -e "\nLooking for the AirPods for 30 seconds..."
+  bluetoothctl --timeout 30 scan bredr >/dev/null
+
+  # Classic Bluetooth addresses are public; the Low Energy ones AirPods advertise are random.
+  candidates=()
+  while read -r _ address name; do
+    info=$(bluetoothctl info "$address")
+    grep -q 'AddressType: public' <<<"$info" && ! grep -q 'Paired: yes' <<<"$info" && candidates+=("$address $name")
+  done < <(bluetoothctl devices | grep -i airpods)
+  (( ${#candidates[@]} > 0 )) || { echo "No AirPods found. Make the light flash white and try again." >&2; exit 1; }
+  choice=$(printf '%s\n' "${candidates[@]}" | gum choose --header "Pair which AirPods?") || exit 1
+  address=${choice%% *}
+
+  bluetoothctl pair "$address"
+  bluetoothctl trust "$address"
+  bluetoothctl connect "$address"
+
+  if (( daemon_was_active )); then
+    systemctl --user start librepods.service
+  fi
+fi
+
+if [[ ! -d $dir ]]; then
+  echo -e "\nAdding the AirPods plugin..."
+  omarchy-plugin-add "$repo" --enable --yes
+fi
+
+echo -e "\nBuilding the AirPods daemon and loading its AppArmor profile..."
+"$dir/setup"
+
+label=$(cat "/proc/$(systemctl --user show -p MainPID --value librepods.service)/attr/current" 2>/dev/null || true)
+if [[ $label == "librepods (enforce)" ]]; then
+  echo -e "\nThe AirPods daemon is running, confined by its AppArmor profile."
+else
+  echo -e "\nThe AirPods daemon is not running under its AppArmor profile (label: ${label:-none})." >&2
+  exit 1
+fi

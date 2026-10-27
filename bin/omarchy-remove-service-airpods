@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# omarchy:summary=Remove the AirPods bar plugin, its daemon, its AppArmor profile and its settings.
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+id=io.github.thisisgm.omapods
+dir="$HOME/.config/omarchy/plugins/$id"
+
+systemctl --user disable --now librepods.service 2>/dev/null || true
+
+# CMake's list of what setup installed into ~/.local lives in the plugin's build folder.
+manifest="$dir/daemon/build/install_manifest.txt"
+if [[ -f $manifest ]]; then
+  xargs rm -f <"$manifest"
+fi
+
+if [[ -f /etc/apparmor.d/librepods ]]; then
+  sudo apparmor_parser -R /etc/apparmor.d/librepods || true
+  sudo rm -f /etc/apparmor.d/librepods
+fi
+
+# ~/.config/AirPodsTrayApp holds the AirPods' pairing secrets.
+rm -rf "$HOME/.config/AirPodsTrayApp" "$HOME/.local/state/librepods"
+
+if [[ -d $dir ]]; then
+  omarchy-plugin-remove "$id" --yes
+fi
+
+echo ""
+echo "The AirPods plugin has been removed."
