@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# What the user has to do is yellow; everything else is information they can let scroll by.
+action() { echo -e "\e[33m$*\e[0m"; }
+
 echo "Stopping the iPhone daemon..."
 systemctl --user stop iphonebridge.service 2>/dev/null || true
 
@@ -28,6 +31,8 @@ if [[ -f $dropin ]]; then
   sudo rmdir --ignore-fail-on-non-empty "${dropin%/*}"
   sudo systemctl daemon-reload
   sudo systemctl restart bluetooth
+  # A Bluetooth keyboard reconnected after the restart only once a key was pressed on it (2026-10-27).
+  action "Press a key on each Bluetooth keyboard and move each Bluetooth mouse so they reconnect."
 fi
 
 ofono_dropin=/etc/systemd/system/ofono.service.d/iphonebridge.conf
@@ -51,5 +56,6 @@ rm -f "$HOME/.local/share/icons/hicolor/scalable/apps/me.santisbon.iphonebridge.
 rm -rf "$HOME/.config/iphonebridge" "$HOME/.local/state/iphonebridge"
 
 echo ""
-echo "iphonebridge has been removed. On the iPhone, open Settings > Bluetooth, tap the (i) next to this"
-echo "computer and tap Forget This Device, or the next pairing will fail."
+echo "iphonebridge has been removed."
+action "On the iPhone, open Settings > Bluetooth, tap the (i) next to this computer and tap"
+action "Forget This Device, or the next pairing will fail."
