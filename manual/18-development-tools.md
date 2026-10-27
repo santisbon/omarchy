@@ -6,7 +6,7 @@ Omarchy ships with [Neovim](https://neovim.io/) by default, but if you'd like so
 
 > **Oaxaca: removed.** Cursor, Zed and Helix are not in Oaxaca's _Install > Editor_, and the menu has no _Install > AUR_ (the distro's docs/6, choice 74).
 
-> **Oaxaca: works differently.** Oaxaca's _Install > Editor_ offers VS Code (Microsoft's apt repository), VSCodium (Flathub), Sublime Text (Sublime HQ's apt repository), Vim and Emacs (Ubuntu's archive, Emacs as `emacs-pgtk`). _Install > Package_ searches Ubuntu's archive, and _Install > Snap_ and _Install > Flatpak_ search the Snap Store and Flathub in place of the AUR (the distro's docs/6, choice 22).
+> **Oaxaca: works differently.** Oaxaca's _Install > Editor_ offers VS Code (Microsoft's apt repository), VSCodium (Flathub), Sublime Text (Sublime HQ's apt repository), Vim and Emacs (Ubuntu's archive, Emacs as `emacs-pgtk`). _Install > Package_ searches Ubuntu's archive, and _Install > Snap_ and _Install > Flatpak_ search the Snap Store and Flathub in place of the AUR (the distro's docs/6, choice 22). _Remove > Editor_ removes VS Code or Sublime Text together with its vendor's apt repository, which _Remove > Package_ would leave behind (choice 107).
 
 Theme matching is offered for `VSCode`, `Cursor`, `VSCodium`, and `Helix`.
 

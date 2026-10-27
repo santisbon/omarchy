@@ -8,7 +8,7 @@ Keeping your passwords in a password manager is a best practice. Doubly so if yo
 
 You start 1Password with `Super + Shift + /`. If it isn't installed yet, that hotkey kicks off the installation first (you can also use _Install > Service > 1Password_ from the Omarchy menu). The installer sets up the 1Password extension for Chromium as well.
 
-> **Oaxaca: works differently.** The 1Password installer adds 1Password's own apt repository and installs the `1password` and `1password-cli` packages from there.
+> **Oaxaca: works differently.** The 1Password installer adds 1Password's own apt repository and installs the `1password` and `1password-cli` packages from there; _Remove > Services > 1Password_ removes both packages, the repository and the Chromium extension setting.
 
 ## Bitwarden
 
@@ -22,7 +22,7 @@ You start 1Password with `Super + Shift + /`. If it isn't installed yet, that ho
 
 You start Spotify using `Super + Shift + M`. Like 1Password, the hotkey kicks off the installation first if Spotify isn't installed yet (or use _Install > Service > Spotify_ from the Omarchy menu).
 
-> **Oaxaca: works differently.** The Spotify installer adds Spotify's own apt repository and installs Spotify's `spotify-client` package from there.
+> **Oaxaca: works differently.** The Spotify installer adds Spotify's own apt repository and installs Spotify's `spotify-client` package from there; _Remove > Services > Spotify_ removes the package and the repository.
 
 ## Dropbox
 

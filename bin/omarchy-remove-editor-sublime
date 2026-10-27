@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Remove Sublime Text and its vendor repository.
+# omarchy:requires-sudo=true
+
+omarchy-pkg-drop sublime-text
+omarchy-pkg-repo-remove sublime-text
+
+echo ""
+echo "Sublime Text has been removed."
