@@ -38,6 +38,11 @@ order=$(grep -oE '^(omarchy-plugin-remove|omarchy-plugin-add|setup)' "$TEST_LOG"
   fail "the installer removes upstream's plugin, adds the fork, then runs setup" "$(cat "$TEST_LOG")"
 pass "the installer removes upstream's plugin, adds the fork, then runs setup"
 
+# The bar widget watches the daemon's status folder from the moment the plugin is added.
+[[ -d $HOME/.local/state/librepods && $(stat -c %a "$HOME/.local/state/librepods") == 700 ]] ||
+  fail "the installer creates the daemon's status folder before adding the plugin"
+pass "the installer creates the daemon's status folder before adding the plugin"
+
 grep -qx 'omarchy-plugin-add https://github.com/santisbon/omarchy-pods --enable --yes' "$TEST_LOG" ||
   fail "the installer adds the fork and enables its widget" "$(cat "$TEST_LOG")"
 pass "the installer adds the fork and enables its widget"

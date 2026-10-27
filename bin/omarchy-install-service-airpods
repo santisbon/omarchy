@@ -86,6 +86,10 @@ if ! airpods_paired && gum confirm "Pair AirPods with this computer now?"; then
   fi
 fi
 
+# The bar widget watches the daemon's status file through the status file's folder,
+# and a folder that doesn't exist yet when the shell loads the widget is never watched.
+mkdir -p -m 700 "$HOME/.local/state/librepods"
+
 if [[ ! -d $dir ]]; then
   echo -e "\nAdding the AirPods plugin..."
   omarchy-plugin-add "$repo" --enable --yes
