@@ -5,15 +5,19 @@
 
 set -euo pipefail
 
+echo "Stopping the iPhone daemon..."
 systemctl --user stop iphonebridge.service 2>/dev/null || true
 
 # Read the iPhone's address before deleting the settings that hold it.
 address=$(sed -n 's/^IPHONEBRIDGE_MAC=//p' "$HOME/.config/iphonebridge/local.env" 2>/dev/null | tr -d '"' | head -1)
 if [[ -n $address ]]; then
+  # BlueZ took 30 seconds to remove a connected iPhone on 2026-10-27.
+  echo "Removing the iPhone's pairing (this can take half a minute)..."
   bluetoothctl remove "$address" >/dev/null 2>&1 || true
 fi
 
 # purge, not remove: the AppArmor profile is a conffile, and only purge deletes it.
+echo "Removing iphonebridge and oFono..."
 omarchy-pkg-drop iphonebridge ofono
 
 dropin=/etc/systemd/system/bluetooth.service.d/iphonebridge.conf
@@ -28,6 +32,7 @@ fi
 wireplumber_conf=$HOME/.config/wireplumber/wireplumber.conf.d/51-bluez-hfp-hf.conf
 if [[ -f $wireplumber_conf ]]; then
   # iphonebridge hfp-enable backs up a file it replaces as 51-bluez-hfp-hf.conf.bak.<time>.
+  echo "Removing the calls setup..."
   rm -f "$wireplumber_conf" "$wireplumber_conf".bak.*
   systemctl --user restart wireplumber
 fi
