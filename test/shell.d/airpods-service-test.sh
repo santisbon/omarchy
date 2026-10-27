@@ -57,6 +57,25 @@ run_installer
 grep -qx 'bluetoothctl pair 22:22:22:22:22:22' "$TEST_LOG" && ! grep -q 'bluetoothctl pair 11:' "$TEST_LOG" ||
   fail "the installer pairs the AirPods' classic Bluetooth address" "$(cat "$TEST_LOG")"
 pass "the installer pairs the AirPods' classic Bluetooth address"
+# The scan is still running at pairing time.
+scan_line=$(grep -n '^bluetoothctl --timeout 300 scan bredr$' "$TEST_LOG" | cut -d: -f1)
+pair_line=$(grep -n '^bluetoothctl pair ' "$TEST_LOG" | cut -d: -f1)
+[[ -n $scan_line && -n $pair_line ]] && (( scan_line < pair_line )) ||
+  fail "the installer scans until it pairs" "$(cat "$TEST_LOG")"
+pass "the installer scans until it pairs"
+
+# One AirPods found: paired at once, with no list to pick from, since BlueZ forgets them about
+# 30 seconds after finding them.
+! grep -q '^gum choose' "$TEST_LOG" || fail "the installer pairs a single AirPods without asking which" "$(cat "$TEST_LOG")"
+pass "the installer pairs a single AirPods without asking which"
+
+# Two AirPods found: the user picks one, and the installer pairs that one.
+stub bluetoothctl '[[ $1 == devices ]] && printf "Device 33:33:33:33:33:33 AirPods Pro\nDevice 44:44:44:44:44:44 AirPods Max\n"; [[ $1 == info ]] && printf "Device $2 (public)\n\tPaired: no\n"; exit 0'
+stub gum '[[ $1 == choose ]] && tail -1; exit 0'
+run_installer
+grep -q '^gum choose' "$TEST_LOG" && grep -qx 'bluetoothctl pair 44:44:44:44:44:44' "$TEST_LOG" ||
+  fail "the installer pairs the AirPods the user picks" "$(cat "$TEST_LOG")"
+pass "the installer pairs the AirPods the user picks"
 
 # The remover deletes what setup installed, the settings and the plugin.
 mkdir -p "$dir/daemon/build" "$HOME/.local/bin" "$HOME/.config/AirPodsTrayApp" "$HOME/.local/state/librepods"

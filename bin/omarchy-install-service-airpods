@@ -37,21 +37,47 @@ if ! airpods_paired && gum confirm "Pair AirPods with this computer now?"; then
   echo -e "\nPut the AirPods in the case with the lid open, then make the status light flash white:"
   echo "on AirPods Pro 3, double-tap the front of the case; on a case with a setup button on the back, press and hold it."
   gum confirm "Is the light flashing white?" || exit 1
-  echo -e "\nLooking for the AirPods for 30 seconds..."
-  bluetoothctl --timeout 30 scan bredr >/dev/null
+  # BlueZ forgets unpaired AirPods about 30 seconds after finding them, even while
+  # discovery is still on, so the AirPods are paired as soon as they are found.
+  echo -e "\nLooking for the AirPods for up to 30 seconds..."
+  bluetoothctl --timeout 300 scan bredr >/dev/null 2>&1 &
+  scan_pid=$!
+  trap 'kill $scan_pid 2>/dev/null' EXIT
 
   # Classic Bluetooth addresses are public; the Low Energy ones AirPods advertise are random.
   # bluetoothctl info names the address type on its first line: "Device <address> (public)".
-  candidates=()
-  while read -r _ address name; do
-    info=$(bluetoothctl info "$address")
-    grep -q '^Device .* (public)' <<<"$info" && ! grep -q 'Paired: yes' <<<"$info" && candidates+=("$address $name")
-  done < <(bluetoothctl devices | grep -i airpods)
-  (( ${#candidates[@]} > 0 )) || { echo "No AirPods found. Make the light flash white and try again." >&2; exit 1; }
-  choice=$(printf '%s\n' "${candidates[@]}" | gum choose --header "Pair which AirPods?") || exit 1
-  address=${choice%% *}
+  find_airpods() {
+    local waited address name info
+    candidates=()
+    for (( waited = 0; waited < 30; waited += 2 )); do
+      sleep 2
+      while read -r _ address name; do
+        info=$(bluetoothctl info "$address")
+        grep -q '^Device .* (public)' <<<"$info" && ! grep -q 'Paired: yes' <<<"$info" && candidates+=("$address $name")
+      done < <(bluetoothctl devices | grep -i airpods)
+      (( ${#candidates[@]} == 0 )) || return 0
+    done
+    return 1
+  }
+
+  find_airpods || { echo "No AirPods found. Make the light flash white and try again." >&2; exit 1; }
+  if (( ${#candidates[@]} == 1 )); then
+    address=${candidates[0]%% *}
+  else
+    choice=$(printf '%s\n' "${candidates[@]}" | gum choose --header "Pair which AirPods?") || exit 1
+    address=${choice%% *}
+    # A slow pick outlasts BlueZ's record of the chosen AirPods; wait for them to answer again.
+    if ! bluetoothctl info "$address" >/dev/null 2>&1; then
+      echo -e "\nMake the light on the chosen AirPods' case flash white again."
+      for (( waited = 0; waited < 30; waited += 2 )); do
+        sleep 2
+        ! bluetoothctl info "$address" >/dev/null 2>&1 || break
+      done
+    fi
+  fi
 
   bluetoothctl pair "$address"
+  kill $scan_pid 2>/dev/null || true
   bluetoothctl trust "$address"
   bluetoothctl connect "$address"
 
