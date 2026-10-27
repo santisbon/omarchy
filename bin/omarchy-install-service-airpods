@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # The fork keeps upstream's plugin ID, so the two can't be installed at once.
-# Its README (https://github.com/santisbon/omarchy-pods) documents these steps.
+# The fork's README (https://github.com/santisbon/omarchy-pods) sends users to this menu entry.
 id=io.github.thisisgm.omapods
 repo=https://github.com/santisbon/omarchy-pods
 dir="$HOME/.config/omarchy/plugins/$id"
