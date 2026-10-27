@@ -8,8 +8,9 @@ set -euo pipefail
 echo "Stopping the iPhone daemon..."
 systemctl --user stop iphonebridge.service 2>/dev/null || true
 
-# Read the iPhone's address before deleting the settings that hold it.
-address=$(sed -n 's/^IPHONEBRIDGE_MAC=//p' "$HOME/.config/iphonebridge/local.env" 2>/dev/null | tr -d '"' | head -1)
+# Read the iPhone's address before deleting the settings that hold it. An install whose pairing
+# failed wrote no local.env, and the removal goes on without an address.
+address=$(sed -n 's/^IPHONEBRIDGE_MAC=//p' "$HOME/.config/iphonebridge/local.env" 2>/dev/null | tr -d '"' | head -1) || true
 if [[ -n $address ]]; then
   # BlueZ took 30 seconds to remove a connected iPhone on 2026-10-27.
   echo "Removing the iPhone's pairing (this can take half a minute)..."

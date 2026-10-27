@@ -123,6 +123,13 @@ grep -qx 'bluetoothctl remove 22:22:22:22:22:22' "$TEST_LOG" && grep -qx 'omarch
   fail "the remover deletes the settings, the data, the WirePlumber config and the icon"
 pass "the remover forgets the iPhone, purges the packages and deletes the settings and the data"
 
+# An install whose pairing failed left no local.env: the remover still purges the packages.
+: >"$TEST_LOG"
+PATH="$work/bin:$PATH" bash "$ROOT/bin/omarchy-remove-service-iphone" >/dev/null 2>&1 || true
+grep -qx 'omarchy-pkg-drop iphonebridge ofono' "$TEST_LOG" && ! grep -q '^bluetoothctl remove' "$TEST_LOG" ||
+  fail "the remover purges the packages when no iPhone was paired" "$(cat "$TEST_LOG")"
+pass "the remover purges the packages when no iPhone was paired"
+
 menu="$ROOT/default/omarchy/omarchy-menu.jsonc"
   grep -A1 '"install.service.signal":' "$menu" | grep -q '"install.service.iphone":.*"label":"iPhone","when":"! omarchy-pkg-present iphonebridge","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-service-iphone"' ||
   fail "Install > Service > iPhone follows Signal and runs the installer while iphonebridge is absent"
