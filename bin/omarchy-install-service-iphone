@@ -1,0 +1,205 @@
+#!/bin/bash
+
+# omarchy:summary=Install iphonebridge, pair the iPhone, and set up its messages, contacts, notifications and calls, with the daemon confined by AppArmor.
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+# iphonebridge comes from Oaxaca's repository, which publishes the project's release .deb unchanged.
+# Its package installs the daemon's AppArmor profile; oFono carries the calls.
+omarchy-pkg-add iphonebridge ofono wl-clipboard ibus-data fonts-noto-color-emoji
+
+# Per-app notifications need BlueZ's experimental PreferredBearer control. A drop-in turns it on
+# with bluetoothd's -E flag, so BlueZ's own /etc/bluetooth/main.conf stays as the package ships it.
+# -E also turns on BlueZ's own Hands-Free client (the plugin "hfp", experimental in BlueZ 5.87),
+# which connects to the iPhone by itself and takes the Hands-Free link oFono needs for calls.
+dropin=/etc/systemd/system/bluetooth.service.d/iphonebridge.conf
+want=$'[Service]\nExecStart=\nExecStart=/usr/libexec/bluetooth/bluetoothd -E --noplugin=hfp'
+if [[ $(cat "$dropin" 2>/dev/null) != "$want" ]]; then
+  echo -e "\nTurning on BlueZ's experimental interfaces (this restarts Bluetooth)..."
+  sudo mkdir -p "${dropin%/*}"
+  printf '%s\n' "$want" | sudo tee "$dropin" >/dev/null
+  sudo systemctl daemon-reload
+  sudo systemctl restart bluetooth
+  sleep 2
+fi
+
+# Calls: WirePlumber hands the Hands-Free profile to oFono, and oFono has to start after
+# WirePlumber to claim it.
+echo -e "\nSetting up calls..."
+iphonebridge hfp-enable >/dev/null
+sudo systemctl enable ofono >/dev/null 2>&1
+sudo systemctl restart ofono
+
+# iOS reads the computer's class and the daemon's Low Energy advertisement when it pairs, and
+# offers the message, contacts and notification toggles only if both were there. The daemon sets
+# both when it starts, even before it knows the iPhone.
+systemctl --user restart iphonebridge
+
+# Paired phones, one "<address> <name>" line each.
+paired_phones() {
+  local address name
+  while read -r _ address name; do
+    bluetoothctl info "$address" | grep -q 'Icon: phone' && echo "$address $name"
+  done < <(bluetoothctl devices Paired)
+}
+
+# Per-app notifications need the bond's Low Energy keys, which BlueZ records in the bond's
+# SupportedTechnologies. Only root can read the bond.
+has_le_keys() {
+  local adapter
+  adapter=$(bluetoothctl show | sed -n 's/^Controller \([0-9A-F:]*\).*/\1/p' | head -1)
+  sudo grep -q '^SupportedTechnologies=.*LE' "/var/lib/bluetooth/$adapter/$1/info" 2>/dev/null
+}
+
+mapfile -t phones < <(paired_phones)
+address=""
+if (( ${#phones[@]} == 1 )); then
+  address=${phones[0]%% *}
+elif (( ${#phones[@]} > 1 )); then
+  choice=$(printf '%s\n' "${phones[@]}" | gum choose --header "Which phone is the iPhone?") || exit 1
+  address=${choice%% *}
+fi
+
+if [[ -n $address ]] && ! has_le_keys "$address"; then
+  echo -e "\nThe iPhone's pairing has no Low Energy keys, so per-app notifications can't work with it."
+  if gum confirm "Pair the iPhone again?"; then
+    bluetoothctl remove "$address" >/dev/null
+    address=""
+  fi
+fi
+
+if [[ -z $address ]]; then
+  name=$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)
+  echo -e "\nOn the iPhone, open Settings > Bluetooth. If \"$name\" is under My Devices, tap the (i) next to it and"
+  echo "tap Forget This Device. Then tap \"$name\" under Other Devices and confirm the code on both screens."
+  echo "The pairing has to start on the iPhone: that is what gives it the Low Energy keys notifications need."
+  result=$(mktemp)
+  trap 'rm -f "$result"' EXIT
+  # A Bluetooth agent for this one pairing, since the desktop runs none: it confirms the code
+  # with gum, accepts the iPhone's services, trusts the iPhone, and writes its address to $result.
+  python3 -c '
+import subprocess, sys
+import dbus, dbus.service, dbus.mainloop.glib
+from gi.repository import GLib
+
+dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+bus = dbus.SystemBus()
+loop = GLib.MainLoop()
+path = "/iphonebridge/pairing_agent"
+
+def props(obj):
+    return dbus.Interface(bus.get_object("org.bluez", obj), "org.freedesktop.DBus.Properties")
+
+class Rejected(dbus.DBusException):
+    _dbus_error_name = "org.bluez.Error.Rejected"
+
+class Agent(dbus.service.Object):
+    @dbus.service.method("org.bluez.Agent1", in_signature="ou", out_signature="")
+    def RequestConfirmation(self, device, passkey):
+        alias = props(device).Get("org.bluez.Device1", "Alias")
+        if subprocess.run(["gum", "confirm", f"Does {alias} show the code {passkey:06d}?"]).returncode:
+            raise Rejected("the codes differ")
+
+    @dbus.service.method("org.bluez.Agent1", in_signature="o", out_signature="")
+    def RequestAuthorization(self, device):
+        pass
+
+    @dbus.service.method("org.bluez.Agent1", in_signature="os", out_signature="")
+    def AuthorizeService(self, device, uuid):
+        pass
+
+    @dbus.service.method("org.bluez.Agent1", in_signature="", out_signature="")
+    def Cancel(self):
+        print("The iPhone cancelled the pairing.")
+
+    @dbus.service.method("org.bluez.Agent1", in_signature="", out_signature="")
+    def Release(self):
+        pass
+
+objects = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager").GetManagedObjects()
+adapter = next(p for p, i in objects.items() if "org.bluez.Adapter1" in i)
+before = {p for p, i in objects.items() if i.get("org.bluez.Device1", {}).get("Paired")}
+
+def changed(iface, values, _invalidated, path=None):
+    if iface == "org.bluez.Device1" and values.get("Paired") and path not in before:
+        props(path).Set("org.bluez.Device1", "Trusted", dbus.Boolean(True))
+        with open(sys.argv[1], "w") as f:
+            f.write(str(props(path).Get("org.bluez.Device1", "Address")))
+        loop.quit()
+
+bus.add_signal_receiver(changed, "PropertiesChanged", "org.freedesktop.DBus.Properties",
+                        "org.bluez", path_keyword="path")
+Agent(bus, path)
+manager = dbus.Interface(bus.get_object("org.bluez", "/org/bluez"), "org.bluez.AgentManager1")
+manager.RegisterAgent(path, "DisplayYesNo")
+manager.RequestDefaultAgent(path)
+adapter_props = props(adapter)
+adapter_props.Set("org.bluez.Adapter1", "Pairable", dbus.Boolean(True))
+adapter_props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(True))
+GLib.timeout_add_seconds(300, loop.quit)
+try:
+    loop.run()
+finally:
+    # Right after a pairing, BlueZ answers Busy while the iPhone is still connecting;
+    # the shell turns discoverable mode off once this helper is done.
+    for call in (lambda: adapter_props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(False)),
+                 lambda: manager.UnregisterAgent(path)):
+        try:
+            call()
+        except dbus.DBusException:
+            pass
+' "$result"
+  bluetoothctl discoverable off >/dev/null 2>&1 || true
+  address=$(cat "$result")
+  [[ -n $address ]] || { echo "The iPhone didn't pair within 5 minutes. Run Install > Service > iPhone again." >&2; exit 1; }
+  # BlueZ stores the Low Energy keys a moment after the pairing itself.
+  for (( waited = 0; waited < 10; waited++ )); do
+    has_le_keys "$address" && break
+    sleep 1
+  done
+  has_le_keys "$address" || echo -e "\nThe pairing has no Low Energy keys: messages, contacts and calls work, per-app notifications won't." >&2
+fi
+
+# What iphonebridge pair-setup writes: the iPhone's address, readable only by the user.
+mkdir -p "$HOME/.config/iphonebridge"
+(umask 077 && echo "IPHONEBRIDGE_MAC=$address" >"$HOME/.config/iphonebridge/local.env")
+bluetoothctl trust "$address" >/dev/null
+
+echo -e "\nConnecting to the iPhone over Bluetooth Low Energy for per-app notifications..."
+iphonebridge ancs-enable || echo "Per-app notifications aren't set up yet: run iphonebridge ancs-enable to try again." >&2
+
+# ancs-enable leaves the iPhone on Bluetooth Low Energy, and when the iPhone comes back over
+# classic Bluetooth it brings neither the Hands-Free link (calls) nor media control. Connect both
+# profiles on the iPhone, Hands-Free Audio Gateway and AV Remote Control, then restart the daemon,
+# which doesn't notice a modem that powers on after its own attempt failed.
+echo -e "\nConnecting the iPhone for calls and media control..."
+for uuid in 0000111f-0000-1000-8000-00805f9b34fb 0000110e-0000-1000-8000-00805f9b34fb; do
+  bluetoothctl connect "$address" "$uuid" >/dev/null 2>&1 || true
+done
+sleep 5
+since=$(date '+%Y-%m-%d %H:%M:%S')
+systemctl --user restart iphonebridge
+# The unit is Type=simple, so systemctl restart returns before the new process
+# has executed the daemon; until then the process is still systemd's, unconfined.
+for (( waited = 0; waited < 10; waited++ )); do
+  label=$(cat "/proc/$(systemctl --user show -p MainPID --value iphonebridge.service)/attr/current" 2>/dev/null || true)
+  [[ $label != "iphonebridge (enforce)" ]] || break
+  sleep 1
+done
+if [[ $label != "iphonebridge (enforce)" ]]; then
+  echo -e "\nThe iPhone daemon is not running under its AppArmor profile (label: ${label:-none})." >&2
+  exit 1
+fi
+
+for (( waited = 0; waited < 30; waited++ )); do
+  journalctl --user -u iphonebridge --since "$since" -o cat | grep -q 'HFP call control ready' && break
+  sleep 2
+done
+journalctl --user -u iphonebridge --since "$since" -o cat | grep -q 'HFP call control ready' ||
+  echo -e "\nCalls aren't ready yet: turn the iPhone's Bluetooth off and on, then run systemctl --user restart iphonebridge." >&2
+
+echo -e "\nThe iPhone daemon is running, confined by its AppArmor profile."
+echo "On the iPhone, in Settings > Bluetooth, tap the (i) next to \"$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)\" and turn on"
+echo "Show Message Notifications, Sync Contacts and Share System Notifications; the toggles can take a minute to appear."
+echo "Then open iphonebridge from the app launcher."

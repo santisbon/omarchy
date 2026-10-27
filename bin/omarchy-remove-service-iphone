@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# omarchy:summary=Remove iphonebridge, oFono, the iPhone's pairing, and iphonebridge's settings, messages and contacts.
+# omarchy:requires-sudo=true
+
+set -euo pipefail
+
+systemctl --user stop iphonebridge.service 2>/dev/null || true
+
+# Read the iPhone's address before deleting the settings that hold it.
+address=$(sed -n 's/^IPHONEBRIDGE_MAC=//p' "$HOME/.config/iphonebridge/local.env" 2>/dev/null | tr -d '"' | head -1)
+if [[ -n $address ]]; then
+  bluetoothctl remove "$address" >/dev/null 2>&1 || true
+fi
+
+# purge, not remove: the AppArmor profile is a conffile, and only purge deletes it.
+omarchy-pkg-drop iphonebridge ofono
+
+dropin=/etc/systemd/system/bluetooth.service.d/iphonebridge.conf
+if [[ -f $dropin ]]; then
+  echo -e "\nTurning off BlueZ's experimental interfaces (this restarts Bluetooth)..."
+  sudo rm -f "$dropin"
+  sudo rmdir --ignore-fail-on-non-empty "${dropin%/*}"
+  sudo systemctl daemon-reload
+  sudo systemctl restart bluetooth
+fi
+
+wireplumber_conf=$HOME/.config/wireplumber/wireplumber.conf.d/51-bluez-hfp-hf.conf
+if [[ -f $wireplumber_conf ]]; then
+  # iphonebridge hfp-enable backs up a file it replaces as 51-bluez-hfp-hf.conf.bak.<time>.
+  rm -f "$wireplumber_conf" "$wireplumber_conf".bak.*
+  systemctl --user restart wireplumber
+fi
+
+# ~/.local/state/iphonebridge holds the message history and the contacts.
+rm -rf "$HOME/.config/iphonebridge" "$HOME/.local/state/iphonebridge"
+
+echo ""
+echo "iphonebridge has been removed. On the iPhone, open Settings > Bluetooth, tap the (i) next to this"
+echo "computer and tap Forget This Device, or the next pairing will fail."
