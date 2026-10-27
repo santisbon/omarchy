@@ -201,5 +201,6 @@ journalctl --user -u iphonebridge --since "$since" -o cat | grep -q 'HFP call co
 
 echo -e "\nThe iPhone daemon is running, confined by its AppArmor profile."
 echo "On the iPhone, in Settings > Bluetooth, tap the (i) next to \"$(bluetoothctl show | sed -n 's/^[[:space:]]*Alias: //p' | head -1)\" and turn on"
-echo "Show Message Notifications, Sync Contacts and Share System Notifications; the toggles can take a minute to appear."
-echo "Then open iphonebridge from the app launcher."
+echo "Show Message Notifications, Sync Contacts and Share System Notifications."
+echo "Some of the toggles can take a minute to appear: if you see only one, wait for the others."
+echo "Then open iPhone from the app launcher."
