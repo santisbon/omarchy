@@ -103,6 +103,10 @@ power-profiles-daemon
 upower
 # systemd-oomd is its own package on Ubuntu (part of systemd on Arch); enable-services.sh enables it.
 systemd-oomd
+# systemd-coredump is its own package on Ubuntu (part of systemd on Arch): it records every crash,
+# which oaxaca-crash-watch announces and the diagnose-crash agent skill reads with coredumpctl.
+# Without it the kernel's core_pattern is plain "core" and crashes leave nothing behind (2026-10-27).
+systemd-coredump
 python3-gi
 qrencode
 qt6-image-formats-plugins
