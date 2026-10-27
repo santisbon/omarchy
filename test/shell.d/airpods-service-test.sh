@@ -49,6 +49,15 @@ order=$(grep -oE '^(omarchy-plugin-remove|omarchy-plugin-add|setup)' "$TEST_LOG"
 [[ $order == "setup " ]] || fail "the installer reruns setup over the fork's clone" "$(cat "$TEST_LOG")"
 pass "the installer reruns setup over the fork's clone"
 
+# With no AirPods paired, the installer offers the classic Bluetooth record, not the Low Energy one,
+# in bluetoothctl 5.87's info format, and pairs it.
+stub gum '[[ $1 == choose ]] && head -1; exit 0'
+stub bluetoothctl '[[ $1 == devices ]] && printf "Device 11:11:11:11:11:11 AirPods Pro 3\nDevice 22:22:22:22:22:22 AirPods Pro 3\n"; [[ $1 == info && $2 == 11:* ]] && printf "Device 11:11:11:11:11:11 (random)\n\tPaired: no\n"; [[ $1 == info && $2 == 22:* ]] && printf "Device 22:22:22:22:22:22 (public)\n\tPaired: no\n"; exit 0'
+run_installer
+grep -qx 'bluetoothctl pair 22:22:22:22:22:22' "$TEST_LOG" && ! grep -q 'bluetoothctl pair 11:' "$TEST_LOG" ||
+  fail "the installer pairs the AirPods' classic Bluetooth address" "$(cat "$TEST_LOG")"
+pass "the installer pairs the AirPods' classic Bluetooth address"
+
 # The remover deletes what setup installed, the settings and the plugin.
 mkdir -p "$dir/daemon/build" "$HOME/.local/bin" "$HOME/.config/AirPodsTrayApp" "$HOME/.local/state/librepods"
 touch "$HOME/.local/bin/librepods"

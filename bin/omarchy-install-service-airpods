@@ -41,10 +41,11 @@ if ! airpods_paired && gum confirm "Pair AirPods with this computer now?"; then
   bluetoothctl --timeout 30 scan bredr >/dev/null
 
   # Classic Bluetooth addresses are public; the Low Energy ones AirPods advertise are random.
+  # bluetoothctl info names the address type on its first line: "Device <address> (public)".
   candidates=()
   while read -r _ address name; do
     info=$(bluetoothctl info "$address")
-    grep -q 'AddressType: public' <<<"$info" && ! grep -q 'Paired: yes' <<<"$info" && candidates+=("$address $name")
+    grep -q '^Device .* (public)' <<<"$info" && ! grep -q 'Paired: yes' <<<"$info" && candidates+=("$address $name")
   done < <(bluetoothctl devices | grep -i airpods)
   (( ${#candidates[@]} > 0 )) || { echo "No AirPods found. Make the light flash white and try again." >&2; exit 1; }
   choice=$(printf '%s\n' "${candidates[@]}" | gum choose --header "Pair which AirPods?") || exit 1
