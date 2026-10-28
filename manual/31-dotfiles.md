@@ -4,7 +4,7 @@ Omarchy is primarily configured through the so-called dotfiles that live in `~/.
 
 The key configs can be edited straight from the Omarchy menu (`Super + Space`), like _Setup > Monitors_, _Setup > Keybindings_, _Setup > Input_, and _Setup > Config > [file]_. When you do it this way, any process that needs restarting after config edits automatically will be after you quit the editor (Neovim by default — `:wq`, remember! — but you can change that via _Setup > Defaults > Editor_).
 
-> **Oaxaca: works differently.** Oaxaca's default editor is nano, not Neovim. Neovim is preinstalled as Ubuntu ships it, without Omarchy's LazyVim configuration, and _Setup > Defaults > Editor > Neovim_ makes Neovim the default. (the distro's docs/6, choice 26)
+> **Oaxaca: works differently.** Oaxaca's default editor is nano, not Neovim. Neovim is preinstalled as Ubuntu ships it, without Omarchy's LazyVim configuration, and _Setup > Defaults > Editor > Neovim_ makes Neovim the default.
 
 Here's a list of the key files in `~/.config` and what they control:
 
@@ -20,7 +20,7 @@ Here's a list of the key files in `~/.config` and what they control:
 | `~/.config/foot/foot.ini` | Controls your terminal (foot is the default). |
 | `~/.XCompose` | Defines your quick-access emoji and name/email autocomplete. Make sure to run `omarchy-restart-xcompose` after making changes. |
 
-> **Oaxaca: works differently.** Oaxaca keeps Caps Lock as Caps Lock and sets no Compose key, so the sequences in `~/.XCompose` do nothing until you add a `compose:` option (for example `compose:caps`) to `kb_options` in `~/.config/hypr/input.lua`. (the distro's docs/6, choice 90)
+> **Oaxaca: works differently.** Oaxaca keeps Caps Lock as Caps Lock and sets no Compose key, so the sequences in `~/.XCompose` do nothing until you add a `compose:` option (for example `compose:caps`) to `kb_options` in `~/.config/hypr/input.lua`.
 
 If you end up making a lot of changes to tweak your own setup, it's a good idea to backup all these dotfiles. [Stow is a great way to do that](https://www.youtube.com/watch?v=NoFiYOqnC4o).
 
@@ -69,7 +69,7 @@ Omarchy ships with a bunch of ergonomic aliases and helpful functions, but it's 
 
 Look, this is your computer. You can do whatever you want with it, but I would advise against making changes to the files in `/usr/share/omarchy` directly. They belong to the Omarchy pacman package, so your changes will simply be overwritten on the next update. You're better off just overwriting any default values you don't like in the `~/.config/*` folder instead.
 
-> **Oaxaca: works differently.** On Oaxaca the files under `/usr/share/omarchy` come from Debian packages that apt installs and updates (`oaxaca-tools`, `oaxaca-shell`, `oaxaca-themes` and `oaxaca-config`), not from a pacman package. (the distro's docs/6, choice 2)
+> **Oaxaca: works differently.** On Oaxaca the files under `/usr/share/oaxaca` come from Debian packages that apt installs and updates (`oaxaca-tools`, `oaxaca-shell`, `oaxaca-themes` and `oaxaca-config`), not from a pacman package.
 
 You can change just about everything that way, like the default keybindings. Just edit `~/.config/hypr/bindings.lua` to, say, replace [Obsidian](https://obsidian.md/) with [Joplin](https://joplinapp.org/) (install with `omarchy-pkg-add joplin-bin`):
 
@@ -78,13 +78,13 @@ hl.unbind("SUPER + SHIFT + O")
 o.bind("SUPER + SHIFT + O", "Joplin", "joplin-desktop")
 ```
 
-> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian: `Super + Shift + O` opens Obsidian once Install > Productivity > Obsidian has installed its snap, and opens that installer before then (the distro's docs/6, choice 97). The example's `hl.unbind` line removes the binding either way.
+> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian: `Super + Shift + O` opens Obsidian once Install > Productivity > Obsidian has installed its snap, and opens that installer before then. The example's `hl.unbind` line removes the binding either way.
 
-> **Oaxaca: works differently.** `omarchy-pkg-add` installs Ubuntu packages with apt. `joplin-bin` is a package from Arch's AUR, and Ubuntu 26.10's archive has no package of that name (checked with `rmadison` on 2026-10-21), so the example's install command fails on Oaxaca.
+> **Oaxaca: works differently.** `oaxaca-pkg-add` installs Ubuntu packages with apt. `joplin-bin` is a package from Arch's AUR, and Ubuntu 26.10's archive has no package of that name (checked with `rmadison` on 2026-10-21), so the example's install command fails on Oaxaca.
 
 If you insist on hacking on the internal Omarchy files, switch to the dev channel via _Update > Channel > Dev_. That links Omarchy to a git checkout of the source code in `~/omarchy`, which you're free to change to your heart's content. Ain't nobody here to tell you what to do!
 
-> **Oaxaca: removed.** Oaxaca's menu has no _Update > Channel_ submenu, because the distro's apt repository has no package channels. The command `omarchy dev link <path-to-checkout>` is still there and points the desktop at a git checkout after a reboot; Oaxaca's source is the `oaxaca` branch of the distro's fork of Omarchy.
+> **Oaxaca: removed.** Oaxaca's menu has no _Update > Channel_ submenu, because the distro's apt repository has no package channels. The command `oaxaca dev link <path-to-checkout>` is still there and points the desktop at a git checkout after a reboot; Oaxaca's source is the `oaxaca` branch of the distro's fork of Omarchy.
 
 ### Resetting any changes
 

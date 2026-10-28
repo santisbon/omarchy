@@ -2,7 +2,7 @@
 
 In addition to the standard Linux tools, Omarchy also ships with a bunch of enhanced shell tools. Here are the key ones.
 
-> **Oaxaca: works differently.** Oaxaca preinstalls these tools from Ubuntu's archive (the universe component) instead of Arch's packages. Zoxide and eza, which the `cd`, `ls` and `lt` aliases use, were dropped from the port at first and came back preinstalled (the distro's docs/6, choice 43).
+> **Oaxaca: works differently.** Oaxaca preinstalls these tools from Ubuntu's archive (the universe component) instead of Arch's packages. Zoxide and eza, which the `cd`, `ls` and `lt` aliases use, were dropped from the port at first and came back preinstalled.
 
 ## fzf
 
@@ -38,7 +38,7 @@ The full manual can be found via `man eza`.
 
 [fd](https://github.com/sharkdp/fd) is an easier to use replacement for `find`. Use `fd person.rb` to find a file called `person.rb` within the current tree. `fd person.rb /` will search the entire file system. `fd person.rb / -H` searches the entire file system, including hidden directories.
 
-> **Oaxaca: works differently.** Ubuntu's `fd-find` package installs the command as `fdfind`, so Oaxaca adds an `fd` link to `fdfind` (the distro's docs/6, choice 9).
+> **Oaxaca: works differently.** Ubuntu's `fd-find` package installs the command as `fdfind`, so Oaxaca adds an `fd` link to `fdfind`.
 
 The full manual can be found via `man fd`.
 
@@ -46,7 +46,7 @@ The full manual can be found via `man fd`.
 
 [bat](https://github.com/sharkdp/bat) is `cat` with syntax highlighting, line numbers, and paging. Run `bat somefile.rb` and you'll see why it's hard to go back. It's also quietly doing work for you elsewhere: it's what colors your man pages, and what renders the previews in `ff`.
 
-> **Oaxaca: works differently.** Ubuntu's `bat` package installs the command as `batcat`, so Oaxaca adds a `bat` link to `batcat` (the distro's docs/6, choice 9).
+> **Oaxaca: works differently.** Ubuntu's `bat` package installs the command as `batcat`, so Oaxaca adds a `bat` link to `batcat`.
 
 The full manual can be found via `man bat`.
 
@@ -54,7 +54,7 @@ The full manual can be found via `man bat`.
 
 [tldr](https://tldr.sh/) is the antidote to man pages that open with three screens of history before showing you a single example. `tldr tar` gives you the handful of invocations you actually wanted.
 
-> **Oaxaca: works differently.** The `tldr` command comes from Ubuntu's `tealdeer` package, a Rust client, because Ubuntu's archive has no package of Omarchy's Python client. Oaxaca's `~/.config/tealdeer/config.toml` turns on tealdeer's automatic page download, so the first `tldr` downloads the pages instead of stopping with "Page cache not found" (the distro's docs/6, choice 32).
+> **Oaxaca: works differently.** The `tldr` command comes from Ubuntu's `tealdeer` package, a Rust client, because Ubuntu's archive has no package of Omarchy's Python client. Oaxaca's `~/.config/tealdeer/config.toml` turns on tealdeer's automatic page download, so the first `tldr` downloads the pages instead of stopping with "Page cache not found".
 
 ## yt-dlp
 
@@ -68,4 +68,4 @@ The full manual can be found via `man yt-dlp`.
 
 Omarchy does not add a project's `bin/` directory to `PATH` automatically. Run trusted project-local tools with an explicit relative path, such as `bin/rails` or `./bin/dev`.
 
-> **Oaxaca: removed.** Oaxaca does not ship try: Omarchy's `tobi-try` package has no Ubuntu build, and try needs Ruby, which Oaxaca does not preinstall. The shell still sets up `try` when try is installed another way (the distro's docs/6, choice 80).
+> **Oaxaca: removed.** Oaxaca does not ship try: Omarchy's `tobi-try` package has no Ubuntu build, and try needs Ruby, which Oaxaca does not preinstall. The shell still sets up `try` when try is installed another way.

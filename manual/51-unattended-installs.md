@@ -1,6 +1,6 @@
 # Unattended Installs
 
-> **Oaxaca: removed.** Oaxaca has no unattended install: Oaxaca's ISO installs with Calamares, which has no unattended or scripted mode (the distro's docs/7, choice 6), and Omarchy's ISO provisioning, which the deferred install for another owner used, was left out (the fork's `PORT-REMOVALS.md`). After an interactive install, Setup > Security > SSHD sets up SSH access with keys, Install > Service > Tailscale installs Tailscale, and Setup > Reset Computer prepares a btrfs install for a new owner.
+> **Oaxaca: removed.** Oaxaca has no unattended install: Oaxaca's ISO installs with Calamares, which has no unattended or scripted mode, and Omarchy's ISO provisioning, which the deferred install for another owner used, was left out. After an interactive install, Setup > Security > SSHD sets up SSH access with keys, Install > Service > Tailscale installs Tailscale, and Setup > Reset Computer prepares a btrfs install for a new owner.
 
 The Omarchy ISO can install itself with nobody at the keyboard. If the installer finds a second drive labeled `cidata` carrying its configuration files, it copies them off, skips the setup wizard entirely, and reboots into the finished system on its own. No special ISO build, no extra boot menu entry — with no such drive attached, nothing changes and you get the normal wizard.
 

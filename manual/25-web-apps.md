@@ -4,7 +4,7 @@ You can add your own web apps using _Install > Web App_ in the Omarchy menu (`Su
 
 They'll then be accessible through the app launcher (`Super + Space`), and use the beautiful frameless web-app window.
 
-> **Oaxaca: works differently.** Because Chromium can be removed in Oaxaca, a web app opens in the default browser when the default browser is Chromium-family, and otherwise in the first installed of Chromium, Chrome, Brave Origin, Brave, Edge and Vivaldi. With none of those installed, a notification points to _Install > Browser_ (the distro's docs/6, choice 18).
+> **Oaxaca: works differently.** Because Chromium can be removed in Oaxaca, a web app opens in the default browser when the default browser is Chromium-family, and otherwise in the first installed of Chromium, Chrome, Brave Origin, Brave, Edge and Vivaldi. With none of those installed, a notification points to _Install > Browser_.
 
 If you wish to remove a web app, just go to _Remove > Web App_ in the Omarchy menu.
 
@@ -24,7 +24,7 @@ By default, Omarchy already ships with an assortment of default apps:
 
 You can start HEY Email using `Super + Shift + E`, jump straight to composing a new email using `Super + Shift + Alt + E`, and start HEY Calendar using `Super + Shift + C`.
 
-> **Oaxaca: removed.** HEY's launcher, HEY's handler for email links and the `Super + Shift + E`, `Super + Shift + Alt + E` and `Super + Shift + C` bindings are gone; HEY can still be added with _Install > Web App_. While Thunderbird is installed from _Install > Service > Thunderbird_, `Super + Shift + E` opens Thunderbird instead (the distro's docs/6, choice 27).
+> **Oaxaca: removed.** HEY's launcher, HEY's handler for email links and the `Super + Shift + E`, `Super + Shift + Alt + E` and `Super + Shift + C` bindings are gone; HEY can still be added with _Install > Web App_. While Thunderbird is installed from _Install > Service > Thunderbird_, `Super + Shift + E` opens Thunderbird instead.
 
 ## Basecamp
 
@@ -32,7 +32,7 @@ You can start HEY Email using `Super + Shift + E`, jump straight to composing a 
 
 You can start Basecamp using the application launcher (`Super + Space`)
 
-> **Oaxaca: removed.** Oaxaca ships no Basecamp launcher; Basecamp can be added with _Install > Web App_ (the distro's docs/6, choice 27).
+> **Oaxaca: removed.** Oaxaca ships no Basecamp launcher; Basecamp can be added with _Install > Web App_.
 
 ## ChatGPT
 

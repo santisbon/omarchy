@@ -42,9 +42,9 @@ Groups:
   ...
 ```
 
-> **Oaxaca: works differently.** `omarchy update` updates the system with apt (`apt-get update` and `full-upgrade`) instead of pacman and the AUR, and the `pkg` group's commands install from Ubuntu's archive, the Snap Store and Flathub. The listing still names the `channel` and `hibernation` groups, but Oaxaca has no commands in either one, so `omarchy channel` and `omarchy hibernation` report an unknown command: Oaxaca has no release channels, and hibernation is not in its first release.
+> **Oaxaca: works differently.** `oaxaca update` updates the system with apt (`apt-get update` and `full-upgrade`) instead of pacman and the AUR, and the `pkg` group's commands install from Ubuntu's archive, the Snap Store and Flathub. The listing still names the `channel` and `hibernation` groups, but Oaxaca has no commands in either one, so `oaxaca channel` and `oaxaca hibernation` report an unknown command: Oaxaca has no release channels, and hibernation is not in its first release.
 
-> **Oaxaca: removed.** Omarchy's `openclaw` group, the OpenClaw agent platform setup, is gone with OpenClaw (the distro's docs/6, choice 73).
+> **Oaxaca: removed.** Omarchy's `openclaw` group, the OpenClaw agent platform setup, is gone with OpenClaw.
 
 And you can dive deeper on every group:
 

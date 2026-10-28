@@ -1,6 +1,6 @@
 # Omarchy on...
 
-> **Oaxaca: works differently.** The guides on this page are written for Omarchy on Arch Linux; Oaxaca installs from its own Ubuntu-based ISO. Oaxaca is built only for 64-bit Intel and AMD processors (amd64), so Apple M1/M2 machines are not supported (the distro's docs/README.md, "Apple hardware"), and Oaxaca's ISO boots on UEFI only, so a virtual machine needs UEFI firmware (the distro's docs/7, choice 4). Omarchy's Discord is Omarchy's own: Oaxaca's problems go to the distro's GitHub issues (`DISTRO_BUG_URL` in the build repository's `distro.conf`).
+> **Oaxaca: works differently.** The guides on this page are written for Omarchy on Arch Linux; Oaxaca installs from its own Ubuntu-based ISO. Oaxaca is built only for 64-bit Intel and AMD processors (amd64), so Apple M1/M2 machines are not supported, and Oaxaca's ISO boots on UEFI only, so a virtual machine needs UEFI firmware. Omarchy's Discord is Omarchy's own: report Oaxaca's problems at <https://github.com/santisbon/oaxaca/issues>.
 
 ### Apple M1/M2 chips
 

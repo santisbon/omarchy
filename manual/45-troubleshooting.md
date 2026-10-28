@@ -4,7 +4,7 @@
 
 First try to [rollback your system](47-system-snapshots.md) the version before your recent update. If that doesn't work, use `omarchy-debug` to share with your problem on #omarchy-help in the Discord. And if all that fails, you can reinstall the defaults configs and packages using `omarchy-reinstall`.
 
-> **Oaxaca: works differently.** Rolling back uses Timeshift snapshots, on btrfs installs only (see [System snapshots](47-system-snapshots.md)). `omarchy-debug` keeps the log on the machine and offers "View log" and "Save in current directory": Oaxaca has no log upload service, and Omarchy's Discord is Omarchy's own, so Oaxaca's problems go to the distro's GitHub issues (`DISTRO_BUG_URL` in the build repository's `distro.conf`). `omarchy-reinstall` reinstalls the default packages with apt instead of pacman.
+> **Oaxaca: works differently.** Rolling back uses Timeshift snapshots, on btrfs installs only (see [System snapshots](47-system-snapshots.md)). `oaxaca-debug` keeps the log on the machine and offers "View log" and "Save in current directory": Oaxaca has no log upload service, and Omarchy's Discord is Omarchy's own, so report Oaxaca's problems at <https://github.com/santisbon/oaxaca/issues>. `oaxaca-reinstall` reinstalls the default packages with apt instead of pacman.
 
 ### Why are some apps so large on my display?
 
@@ -26,7 +26,7 @@ hl.config({
 })
 ```
 
-> **Oaxaca: works differently.** On Oaxaca, Caps Lock is Caps Lock and no key is the Compose key: Oaxaca's Hyprland configuration takes the keyboard model and options from `/etc/default/keyboard`, which Oaxaca's installer writes, so the keyboard behaves as the layout chosen at installation does on other systems. Omarchy's quick emojis and completions in `~/.XCompose` work only after a `compose:` option is added to `kb_options` in `~/.config/hypr/input.lua`, and `compose:ralt` takes AltGr away from layouts that type characters with Right Alt, such as German, British and Spanish (the distro's docs/6, choice 90).
+> **Oaxaca: works differently.** On Oaxaca, Caps Lock is Caps Lock and no key is the Compose key: Oaxaca's Hyprland configuration takes the keyboard model and options from `/etc/default/keyboard`, which Oaxaca's installer writes, so the keyboard behaves as the layout chosen at installation does on other systems. Omarchy's quick emojis and completions in `~/.XCompose` work only after a `compose:` option is added to `kb_options` in `~/.config/hypr/input.lua`, and `compose:ralt` takes AltGr away from layouts that type characters with Right Alt, such as German, British and Spanish.
 
 ### My Wi-Fi, Bluetooth, audio, or trackpad just stopped working
 
@@ -44,7 +44,7 @@ On some laptops, Omarchy automatically applies a speaker tuning that corrects th
 
 You probably typed it wrong too many times and got locked out. If this is happening on the lock screen, you can hit `CTRL + ALT + F2` to start a new TTY where you can login as root, then run `faillock --reset --user [your-username]`. That'll reset the lockout, and you're good to go.
 
-> **Oaxaca: removed.** Omarchy's faillock lockout is not set up: Ubuntu's PAM stack has no `pam_faillock`, so the lockout and its `faillock --reset` fix do not apply (the fork's `PORT-REMOVALS.md`). Oaxaca's installer also sets no root password, so a TTY login as root is not available (the distro's docs/7, "Installing: what Calamares does, in order").
+> **Oaxaca: removed.** Omarchy's faillock lockout is not set up: Ubuntu's PAM stack has no `pam_faillock`, so the lockout and its `faillock --reset` fix do not apply. Oaxaca's installer also sets no root password, so a TTY login as root is not available.
 
 ### Why isn't my 1Password authorization prompts for 1Password SSH Agent / CLI appearing?
 

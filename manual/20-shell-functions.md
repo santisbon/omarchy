@@ -25,7 +25,7 @@ Instant multi-pane development layouts for tmux:
 
 The same layouts are available for Herdr as `hdl`, `hds`, `hdlm`, and `hsl`.
 
-> **Oaxaca: works differently.** Herdr is not preinstalled: _Install > Development > Herdr_ installs herdr per user through mise, and the Herdr layouts work once herdr is installed (the distro's docs/6, choice 80).
+> **Oaxaca: works differently.** Herdr is not preinstalled: _Install > Development > Herdr_ installs herdr per user through mise, and the Herdr layouts work once herdr is installed.
 
 ## Git worktrees
 

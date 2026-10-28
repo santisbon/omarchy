@@ -16,7 +16,7 @@ Omarchy uses whatever DNS your network hands out over DHCP. You can override tha
 
 From the terminal, `omarchy dns` prints the current provider and `omarchy dns Cloudflare` sets one.
 
-> **Oaxaca: works differently.** Omarchy's `omarchy dns` writes a NetworkManager drop-in file as root through a sudoers rule. Oaxaca's runs as you with no sudoers rule: `omarchy dns` sets the servers on the existing Wi-Fi and Ethernet profiles with `nmcli`, with DNS over TLS where the provider offers it, and sets NetworkManager's global DNS over D-Bus, which a polkit rule that Oaxaca ships allows for users in the `sudo` or `netdev` group. Networks joined later get the servers through the global setting, without DNS over TLS. (the distro's docs/6, choice 54)
+> **Oaxaca: works differently.** Omarchy's `omarchy dns` writes a NetworkManager drop-in file as root through a sudoers rule. Oaxaca's runs as you with no sudoers rule: `oaxaca dns` sets the servers on the existing Wi-Fi and Ethernet profiles with `nmcli`, with DNS over TLS where the provider offers it, and sets NetworkManager's global DNS over D-Bus, which a polkit rule that Oaxaca ships allows for users in the `sudo` or `netdev` group. Networks joined later get the servers through the global setting, without DNS over TLS.
 
 ## Pinning the Wi-Fi band
 
@@ -34,7 +34,7 @@ The firewall is on by default and blocks all incoming traffic, with one exceptio
 
 SSH is off until you turn it on with _Setup > Security > SSHD_, which starts the daemon, opens port 22 rate-limited against brute force, and authorizes a key. Docker is locked down too, so containers can't accidentally expose themselves to the world. See [security](48-security.md) for the whole story.
 
-> **Oaxaca: works differently.** Oaxaca turns ufw on with Ubuntu's own policies (incoming dropped, outgoing allowed) plus LocalSend's port 53317, and adds none of Omarchy's Docker rules or the `ufw-docker` add-on, because Docker Engine is not preinstalled; _Install > Development > Docker Desktop_ installs Docker Desktop, which runs its engine in a virtual machine. (the distro's docs/6, choices 40 and 85)
+> **Oaxaca: works differently.** Oaxaca turns ufw on with Ubuntu's own policies (incoming dropped, outgoing allowed) plus LocalSend's port 53317, and adds none of Omarchy's Docker rules or the `ufw-docker` add-on, because Docker Engine is not preinstalled; _Install > Development > Docker Desktop_ installs Docker Desktop, which runs its engine in a virtual machine.
 
 > **Oaxaca: works differently.** _Setup > Security > SSHD_ installs Ubuntu's `openssh-server` package and enables Ubuntu's `ssh.service`, where Omarchy installs Arch's `openssh` and enables `sshd.service`.
 

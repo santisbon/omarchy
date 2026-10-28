@@ -2,7 +2,7 @@
 
 You can see all the main keyboard bindings with `Super + K` (Tmux bindings with `Super + Alt + K` and Herdr bindings with `Super + Ctrl + K`).
 
-> **Oaxaca: works differently.** Herdr is not preinstalled: Install > Development > Herdr installs Herdr through mise, and Learn > Herdr appears in the menu only once Herdr is installed (the distro's docs/6, choice 80).
+> **Oaxaca: works differently.** Herdr is not preinstalled: Install > Development > Herdr installs Herdr through mise, and Learn > Herdr appears in the menu only once Herdr is installed.
 
 ## Navigating
 
@@ -81,7 +81,7 @@ You can see all the main keyboard bindings with `Super + K` (Tmux bindings with 
 | `Super + Ctrl + .` | Transcode media |
 | `Super + Shift + Ctrl + A` | Pick an AI agent |
 
-> **Oaxaca: works differently.** `Super + Ctrl + Q` (and the Calculator key) opens GNOME Calculator, preinstalled in place of Omarchy's Omacalc (the distro's docs/6, choice 47). `Super + Ctrl + S` shares through LocalSend, preinstalled from the distro's own apt repository (the distro's docs/6, choice 19).
+> **Oaxaca: works differently.** `Super + Ctrl + Q` (and the Calculator key) opens GNOME Calculator, preinstalled in place of Omarchy's Omacalc. `Super + Ctrl + S` shares through LocalSend, preinstalled from the distro's own apt repository.
 
 ## Adjustments
 
@@ -128,9 +128,9 @@ You can see all the main keyboard bindings with `Super + K` (Tmux bindings with 
 | `Super + Shift + Alt + X`           | X Compose |
 | `Super + Shift + Y`           | YouTube |
 
-> **Oaxaca: removed.** `Super + Shift + C` (HEY Calendar) and `Super + Shift + Alt + E` (new HEY email) are gone with HEY (the distro's docs/6, choice 27). `Super + Shift + D` (LazyDocker) is gone with Omarchy's Docker setup (the distro's docs/6, choice 71), and `Super + Shift + W` with Omawrite (the distro's docs/6, choice 80).
+> **Oaxaca: removed.** `Super + Shift + C` (HEY Calendar) and `Super + Shift + Alt + E` (new HEY email) are gone with HEY. `Super + Shift + D` (LazyDocker) is gone with Omarchy's Docker setup, and `Super + Shift + W` with Omawrite.
 
-> **Oaxaca: works differently.** `Super + Shift + E` opens Thunderbird instead of HEY, and is bound only while Thunderbird, from Install > Service (the Snap Store), is installed (the distro's docs/6, choice 27). `Super + Shift + N` opens the default editor, which is nano until Setup > Defaults > Editor picks another, such as Neovim (the distro's docs/6, choice 26). `Super + Ctrl + Return` (Herdr) and `Super + Shift + Alt + M` (cliamp) need Install > Development > Herdr and Install > Service > cliamp first, since neither program is preinstalled (the distro's docs/6, choice 80).
+> **Oaxaca: works differently.** `Super + Shift + E` opens Thunderbird instead of HEY, and is bound only while Thunderbird, from Install > Service (the Snap Store), is installed. `Super + Shift + N` opens the default editor, which is nano until Setup > Defaults > Editor picks another, such as Neovim. `Super + Ctrl + Return` (Herdr) and `Super + Shift + Alt + M` (cliamp) need Install > Development > Herdr and Install > Service > cliamp first, since neither program is preinstalled.
 
 Change/add bindings in `~/.config/hypr/bindings.lua`.
 
@@ -161,7 +161,7 @@ Usually on Linux, you need `Ctrl + Shift + C/V` to copy'n'paste in the terminal 
 | `Super + Ctrl + X` | Start/stop dictation (requires _Install > AI > Dictation_) |
 | `F9` | Push-to-talk dictation (requires _Install > AI > Dictation_) |
 
-> **Oaxaca: works differently.** Install > AI > Dictation installs Voxtype from the distro's own apt repository, repackaged from Voxtype's release, instead of from the AUR (the distro's docs/6, choice 30).
+> **Oaxaca: works differently.** Install > AI > Dictation installs Voxtype from the distro's own apt repository, repackaged from Voxtype's release, instead of from the AUR.
 
 With screenrecordings, the hotkey first asks which audio you want, then starts recording. Hit it again to stop. See [screenshots and recording](12-screenshots-recording.md) for the details.
 
@@ -316,7 +316,7 @@ Ghostty terminal is installed using _Install > Terminal_ via the Omarchy menu.
 
 ## Neovim (w/ lazyvim)
 
-> **Oaxaca: removed.** Omarchy's LazyVim configuration is not shipped: Neovim is preinstalled as Ubuntu packages it, with Neovim's own key bindings, so the LazyVim bindings below do not apply, and Learn > Neovim opens Neovim's quick reference instead of LazyVim's keymaps (the distro's docs/6, choices 26 and 71).
+> **Oaxaca: removed.** Omarchy's LazyVim configuration is not shipped: Neovim is preinstalled as Ubuntu packages it, with Neovim's own key bindings, so the LazyVim bindings below do not apply, and Learn > Neovim opens Neovim's quick reference instead of LazyVim's keymaps.
 
 ### Navigation
 
@@ -350,7 +350,7 @@ Ghostty terminal is installed using _Install > Terminal_ via the Omarchy menu.
 
 You can use `Super + Ctrl + E` to show a complete emoji picker that'll put the selection on the clipboard or you can use these quick access options.
 
-> **Oaxaca: works differently.** Caps Lock is Caps Lock on Oaxaca and no key is the Compose key, so the `CapsLock` sequences in this section and in Quick Completions below do nothing until a `compose:` option (for example `compose:caps`) is added to `kb_options` in `~/.config/hypr/input.lua`. The sequences themselves are still written to `~/.XCompose`, and `Super + Ctrl + E` works as described (the distro's docs/6, choice 90).
+> **Oaxaca: works differently.** Caps Lock is Caps Lock on Oaxaca and no key is the Compose key, so the `CapsLock` sequences in this section and in Quick Completions below do nothing until a `compose:` option (for example `compose:caps`) is added to `kb_options` in `~/.config/hypr/input.lua`. The sequences themselves are still written to `~/.XCompose`, and `Super + Ctrl + E` works as described.
 
 | Hotkey       | EM | Clue       |
 | ------------ | -- | ---------- |

@@ -8,7 +8,7 @@ Plug in a USB stick or an SD card and it's mounted automatically, so it just sho
 
 Double-clicking follows sensible defaults: images open in imv, video in mpv, PDFs in Document Viewer, and plain text in Neovim.
 
-> **Oaxaca: works differently.** PDFs open in Papers, GNOME's successor to Document Viewer (Evince) and Ubuntu's own default viewer, because Ubuntu 26.10 carries Evince only as an alpha (the distro's docs/6, choice 28).
+> **Oaxaca: works differently.** PDFs open in Papers, GNOME's successor to Document Viewer (Evince) and Ubuntu's own default viewer, because Ubuntu 26.10 carries Evince only as an alpha.
 
 ## Obsidian
 
@@ -20,7 +20,7 @@ Obsidian also offers a [commercial add-on for syncing](https://obsidian.md/sync)
 
 You start Obsidian with `Super + Shift + O`. To use theme syncing, you must select the `Omarchy` theme under settings.
 
-> **Oaxaca: works differently.** Obsidian is not preinstalled. _Install > Productivity > Obsidian_ installs Obsidian's own snap from the Snap Store, and _Remove > Productivity > Obsidian_ removes it, leaving your vaults. Before the snap is installed, `Super + Shift + O` opens that installer (the distro's docs/6, choices 71 and 97).
+> **Oaxaca: works differently.** Obsidian is not preinstalled. _Install > Productivity > Obsidian_ installs Obsidian's own snap from the Snap Store, and _Remove > Productivity > Obsidian_ removes it, leaving your vaults. Before the snap is installed, `Super + Shift + O` opens that installer.
 
 ## Omawrite
 
@@ -28,7 +28,7 @@ You start Obsidian with `Super + Shift + O`. To use theme syncing, you must sele
 
 You start Omawrite with `Super + Shift + W`.
 
-> **Oaxaca: removed.** Omawrite and its `Super + Shift + W` binding are not in Oaxaca: Omawrite has no build in Ubuntu's archive, on Flathub or on the Snap Store (the distro's docs/6, choice 80).
+> **Oaxaca: removed.** Omawrite and its `Super + Shift + W` binding are not in Oaxaca: Omawrite has no build in Ubuntu's archive, on Flathub or on the Snap Store.
 
 ## Pinta
 
@@ -36,7 +36,7 @@ You start Omawrite with `Super + Shift + W`.
 
 You start Pinta via the application launcher (`Super + Space`).
 
-> **Oaxaca: removed.** Pinta is not preinstalled (the distro's docs/6, choice 71). Pinta can be installed from Flathub with _Install > Flatpak_.
+> **Oaxaca: removed.** Pinta is not preinstalled. Pinta can be installed from Flathub with _Install > Flatpak_.
 
 ## Aether
 
@@ -50,7 +50,7 @@ You start Aether via the application launcher (`Super + Space`).
 
 [LocalSend](https://localsend.org/) lets you send files to other devices on the same network running the app, like Apple's AirDrop. It's cross-platform, though, so you can send files to and from Windows, macOS, Android, iOS, and of course Linux.
 
-> **Oaxaca: works differently.** Ubuntu's archive has no LocalSend, so Oaxaca preinstalls LocalSend from the distro's own apt repository, repackaged from LocalSend's own release builds (the distro's docs/6, choice 19).
+> **Oaxaca: works differently.** Ubuntu's archive has no LocalSend, so Oaxaca preinstalls LocalSend from the distro's own apt repository, repackaged from LocalSend's own release builds.
 
 You can open the Share menu on `Super + Ctrl + S` or under _Trigger > Share_ in the Omarchy menu. It gives you four options:
 
@@ -71,7 +71,7 @@ Omarchy's firewall is closed by default except for LocalSend's port, so this wor
 
 You start LibreOffice via the application launcher (`Super + Space`).
 
-> **Oaxaca: works differently.** LibreOffice is not preinstalled. _Install > Productivity > LibreOffice_ in the menu installs Canonical's LibreOffice snap from the Snap Store, and _Remove > Productivity > LibreOffice_ removes LibreOffice again (the distro's docs/6, choices 31 and 71).
+> **Oaxaca: works differently.** LibreOffice is not preinstalled. _Install > Productivity > LibreOffice_ in the menu installs Canonical's LibreOffice snap from the Snap Store, and _Remove > Productivity > LibreOffice_ removes LibreOffice again.
 
 ## Omacalc
 
@@ -79,7 +79,7 @@ You start LibreOffice via the application launcher (`Super + Space`).
 
 You start Omacalc with `Super + Ctrl + Q` (or the calculator key, if your keyboard has one).
 
-> **Oaxaca: works differently.** Omacalc is not in Oaxaca, because Omacalc has no Ubuntu build. GNOME Calculator is preinstalled in Omacalc's place, takes Omacalc's bindings (`Super + Ctrl + Q` and the calculator key) and opens in a floating window as Omacalc does (the distro's docs/6, choice 47).
+> **Oaxaca: works differently.** Omacalc is not in Oaxaca, because Omacalc has no Ubuntu build. GNOME Calculator is preinstalled in Omacalc's place, takes Omacalc's bindings (`Super + Ctrl + Q` and the calculator key) and opens in a floating window as Omacalc does.
 
 ## Signal
 
@@ -101,7 +101,7 @@ You start mpv via the application launcher (`Super + Space`) or just double-clic
 
 It's not part of the base install: install it from _Install > Productivity > OBS Studio_ in the Omarchy menu (`Super + Space`), which installs the OBS project's own Flatpak from Flathub. Then start it via the application launcher (`Super + Space`).
 
-> **Oaxaca: works differently.** The paragraph above is Oaxaca's. Omarchy preinstalls OBS Studio (`obs-studio` in Omarchy's base package list) and has no menu entry for OBS Studio. Oaxaca offers the Flathub build because the OBS project's other official channel, its PPA, has no build for Ubuntu 26.10; _Remove > Productivity > OBS Studio_ removes OBS Studio again (the distro's docs/6, choice 83).
+> **Oaxaca: works differently.** The paragraph above is Oaxaca's. Omarchy preinstalls OBS Studio (`obs-studio` in Omarchy's base package list) and has no menu entry for OBS Studio. Oaxaca offers the Flathub build because the OBS project's other official channel, its PPA, has no build for Ubuntu 26.10; _Remove > Productivity > OBS Studio_ removes OBS Studio again.
 
 ## Kdenlive
 
@@ -109,7 +109,7 @@ It's not part of the base install: install it from _Install > Productivity > OBS
 
 It's not part of the base install: install it from _Install > Productivity > Kdenlive_ in the Omarchy menu (`Super + Space`), which installs KDE's Flatpak from Flathub. Then start it via the application launcher (`Super + Space`).
 
-> **Oaxaca: works differently.** The paragraph above is Oaxaca's. Omarchy preinstalls Kdenlive (`kdenlive` in Omarchy's base package list) and has no menu entry for Kdenlive. Oaxaca offers KDE's Flatpak instead, and _Remove > Productivity > Kdenlive_ removes Kdenlive again (the distro's docs/6, choice 84).
+> **Oaxaca: works differently.** The paragraph above is Oaxaca's. Omarchy preinstalls Kdenlive (`kdenlive` in Omarchy's base package list) and has no menu entry for Kdenlive. Oaxaca offers KDE's Flatpak instead, and _Remove > Productivity > Kdenlive_ removes Kdenlive again.
 
 ## Omacut
 
@@ -117,4 +117,4 @@ It's not part of the base install: install it from _Install > Productivity > Kde
 
 You start Omacut via the application launcher (`Super + Space`).
 
-> **Oaxaca: removed.** Omacut is not in Oaxaca: Omacut has no build in Ubuntu's archive, on Flathub or on the Snap Store (the distro's docs/6, choice 80).
+> **Oaxaca: removed.** Omacut is not in Oaxaca: Omacut has no build in Ubuntu's archive, on Flathub or on the Snap Store.

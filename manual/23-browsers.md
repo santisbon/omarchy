@@ -2,11 +2,11 @@
 
 Omarchy ships with [Chromium](https://www.chromium.org/) as the default browser. It's the plain open-source build, themed to match the rest of your system, and it's what `Super + Shift + Return` opens and what every [web app](25-web-apps.md) runs inside.
 
-> **Oaxaca: works differently.** Ubuntu's archive has only a placeholder package that installs Chromium's snap, so Oaxaca preinstalls Chromium from the xtradeb PPA, a community build of upstream Chromium published on Launchpad, pinned below Ubuntu's archive (the distro's docs/6, choices 3 and 16).
+> **Oaxaca: works differently.** Ubuntu's archive has only a placeholder package that installs Chromium's snap, so Oaxaca preinstalls Chromium from the xtradeb PPA, a community build of upstream Chromium published on Launchpad, pinned below Ubuntu's archive.
 
 If Chromium isn't your taste, you're not stuck with it. Under _Install > Browser_ in the Omarchy menu you'll find Chrome, Edge, Brave, Brave Origin, Firefox, and [Zen](https://zen-browser.app/). Pick one and Omarchy installs it, sets up its policy directory, and applies your current theme to it.
 
-> **Oaxaca: works differently.** _Install > Browser_ offers Chrome, Brave Origin and Firefox, plus Chromium once Chromium has been removed; Edge, Brave and Zen are not in the menu (the distro's docs/6, choice 74). Chrome comes from Google's `.deb`, which adds Google's apt repository for updates; Brave Origin comes from Brave's apt repository and Firefox from Mozilla's.
+> **Oaxaca: works differently.** _Install > Browser_ offers Chrome, Brave Origin and Firefox, plus Chromium once Chromium has been removed; Edge, Brave and Zen are not in the menu. Chrome comes from Google's `.deb`, which adds Google's apt repository for updates; Brave Origin comes from Brave's apt repository and Firefox from Mozilla's.
 
 ## Making one the default
 
@@ -24,7 +24,7 @@ Run it with no argument and it tells you the current default. This sets the XDG 
 
 The Chromium-family browsers (Chromium itself, Chrome, Edge, and Brave) come with two Omarchy extensions that reach out of the browser and into the rest of your system.
 
-> **Oaxaca: works differently.** In Oaxaca the Chromium-family browsers that get the two extensions are Chromium, Chrome and Brave Origin, the ones the menu installs; Edge and Brave are not offered (the distro's docs/6, choice 74).
+> **Oaxaca: works differently.** In Oaxaca the Chromium-family browsers that get the two extensions are Chromium, Chrome and Brave Origin, the ones the menu installs; Edge and Brave are not offered.
 
 **Copy URL** puts the current tab's address on your clipboard with `Alt + Shift + L`. That's faster than clicking into the address bar and copying, and because it goes through the system clipboard rather than the browser's, you get an Omarchy notification confirming it and the URL is immediately available in [clipboard history](08-unified-clipboard-history.md) and every other app. There's a toolbar button too, if you prefer clicking.
 
@@ -38,7 +38,7 @@ These are Chromium-family only. Firefox and Zen don't get them.
 
 Firefox and Zen are a different family, so they get different treatment: Omarchy installs a policies file for sensible defaults and switches them into native Wayland mode, which you want for fractional scaling and smooth trackpad scrolling.
 
-> **Oaxaca: removed.** Zen is not in the menu (the distro's docs/6, choice 74), so in Oaxaca this section applies to Firefox.
+> **Oaxaca: removed.** Zen is not in the menu, so in Oaxaca this section applies to Firefox.
 
 They don't get the Chromium extensions above, and they're not themed by Omarchy, so those parts of the experience are yours to set up.
 

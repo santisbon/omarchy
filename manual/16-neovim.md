@@ -8,11 +8,11 @@ Now Neovim is basically infinitely configurable. If you really want to go nuts, 
 
 But Omarchy ships with a complete Neovim setup — the `omarchy-nvim` package — that's been lovingly tuned to showcase the best of what's possible out of the box. Without you having to write a single line of configuration! It's built on [LazyVim](https://www.lazyvim.org/), a distribution of Neovim plugins and configurations. It's awesome.
 
-> **Oaxaca: removed.** Oaxaca does not ship the `omarchy-nvim` package or any LazyVim configuration: Neovim is preinstalled as Ubuntu's `neovim` package with Neovim's own defaults. The `omarchy-nvim` package builds its plugin cache by downloading every plugin from GitHub during the package build, and Oaxaca's package builds run without network (the distro's docs/6, choices 26 and 71).
+> **Oaxaca: removed.** Oaxaca does not ship the `omarchy-nvim` package or any LazyVim configuration: Neovim is preinstalled as Ubuntu's `neovim` package with Neovim's own defaults. The `omarchy-nvim` package builds its plugin cache by downloading every plugin from GitHub during the package build, and Oaxaca's package builds run without network.
 
 ## LazyVim Basics
 
-> **Oaxaca: removed.** The LazyVim keys below (the `Space` leader menu, the file tree, LazyGit in a floating pane) do not exist in Oaxaca's stock Neovim. _Learn > Neovim_ in the Oaxaca menu opens Neovim's quick reference (`neovim.io/doc/user/quickref.html`) instead of LazyVim's keymaps (the distro's docs/6, choice 26).
+> **Oaxaca: removed.** The LazyVim keys below (the `Space` leader menu, the file tree, LazyGit in a floating pane) do not exist in Oaxaca's stock Neovim. _Learn > Neovim_ in the Oaxaca menu opens Neovim's quick reference (`neovim.io/doc/user/quickref.html`) instead of LazyVim's keymaps.
 
 As mentioned, I'm not going to teach you vim in this short introduction, but I can show you a few basics of LazyVim, and how to get around.
 
@@ -41,10 +41,10 @@ You can see all the possible commands on [the LazyVim Keymaps page](https://www.
 
 You can start Neovim using `Super + Shift + N` (the binding launches your default editor, which is Neovim out of the box), but it's usually easier to drive it from the terminal by navigating to the directory you wish to work in and typing `n`. The `n` is the alias for `nvim`, which will use the the present directory to open by default. You can open a single file with `n myfile.txt`.
 
-> **Oaxaca: works differently.** The default editor out of the box is nano, which Oaxaca preinstalls from Ubuntu's archive, so `Super + Shift + N` opens nano until _Setup > Defaults > Editor > Neovim_ makes Neovim the default. The `n` function still opens `nvim` (the distro's docs/6, choice 26).
+> **Oaxaca: works differently.** The default editor out of the box is nano, which Oaxaca preinstalls from Ubuntu's archive, so `Super + Shift + N` opens nano until _Setup > Defaults > Editor > Neovim_ makes Neovim the default. The `n` function still opens `nvim`.
 
 ## Using Neovim for sudo edits
 
 If you need to edit files that you can only change as a super user, you can use neovim with all your plugins setup by running `sudoedit /etc/sudoers.d/00-sudo-only-file`.
 
-> **Oaxaca: works differently.** `sudoedit` opens the default editor, so on a fresh Oaxaca install `sudoedit` opens nano, and Neovim has no Omarchy plugins to bring along (the distro's docs/6, choice 26).
+> **Oaxaca: works differently.** `sudoedit` opens the default editor, so on a fresh Oaxaca install `sudoedit` opens nano, and Neovim has no Omarchy plugins to bring along.

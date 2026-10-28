@@ -18,7 +18,7 @@ Tmux provides a consistent, programmable interface for panes, windows (aka tabs)
 
 You start a new Tmux session in a fresh terminal using `Super + Alt + Return`, and because Tmux is a persistent process, you can resume your session even if you close that terminal. Just hit `Ctrl + Space` (called the prefix key) then `s` to see all your active sessions.
 
-> **Oaxaca: works differently.** Tmux is preinstalled from Ubuntu's archive (the main component) with Omarchy's configuration (the distro's docs/6, choice 25). Oaxaca's `~/.config/tmux/tmux.conf` turns on tmux's extended keys for every terminal that reports an `xterm*` type (Foot, Alacritty, Ghostty and Kitty), where Omarchy's `tmux.conf` turns extended keys on only for Kitty, so `Shift + Enter` reaches programs such as Claude Code inside tmux.
+> **Oaxaca: works differently.** Tmux is preinstalled from Ubuntu's archive (the main component) with Omarchy's configuration. Oaxaca's `~/.config/tmux/tmux.conf` turns on tmux's extended keys for every terminal that reports an `xterm*` type (Foot, Alacritty, Ghostty and Kitty), where Omarchy's `tmux.conf` turns extended keys on only for Kitty, so `Shift + Enter` reaches programs such as Claude Code inside tmux.
 
 Omarchy ships with an ergonomically-optimized Tmux configuration, which has a lot of keybindings to learn, so keep [the cheatsheet handy](07-hotkeys.md#tmux).
 

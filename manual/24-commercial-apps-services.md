@@ -14,7 +14,7 @@ You start 1Password with `Super + Shift + /`. If it isn't installed yet, that ho
 
 [Bitwarden](https://bitwarden.com/) is the open source alternative in the password manager space, with a free tier that covers most personal use. Install it with _Install > Service > Bitwarden_ from the Omarchy menu, which brings along the Bitwarden command line tool as well.
 
-> **Oaxaca: works differently.** _Install > Service > Bitwarden_ installs Bitwarden's own snap from the Snap Store (publisher 8bit Solutions LLC, Bitwarden's company), connects the snap to the `password-manager-service` interface Bitwarden needs for secure storage, and opens Bitwarden. The Bitwarden command line tool is not installed with it: Bitwarden publishes the command line tool as the `bw` snap, which _Install > Snap_ can add. _Remove > Snap_ removes either snap (the distro's docs/6, choice 77).
+> **Oaxaca: works differently.** _Install > Service > Bitwarden_ installs Bitwarden's own snap from the Snap Store (publisher 8bit Solutions LLC, Bitwarden's company), connects the snap to the `password-manager-service` interface Bitwarden needs for secure storage, and opens Bitwarden. The Bitwarden command line tool is not installed with it: Bitwarden publishes the command line tool as the `bw` snap, which _Install > Snap_ can add. _Remove > Snap_ removes either snap.
 
 ## Spotify
 
@@ -42,16 +42,16 @@ It gets a panel in the bar, a web app for the admin console, and Taildrop for se
 
 [ONCE](https://once.com/) is 37signals' line of software you buy once and run on your own server, like the Campfire chat system. Select _Install > Service > ONCE_ from the Omarchy menu to install it, which enables its background service and drops you into the ONCE terminal interface to take it from there.
 
-> **Oaxaca: removed.** ONCE is not in the menu: ONCE is a binary released on GitHub with no package, and ONCE needs Docker, whose Docker Engine Oaxaca does not preinstall (the distro's docs/6, choice 71).
+> **Oaxaca: removed.** ONCE is not in the menu: ONCE is a binary released on GitHub with no package, and ONCE needs Docker, whose Docker Engine Oaxaca does not preinstall.
 
 ## NordVPN
 
 [NordVPN](https://nordvpn.com/) is a standard VPN service that lets you exit your traffic from most regions around the world. To set it up, select _Install > Service > NordVPN_ from the Omarchy menu. After the reboot it asks for, run `nordvpn login` to authenticate.
 
-> **Oaxaca: works differently.** _Install > Service > NordVPN_ installs NordVPN's own snap from the Snap Store, which runs NordVPN's daemon as a snap service, and asks for no reboot: Omarchy's group step and reboot are left out because NordVPN's Linux guide does not give them for the snap. _Remove > Snap_ removes NordVPN. Logging in and connecting with the snap have not been tested on Oaxaca (the distro's docs/6, choice 77).
+> **Oaxaca: works differently.** _Install > Service > NordVPN_ installs NordVPN's own snap from the Snap Store, which runs NordVPN's daemon as a snap service, and asks for no reboot: Omarchy's group step and reboot are left out because NordVPN's Linux guide does not give them for the snap. _Remove > Snap_ removes NordVPN. Logging in and connecting with the snap have not been tested on Oaxaca.
 
 > **Oaxaca: added.** _Install > Service > Sidra (Apple Music)_ installs [Sidra](https://github.com/wimpysworld/sidra), an Apple Music app, from the Snap Store; _Remove > Services > Sidra (Apple Music)_ removes it.
 
-> **Oaxaca: added.** _Install > Service_ also offers Mullvad VPN, from Mullvad's own apt repository, and Thunderbird, from the Snap Store; while Thunderbird is installed, `Super + Shift + E` opens Thunderbird (the distro's docs/6, choice 27). _Remove > Services_ removes both.
+> **Oaxaca: added.** _Install > Service_ also offers Mullvad VPN, from Mullvad's own apt repository, and Thunderbird, from the Snap Store; while Thunderbird is installed, `Super + Shift + E` opens Thunderbird. _Remove > Services_ removes both.
 
-> **Oaxaca: added.** _Install > Service > iPhone_ installs [iphonebridge](https://github.com/santisbon/iphonebridge), which brings a paired iPhone's messages, contacts, notifications, calls and music controls to the desktop, and pairs the iPhone: start the pairing on the iPhone when the installer asks. _Remove > Services > iPhone_ removes iphonebridge and its data (the distro's docs/6, choice 109).
+> **Oaxaca: added.** _Install > Service > iPhone_ installs [iphonebridge](https://github.com/santisbon/iphonebridge), which brings a paired iPhone's messages, contacts, notifications, calls and music controls to the desktop, and pairs the iPhone: start the pairing on the iPhone when the installer asks. _Remove > Services > iPhone_ removes iphonebridge and its data.

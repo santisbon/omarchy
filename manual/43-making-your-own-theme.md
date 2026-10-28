@@ -4,11 +4,11 @@ You can add your own themes to `~/.config/omarchy/themes`. Just copy one of the 
 
 The main file you have to tweak is `colors.toml`. That defines the color set that's then used to generate configurations for the terminal (Foot/Alacritty/Ghostty/Kitty), btop, Chromium, Hyprland, Neovim, Helix, VSCode, Obsidian, and the entire Omarchy shell (top bar, menu, notifications, OSD, and lock screen).
 
-> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian (the distro's docs/6, choice 71). Once Install > Productivity > Obsidian has installed its snap, `omarchy-theme-set-obsidian` themes it as on Omarchy (choice 97).
+> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian. Once Install > Productivity > Obsidian has installed its snap, `oaxaca-theme-set-obsidian` themes it as on Omarchy.
 
 You can also use the included Aether application to create a new theme using a lovely GUI interface to play with colors and search for backgrounds. Just start it via the apps menu on `Super + Alt + Space`.
 
-> **Oaxaca: removed.** Aether, Omarchy's theme designer, is not included: Aether is not in Ubuntu 26.10's archive, and Aether's repository has no licence, so the distro cannot redistribute it (the fork's `PORT-REMOVALS.md`).
+> **Oaxaca: removed.** Aether, Omarchy's theme designer, is not included: Aether is not in Ubuntu 26.10's archive, and Aether's repository has no licence, so the distro cannot redistribute it.
 
 ### What an installed theme can contain
 
@@ -42,7 +42,7 @@ There's a fully commented `alacritty.toml.tpl.sample` in that folder to copy fro
 
 If you want to distribute your theme so others can use it, you need to put it on a public git server, like GitHub. Then people can install it using _Install > Style > Theme_ in the Omarchy menu using that URL. It's recommended that you follow the naming convention of `omarchy-[themename]-theme`, as the theme will show correctly as just `[themename]` in the theme selection menu after installation.
 
-> **Oaxaca: added.** Before applying a theme installed from a repo, `omarchy theme install` looks through the theme's files for Arch Linux's package tools (`pacman`, `yay`, `paru`, `makepkg`), lists what it found and asks "Install it anyway?", with no as the default, because Oaxaca installs software with apt. A theme that mentions those tools may still work (the distro's docs/6, choice 86).
+> **Oaxaca: added.** Before applying a theme installed from a repo, `oaxaca theme install` looks through the theme's files for Arch Linux's package tools (`pacman`, `yay`, `paru`, `makepkg`), lists what it found and asks "Install it anyway?", with no as the default, because Oaxaca installs software with apt. A theme that mentions those tools may still work.
 
 That leftover `[themename]` becomes the theme's directory name, so it has to be one Omarchy can hand around safely: it must start with a letter, a digit, or an underscore, and the rest may hold letters, digits, `.`, `_`, `+`, and `-`. Capitals are lowercased for you, but anything else — a space, a quote, a non-English character — is refused at install time rather than turned into a directory name. So `omarchy-tokyo-night-theme`, `omarchy-flexoki_light-theme`, and `omarchy-c++-theme` all install fine.
 

@@ -60,9 +60,9 @@ The panels aren't read-outs. They're where you actually do the thing:
 
 > **Oaxaca: added.** _Install > Service > AirPods_ adds an AirPods panel to the bar, with each pod's and the case's battery and the listening controls, and pairs the AirPods first if they aren't paired yet; _Remove > Service > AirPods_ takes it away again.
 
-> **Oaxaca: works differently.** Until a power profile is chosen, Oaxaca uses balanced on AC as on battery, where Omarchy picks performance on AC; a profile chosen in the Power panel is still remembered per power source (`omarchy-powerprofiles-set` in the fork).
+> **Oaxaca: works differently.** Until a power profile is chosen, Oaxaca uses balanced on AC as on battery, where Omarchy picks performance on AC; a profile chosen in the Power panel is still remembered per power source (`oaxaca-powerprofiles-set`).
 
-> **Oaxaca: works differently.** The Display panel's scale presets (and `Super + /`) change only the focused monitor, written as a rule for that monitor alone in `~/.config/hypr/monitors.lua`; Omarchy writes the scale into the catch-all rule, which every monitor without a rule of its own follows. When nwg-displays has saved a rule for that monitor in `~/.config/hypr/monitors-gui.lua`, the scale in that rule changes too. Text size stays one setting for all monitors, and its header reads "TEXT SIZE · ALL DISPLAYS" when more than one monitor is on (the distro's docs/6, choices 92 and 95).
+> **Oaxaca: works differently.** The Display panel's scale presets (and `Super + /`) change only the focused monitor, written as a rule for that monitor alone in `~/.config/hypr/monitors.lua`; Omarchy writes the scale into the catch-all rule, which every monitor without a rule of its own follows. When nwg-displays has saved a rule for that monitor in `~/.config/hypr/monitors-gui.lua`, the scale in that rule changes too. Text size stays one setting for all monitors, and its header reads "TEXT SIZE · ALL DISPLAYS" when more than one monitor is on.
 
 Every panel takes the keyboard as well as the mouse: arrows move, Return activates, Tab steps to the neighbouring panel, and Escape closes.
 

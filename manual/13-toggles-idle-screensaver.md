@@ -23,7 +23,7 @@ From the terminal, the same switches are `omarchy toggle <thing>`. Run `omarchy 
 
 The touchpad, touchscreen, and hybrid GPU switches live under _Trigger > Hardware_ (`Super + Ctrl + H`) rather than under Toggle, since they only show up when you actually have that hardware. The touchpad and touchscreen ones survive a Hyprland reload — the disabled device's name is saved to a small state file that Hyprland reads on startup to disable it again.
 
-> **Oaxaca: works differently.** _Trigger > Hardware > Hybrid GPU_ shows only on ASUS ROG laptops with two GPUs, where `omarchy toggle hybrid gpu` drives supergfxctl; Oaxaca builds supergfxctl and asusctl in its own apt repository (the distro's docs/6, choice 68).
+> **Oaxaca: works differently.** _Trigger > Hardware > Hybrid GPU_ shows only on ASUS ROG laptops with two GPUs, where `oaxaca toggle hybrid gpu` drives supergfxctl; Oaxaca builds supergfxctl and asusctl in its own apt repository.
 
 The Toggle menu also carries a few things that aren't `omarchy toggle` commands but behave the same: battery percentage in the bar, workspace layout (`Super + L`), window gaps (`Super + Shift + Backspace`), and the 1-window square aspect (`Super + Ctrl + Backspace`).
 
@@ -92,7 +92,7 @@ This is about locking and the screensaver, not power. Suspend and hibernation ha
 
 Omarchy's screensaver is ASCII art running through random text effects, one instance per monitor. Any key or mouse movement exits it.
 
-> **Oaxaca: works differently.** The text effects come from ttfx, Omarchy's terminal text effects program, which Oaxaca's own apt repository builds from source because Ubuntu's archive has no ttfx package. Before opening its windows, the screensaver closes any open shell panel and the Oaxaca menu, which would otherwise keep the screensaver from going fullscreen (the distro's docs/6, choice 43).
+> **Oaxaca: works differently.** The text effects come from ttfx, Omarchy's terminal text effects program, which Oaxaca's own apt repository builds from source because Ubuntu's archive has no ttfx package. Before opening its windows, the screensaver closes any open shell panel and the Oaxaca menu, which would otherwise keep the screensaver from going fullscreen.
 
 You can start it on demand from _System > Screensaver_ (`Super + Esc`), which forces it up even if you've turned the idle screensaver off. There's no hotkey bound to it by default.
 

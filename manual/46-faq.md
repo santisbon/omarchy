@@ -16,7 +16,7 @@ hl.config({
 
 The bar will automatically show your current keyboard layout once you have multiple layouts configured (and you can click it to switch too).
 
-> **Oaxaca: works differently.** The example's `compose:caps,shift:both_capslock_cancel` brings back Omarchy's Caps Lock setup, which Oaxaca does not use: Oaxaca's keyboard options come from `/etc/default/keyboard` as the installer wrote them, and the commented example in Oaxaca's `~/.config/hypr/input.lua` sets only `grp:alts_toggle`. A non-Latin layout chosen at installation already gets US in front of it, with `grp:alts_toggle` to switch (the distro's docs/6, choice 90).
+> **Oaxaca: works differently.** The example's `compose:caps,shift:both_capslock_cancel` brings back Omarchy's Caps Lock setup, which Oaxaca does not use: Oaxaca's keyboard options come from `/etc/default/keyboard` as the installer wrote them, and the commented example in Oaxaca's `~/.config/hypr/input.lua` sets only `grp:alts_toggle`. A non-Latin layout chosen at installation already gets US in front of it, with `grp:alts_toggle` to switch.
 
 ### How do I change the clock format to 12-hour?
 
@@ -76,7 +76,7 @@ Remember that you have built-in brightness control in Omarchy for the Apple Disp
 
 If you don't want programs like Obsidian or LibreOffice or any of the other preinstalled stuff, you can very easily remove it.
 
-> **Oaxaca: works differently.** Oaxaca preinstalls neither Obsidian nor LibreOffice: Install > Productivity > LibreOffice installs Canonical's snap, and Install > Productivity > Obsidian installs Obsidian's own snap (the fork's `PORT.md`, "The Applications"; the distro's docs/6, choices 71 and 97).
+> **Oaxaca: works differently.** Oaxaca preinstalls neither Obsidian nor LibreOffice: Install > Productivity > LibreOffice installs Canonical's snap, and Install > Productivity > Obsidian installs Obsidian's own snap.
 
 Run _Remove > Package_ to see every package that's installed. Then you can select any package you'd like to remove with tab, and start removing everything you've selected with return.
 
@@ -88,7 +88,7 @@ And you can use _Remove > Web App_ from the Omarchy menu to remove any of the pr
 
 Or run _Remove > Preinstalls_ to sweep out all the preinstalled extras — web apps, TUIs, and optional applications — in one go. The hotkeys that launched them go away with them, so you're left with a clean slate of bindings to fill with your own in `~/.config/hypr/bindings.lua`.
 
-> **Oaxaca: removed.** Remove > Preinstalls is gone, because nothing removable is preinstalled (the fork's `PORT-REMOVALS.md`). Oaxaca preinstalls no web apps either: Install > Web App adds them one at a time, and Remove > Web App appears once one exists.
+> **Oaxaca: removed.** Remove > Preinstalls is gone, because nothing removable is preinstalled. Oaxaca preinstalls no web apps either: Install > Web App adds them one at a time, and Remove > Web App appears once one exists.
 
 ---
 

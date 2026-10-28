@@ -17,11 +17,11 @@ Hit `Print Screen` and the screen freezes so nothing shifts under you while you 
 
 The result goes two places at once: a PNG in your pictures directory, and the clipboard, so you can paste it straight into a chat window with `Super + V`. A notification pops up with a thumbnail. Click it (or hit `Super + Alt + ,` to invoke the last notification) and the shot opens in Tensaku, the annotation editor, where you can draw arrows and boxes on it before you send it.
 
-> **Oaxaca: works differently.** The notification opens the shot in swappy, a Wayland annotation tool from Ubuntu's archive, because Omarchy's Tensaku has no Ubuntu build. In swappy, `Ctrl + S` saves the annotated copy next to the screenshot with `-edited` at the end of its name and closes swappy, `Ctrl + C` copies the annotated image, and `Escape` discards the drawing; the screenshot itself stays as captured (the distro's docs/6, choice 29).
+> **Oaxaca: works differently.** The notification opens the shot in swappy, a Wayland annotation tool from Ubuntu's archive, because Omarchy's Tensaku has no Ubuntu build. In swappy, `Ctrl + S` saves the annotated copy next to the screenshot with `-edited` at the end of its name and closes swappy, `Ctrl + C` copies the annotated image, and `Escape` discards the drawing; the screenshot itself stays as captured.
 
 Files land in `~/Pictures` by default, named `screenshot-2026-08-13_14-22-05.png`. If you'd rather keep them in their own folder, set `OMARCHY_SCREENSHOT_DIR` — see [the FAQ](46-faq.md) for where to put session environment variables. Omarchy creates the directory for you if it isn't there. You can swap the editor too with `OMARCHY_SCREENSHOT_EDITOR`.
 
-> **Oaxaca: works differently.** `OMARCHY_SCREENSHOT_EDITOR` defaults to `swappy` instead of `tensaku-edit`, and swappy's own configuration (`~/.config/swappy/config`) saves its edited copies in `OMARCHY_SCREENSHOT_DIR` too (the distro's docs/6, choice 29).
+> **Oaxaca: works differently.** `OMARCHY_SCREENSHOT_EDITOR` defaults to `swappy` instead of `tensaku-edit`, and swappy's own configuration (`~/.config/swappy/config`) saves its edited copies in `OMARCHY_SCREENSHOT_DIR` too.
 
 From the terminal, `omarchy screenshot` takes the same shot, and you can be explicit about it: `omarchy capture screenshot region` for freeform only, `windows` to snap to window and monitor rectangles, or `fullscreen` to skip the picker entirely and grab the focused monitor. A second argument of `copy` puts the shot only on the clipboard, and `save` only on disk.
 
@@ -81,4 +81,4 @@ It works from the terminal too, if you already know what you want: `omarchy tran
 
 Once you've got the file, `Super + Ctrl + S` opens the Share menu and sends it to another device on your network via LocalSend. See [GUIs](22-guis.md) for that.
 
-> **Oaxaca: works differently.** LocalSend comes preinstalled from Oaxaca's own apt repository, built from LocalSend's release, since Ubuntu's archive has no LocalSend package; the firewall, which Oaxaca turns on, allows LocalSend's port 53317 (the distro's docs/6, choices 19 and 40).
+> **Oaxaca: works differently.** LocalSend comes preinstalled from Oaxaca's own apt repository, built from LocalSend's release, since Ubuntu's archive has no LocalSend package; the firewall, which Oaxaca turns on, allows LocalSend's port 53317.

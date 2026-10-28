@@ -2,7 +2,7 @@
 
 Omarchy isn't just for _pRoDUcTiVItY_, it's also for having fun, and what's more fun than gaming? Omarchy ships with a whole suite of gaming options — Steam and RetroArch for native and retro play, Battle.net, Lutris, and Heroic for non-Steam stores, Xbox Cloud Gaming + NVIDIA GeForce NOW for cloud, plus the evergreen Minecraft.
 
-> **Oaxaca: removed.** Omarchy's version of this paragraph also names Moonlight for PC streaming, which Oaxaca does not preinstall (the distro's docs/6, choice 71). Battle.net, in the list above, is not in Oaxaca either.
+> **Oaxaca: removed.** Omarchy's version of this paragraph also names Moonlight for PC streaming, which Oaxaca does not preinstall. Battle.net, in the list above, is not in Oaxaca either.
 
 Thanks to Valve's incredible work on [the proton compatibility layer](https://en.wikipedia.org/wiki/Proton_(software)), there are now tens of thousands of playable modern games on Linux. Oh, and did you know that the [Steam Deck](https://store.steampowered.com/steamdeck/) actually runs Arch!
 
@@ -58,7 +58,7 @@ Install the cloud-gaming service [NVIDIA GeForce NOW](https://www.nvidia.com/en-
 
 Install Minecraft by selecting _Install > Gaming > Minecraft_ from the Omarchy menu (`Super + Space`).
 
-> **Oaxaca: works differently.** The Minecraft installer downloads Mojang's own `Minecraft.deb` and installs that package with apt, after the distro's `oaxaca-gdk-pixbuf-compat` package, which provides an old library package name that Mojang's package still depends on and Ubuntu no longer provides (the distro's docs/6, choice 76).
+> **Oaxaca: works differently.** The Minecraft installer downloads Mojang's own `Minecraft.deb` and installs that package with apt, after the distro's `oaxaca-gdk-pixbuf-compat` package, which provides an old library package name that Mojang's package still depends on and Ubuntu no longer provides.
 
 Like Steam, note that it can take a while after logging in or starting up for the next screen to appear, and you're not going to get any feedback while you're waiting.
 
@@ -70,7 +70,7 @@ Install support for Bluetooth Xbox controllers by selecting _Install > Gaming > 
 
 > **Oaxaca: works differently.** The Xbox Controllers installer installs Ubuntu's `xpadneo-dkms`, a kernel module compiled on the machine, which needs a Secure Boot key (a Machine Owner Key) enrolled when Secure Boot is on. The installer then asks you to choose a one-time password; at the next restart, press a key within 10 seconds when the blue screen says "Press any key to perform MOK management", choose _Enroll MOK_, type that password, and choose _Reboot_. Ubuntu's kernel already runs Xbox controllers over USB and Bluetooth with its own drivers.
 
-> **Oaxaca: removed.** Omarchy's manual has a section here, "Moonlight (Game streaming from a PC)": Omarchy preinstalls the Moonlight client, and `omarchy install service sunshine` installs Sunshine, the streaming host, and opens Moonlight's streaming ports for the LAN and Tailscale. Oaxaca has neither; Moonlight and Sunshine (`dev.lizardbyte.app.Sunshine`) can be installed from Flathub with _Install > Flatpak_, without Omarchy's firewall rules (the distro's docs/6, choices 71 and 78).
+> **Oaxaca: removed.** Omarchy's manual has a section here, "Moonlight (Game streaming from a PC)": Omarchy preinstalls the Moonlight client, and `omarchy install service sunshine` installs Sunshine, the streaming host, and opens Moonlight's streaming ports for the LAN and Tailscale. Oaxaca has neither; Moonlight and Sunshine (`dev.lizardbyte.app.Sunshine`) can be installed from Flathub with _Install > Flatpak_, without Omarchy's firewall rules.
 
 ## Battle.net
 
@@ -92,6 +92,6 @@ Installation is a little janky and looks like nothing is happening at times — 
 
 Install the [Heroic Launcher](https://heroicgameslauncher.com/) by selecting _Install > Gaming > Heroic (Epic Games)_ from the Omarchy menu (`Super + Space`). Heroic lets you run Epic Games titles, like OddSparks, that don't rely on anti-cheat — plus games from GOG and Amazon Prime Gaming. Sadly, that means no Fortnite and no Rocket League — until Tim Sweeney comes to Linux, this is as close as it gets.
 
-> **Oaxaca: works differently.** The Heroic installer installs Flathub's `com.heroicgameslauncher.hgl`, published by Heroic's developers and marked verified, instead of Omarchy's own package, and Flatpak keeps Heroic updated. _Remove > Gaming > Heroic (Epic Games)_ deletes Heroic's data and `~/Games/Heroic`, as Omarchy's remover does (the distro's docs/6, choice 75).
+> **Oaxaca: works differently.** The Heroic installer installs Flathub's `com.heroicgameslauncher.hgl`, published by Heroic's developers and marked verified, instead of Omarchy's own package, and Flatpak keeps Heroic updated. _Remove > Gaming > Heroic (Epic Games)_ deletes Heroic's data and `~/Games/Heroic`, as Omarchy's remover does.
 
 Like Lutris, it can feel slow and janky while installing games. Give it time.
