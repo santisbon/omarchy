@@ -10,7 +10,7 @@ Download the ISO first, put it on a USB stick (use [balenaEtcher](https://etcher
 
 _You must turn off Secure Boot and/or TPM in the BIOS. You have to turn these off to be able to install Omarchy. They're Microsoft security schemes meant for Windows and Microsoft-affiliated Linux distributions._
 
-> **Oaxaca: works differently.** Secure Boot can stay on or off: Oaxaca's live USB and installed system boot through Ubuntu's signed chain (shim, then Canonical's signed GRUB and kernel; the distro's developer README, "Secure Boot"). Oaxaca boots in UEFI mode only. The TPM can stay on too, and Setup > Security > TPM Unlock can use the TPM to unlock the encrypted disk at boot, an opt-in that requires Secure Boot on.
+> **Oaxaca: works differently.** Secure Boot can stay on or off: Oaxaca's live USB and installed system boot through Ubuntu's signed chain (shim, then Canonical's signed GRUB and kernel). Oaxaca boots in UEFI mode only. The TPM can stay on too, and Setup > Security > TPM Unlock can use the TPM to unlock the encrypted disk at boot, an opt-in that requires Secure Boot on.
 
 Then answer the configuration questions, and confirm them like this:
 
@@ -23,6 +23,21 @@ Then select a drive for your installation, and sit back and watch the installati
 Now you're ready to Omarchy!
 
 > **Oaxaca: works differently.** The screenshots above show Omarchy's installer. Calamares shows its own pages in this order: welcome, locale, keyboard, partition, users and a summary; it then copies the installed system to the disk and offers the reboot.
+
+> **Oaxaca: added.** Which NVIDIA driver a graphics card needs depends on its architecture. The installer installs NVIDIA's open driver for Turing and newer cards from the USB stick. Older cards need NVIDIA's closed driver, branch 580, the last one for them, which comes from Ubuntu's archive after installation. Both drivers load with Secure Boot on.
+>
+> | Architecture | Example GPUs | Driver needed | On the USB stick | After installation |
+> |---|---|---|---|---|
+> | Blackwell | GeForce RTX 50 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
+> | Ada Lovelace | GeForce RTX 40 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
+> | Ampere | GeForce RTX 30 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
+> | Turing | GeForce RTX 20 series, GTX 16 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
+> | Volta | TITAN V | NVIDIA's closed driver, branch 580 | No | Nouveau, until you install the 580 driver |
+> | Pascal | GeForce GTX 10 series, such as the GTX 1080 and GTX 1050 Ti Mobile | NVIDIA's closed driver, branch 580 | No | Nouveau, until you install the 580 driver |
+> | Maxwell | GeForce GTX 900 series, GTX 750 Ti | NVIDIA's closed driver, branch 580 | No | Nouveau, until you install the 580 driver |
+> | Kepler and older | Most of the GeForce GTX 600 and 700 series, such as the GTX 680 and GTX 780 | None: Ubuntu 26.10 has no NVIDIA driver for them | No | Nouveau |
+>
+> Nouveau is the open NVIDIA driver built into Linux. To install the 580 driver on a Volta, Pascal or Maxwell card, connect to the internet, run `sudo oaxaca-drivers-install` in a terminal, and restart. `oaxaca-drivers-install --show` prints the driver it would install, without installing anything.
 
 ### Use a wired or 2.4ghz keyboard!
 

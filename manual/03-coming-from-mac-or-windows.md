@@ -58,7 +58,7 @@ And when you close a window, the app actually quits. There's no macOS limbo wher
 
 Omarchy runs well on Intel Macs — see [Mac support](44-mac-support.md). And the keyboard is kind to you: Omarchy doesn't remap anything, and Linux treats the Command key as Super, so Super sits right where Cmd always was. Your thumb won't notice the move.
 
-> **Oaxaca: removed.** Oaxaca does not support Macs with Apple's T2 chip (most Macs from 2018 to 2020), whose setup in Omarchy needs an out-of-tree kernel from a pacman repository, nor the Broadcom BCM4360 Wi-Fi of 2013 to 2015 MacBooks, whose only driver is a DKMS module that Secure Boot would refuse without an enrolled key. No Mac has run Oaxaca yet (the distro's developer README, "Apple hardware").
+> **Oaxaca: removed.** Oaxaca does not support Macs with Apple's T2 chip (most Macs from 2018 to 2020), whose setup in Omarchy needs an out-of-tree kernel from a pacman repository, nor the Broadcom BCM4360 Wi-Fi of 2013 to 2015 MacBooks, whose only driver is a DKMS module that Secure Boot would refuse without an enrolled key. No Mac has run Oaxaca yet.
 
 > **Oaxaca: works differently.** Omarchy does remap one key: Caps Lock becomes the Compose key, with Caps Lock moved to both Shift keys pressed together. Oaxaca keeps the keyboard exactly as chosen at installation, so Caps Lock stays Caps Lock.
 
