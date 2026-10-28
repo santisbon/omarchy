@@ -10,7 +10,7 @@ Download the ISO first, put it on a USB stick (use [balenaEtcher](https://etcher
 
 _You must turn off Secure Boot and/or TPM in the BIOS. You have to turn these off to be able to install Omarchy. They're Microsoft security schemes meant for Windows and Microsoft-affiliated Linux distributions._
 
-> **Oaxaca: works differently.** Secure Boot can stay on or off: Oaxaca's live USB and installed system boot through Ubuntu's signed chain (shim, then Canonical's signed GRUB and kernel), and Oaxaca never asks to enroll a key (the distro's developer README, "Secure Boot"). Oaxaca boots in UEFI mode only (the distro's docs/7, choice 4). The TPM can stay on too, and Setup > Security > TPM Unlock can use the TPM to unlock the encrypted disk at boot, an opt-in that requires Secure Boot on (the distro's docs/6, choice 37).
+> **Oaxaca: works differently.** Secure Boot can stay on or off: Oaxaca's live USB and installed system boot through Ubuntu's signed chain (shim, then Canonical's signed GRUB and kernel; the distro's developer README, "Secure Boot"). Oaxaca boots in UEFI mode only (the distro's docs/7, choice 4). The TPM can stay on too, and Setup > Security > TPM Unlock can use the TPM to unlock the encrypted disk at boot, an opt-in that requires Secure Boot on (the distro's docs/6, choice 37).
 
 Then answer the configuration questions, and confirm them like this:
 

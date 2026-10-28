@@ -32,7 +32,7 @@ It is necessary to disable Apple's Secure Boot in order to boot the bootable USB
 6. Choose "No Security" from the Secure Boot options
 7. Choose "Allow booting from external or removable media" from the External Boot options
 
-> **Oaxaca: works differently.** Oaxaca boots with Secure Boot on or off, through Ubuntu's signed chain (shim, then Canonical's GRUB and kernel), and never asks for a key to be enrolled (the distro's docs/README.md, "Secure Boot"). Which of Apple's Startup Security Utility settings that chain needs on a Mac has not been tested.
+> **Oaxaca: works differently.** Oaxaca boots with Secure Boot on or off, through Ubuntu's signed chain (shim, then Canonical's GRUB and kernel; the distro's docs/README.md, "Secure Boot"). Which of Apple's Startup Security Utility settings that chain needs on a Mac has not been tested.
 
 #### Start the Installation
 
