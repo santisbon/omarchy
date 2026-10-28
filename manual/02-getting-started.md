@@ -24,20 +24,20 @@ Now you're ready to Omarchy!
 
 > **Oaxaca: works differently.** The screenshots above show Omarchy's installer. Calamares shows its own pages in this order: welcome, locale, keyboard, partition, users and a summary; it then copies the installed system to the disk and offers the reboot.
 
-> **Oaxaca: added.** Which NVIDIA driver a graphics card needs depends on its architecture. The installer installs NVIDIA's open driver for Turing and newer cards from the USB stick. Older cards need NVIDIA's closed driver, branch 580, the last one for them, which comes from Ubuntu's archive after installation. Both drivers load with Secure Boot on.
+> **Oaxaca: added.** Which NVIDIA driver a graphics card needs depends on its architecture. The installer installs NVIDIA's driver with open kernel modules for Turing and newer cards from the USB stick. Older cards need NVIDIA's driver 580 with closed kernel modules, the last NVIDIA driver for them, which comes from Ubuntu's archive after installation. Both drivers load with Secure Boot on.
 >
 > | Architecture | Example GPUs | Driver needed | On the USB stick | After installation |
 > |---|---|---|---|---|
-> | Blackwell | GeForce RTX 50 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
-> | Ada Lovelace | GeForce RTX 40 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
-> | Ampere | GeForce RTX 30 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
-> | Turing | GeForce RTX 20 series, GTX 16 series | NVIDIA's open driver | Yes | NVIDIA's open driver |
-> | Volta | TITAN V | NVIDIA's closed driver, branch 580 | No | Nouveau, until you install the 580 driver |
-> | Pascal | GeForce GTX 10 series, such as the GTX 1080 and GTX 1050 Ti Mobile | NVIDIA's closed driver, branch 580 | No | Nouveau, until you install the 580 driver |
-> | Maxwell | GeForce GTX 900 series, GTX 750 Ti | NVIDIA's closed driver, branch 580 | No | Nouveau, until you install the 580 driver |
+> | Blackwell | GeForce RTX 50 series | NVIDIA's driver, open kernel modules | Yes | NVIDIA's driver, open kernel modules |
+> | Ada Lovelace | GeForce RTX 40 series | NVIDIA's driver, open kernel modules | Yes | NVIDIA's driver, open kernel modules |
+> | Ampere | GeForce RTX 30 series | NVIDIA's driver, open kernel modules | Yes | NVIDIA's driver, open kernel modules |
+> | Turing | GeForce RTX 20 series, GTX 16 series | NVIDIA's driver, open kernel modules | Yes | NVIDIA's driver, open kernel modules |
+> | Volta | TITAN V | NVIDIA's driver 580, closed kernel modules | No | Nouveau, until you install NVIDIA's driver 580 |
+> | Pascal | GeForce GTX 10 series, such as the GTX 1080 and GTX 1050 Ti Mobile | NVIDIA's driver 580, closed kernel modules | No | Nouveau, until you install NVIDIA's driver 580 |
+> | Maxwell | GeForce GTX 900 series, GTX 750 Ti | NVIDIA's driver 580, closed kernel modules | No | Nouveau, until you install NVIDIA's driver 580 |
 > | Kepler and older | Most of the GeForce GTX 600 and 700 series, such as the GTX 680 and GTX 780 | None: Ubuntu 26.10 has no NVIDIA driver for them | No | Nouveau |
 >
-> Nouveau is the open NVIDIA driver built into Linux. To install the 580 driver on a Volta, Pascal or Maxwell card, connect to the internet, run `sudo oaxaca-drivers-install` in a terminal, and restart. `oaxaca-drivers-install --show` prints the driver it would install, without installing anything.
+> Nouveau is a driver for NVIDIA cards that comes with Linux, written by its community rather than by NVIDIA. To install NVIDIA's driver 580 on a Volta, Pascal or Maxwell card, connect to the internet, run `sudo oaxaca-drivers-install` in a terminal, and restart. `oaxaca-drivers-install --show` prints the driver it would install, without installing anything.
 
 ### Use a wired or 2.4ghz keyboard!
 
