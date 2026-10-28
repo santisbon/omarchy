@@ -16,6 +16,15 @@ mkdir -p "$home" "$stub_bin"
 cat >"$stub_bin/mise" <<'SH'
 #!/bin/bash
 
+# Two entries from mise 2026.10.21's registry: one npm backend, one not.
+if [[ $1 == "registry" ]]; then
+  case $2 in
+    gemini) echo "npm:@google/gemini-cli" ;;
+    crush) echo "aqua:charmbracelet/crush" ;;
+  esac
+  exit 0
+fi
+
 printf 'mise' >>"$OMARCHY_MISE_TEST_LOG"
 for arg in "$@"; do
   printf '\t%s' "$arg" >>"$OMARCHY_MISE_TEST_LOG"
@@ -25,7 +34,7 @@ SH
 chmod +x "$stub_bin/mise"
 
 install_wrapper() {
-  HOME="$home" "$ROOT/bin/omarchy-mise-install" "$@"
+  HOME="$home" PATH="$stub_bin:$PATH" "$ROOT/bin/omarchy-mise-install" "$@"
 }
 
 # The ordinary case still works, and every call site in install/user/mise.sh
@@ -95,3 +104,20 @@ fi
   fail "an escaping command name removes nothing outside ~/.local/bin"
 
 pass "an escaping command name removes nothing outside ~/.local/bin"
+
+# A short name that mise's registry resolves to an npm package needs Node.js first, as an npm: name does.
+install_wrapper gemini >/dev/null
+log="$tmpdir/registry-npm.log"
+: >"$log"
+OMARCHY_MISE_TEST_LOG="$log" PATH="$stub_bin:$PATH" "$home/.local/bin/gemini" >/dev/null
+[[ $(head -1 "$log") == $'mise\tuse\t-g\t--quiet\tnode@lts' ]] ||
+  fail "a registry name with an npm backend installs Node.js before the package" "$(cat "$log")"
+
+install_wrapper crush >/dev/null
+log="$tmpdir/registry-other.log"
+: >"$log"
+OMARCHY_MISE_TEST_LOG="$log" PATH="$stub_bin:$PATH" "$home/.local/bin/crush" >/dev/null
+grep -Fq node@lts "$log" &&
+  fail "a registry name with another backend does not install Node.js" "$(cat "$log")"
+
+pass "a registry name gets Node.js exactly when its backend is npm"

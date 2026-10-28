@@ -67,9 +67,13 @@ else
       { [[ -L $HOME/.local/bin/$agent ]] || ! grep -q '^mise use -g' "$HOME/.local/bin/$agent"; }
   }
   agent_present() { user_install || mise where "$agent_package" &>/dev/null; }
-  # An npm: agent (Grok) needs Node.js to run, which mise never adds by itself (mise's npm
-  # backend page), and the base install has none.
-  node_first() { [[ $agent_package != npm:* ]] || mise use -g node@lts; }
+  # An npm: agent (Grok, and Gemini through mise's registry) needs Node.js to run, which mise
+  # never adds by itself (mise's npm backend page), and the base install has none.
+  node_first() {
+    local backend=$agent_package
+    [[ $backend == *:* ]] || backend=$(mise registry "$agent_package" 2>/dev/null | awk '{print $1}')
+    [[ $backend != npm:* ]] || mise use -g node@lts
+  }
   agent_install() { user_install || { node_first && mise use -g "$agent_package"; }; }
 fi
 

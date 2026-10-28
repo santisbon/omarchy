@@ -52,8 +52,11 @@ esac
 # Node.js to run ... mise installs it before your npm tools, but never adds it for you", mise's npm
 # backend page). Ubuntu's base install for this distro has no Node, so the wrapper adds mise's
 # LTS Node first for those packages.
+# A short name such as gemini or opencode takes the first backend that mise's registry lists for it.
+backend=$package
+[[ $backend == *:* ]] || backend=$(mise registry "$package" 2>/dev/null | awk '{print $1}')
 node_line=""
-[[ $package == npm:* ]] && node_line=$'mise use -g --quiet node@lts || exit 1\n'
+[[ $backend == npm:* ]] && node_line=$'mise use -g --quiet node@lts || exit 1\n'
 rm -f "$HOME/.local/bin/$command"
 cat >"$HOME/.local/bin/$command" <<EOF
 #!/bin/bash

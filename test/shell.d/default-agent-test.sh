@@ -54,6 +54,14 @@ SH
 
 cat >"$mock_bin/mise" <<'SH'
 #!/bin/bash
+# The npm backends among mise 2026.10.21's registry entries for the agents' short names.
+if [[ $1 == "registry" ]]; then
+  case $2 in
+    gemini) echo "npm:@google/gemini-cli" ;;
+    opencode) echo "npm:@opencode/cli aqua:anomalyco/opencode" ;;
+  esac
+  exit 0
+fi
 printf '%s\0' "$@" >"$OMARCHY_TEST_MISE_LOG"
 printf '%s\n' "$*" >>"$OMARCHY_TEST_MISE_HISTORY"
 
@@ -290,6 +298,14 @@ mapfile -d '' -t agent_open_args <"$agent_open_log"
 [[ ${#agent_open_args[@]} == 2 && ${agent_open_args[0]} == "omarchy-agent" && ${agent_open_args[1]} == "--inline" ]] ||
   fail "newly installed agent opens in the installation terminal"
 pass "missing agents install visibly and open in the same terminal"
+
+# Gemini's short name resolves to an npm package in mise's registry, which needs Node.js first.
+: >"$mise_history"
+omarchy-default-agent --install gemini >/dev/null
+mapfile -t mise_calls <"$mise_history"
+[[ ${mise_calls[0]} == "use -g node@lts" && ${mise_calls[1]} == "use -g gemini" ]] ||
+  fail "installing Gemini installs Node.js first" "$(cat "$mise_history")"
+pass "an agent whose registry backend is npm gets Node.js before it installs"
 
 : >"$notification_history"
 : >"$agent_open_log"
