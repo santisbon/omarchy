@@ -54,10 +54,10 @@ SH
 
 cat >"$mock_bin/mise" <<'SH'
 #!/bin/bash
-# The npm backends among mise 2026.10.21's registry entries for the agents' short names.
+# mise 2026.10.21's registry entries for the agents' short names that the tests below resolve.
 if [[ $1 == "registry" ]]; then
   case $2 in
-    gemini) echo "npm:@google/gemini-cli" ;;
+    antigravity-cli) echo "aqua:google-antigravity/antigravity-cli" ;;
     opencode) echo "npm:@opencode/cli aqua:anomalyco/opencode" ;;
   esac
   exit 0
@@ -122,6 +122,7 @@ export OMARCHY_PATH="$ROOT"
 grok_package="npm:@xai-official/grok"
 omp_package="github:can1357/oh-my-pi"
 crush_package="crush"
+agy_package="antigravity-cli"
 cursor_agent_package="cursor-agent"
 muse_package="http:muse[url=https://api.meta.ai/muse-launcher.sh,bin=muse,version_list_url=https://api.meta.ai/muse-code/channels/muse-stable,version_json_path=.version]"
 
@@ -154,6 +155,7 @@ assert_lazy_stub "$muse_package" muse
 pass "custom agent lazy stubs preserve their mise packages"
 
 OMARCHY_TEST_MISSING_COMMAND=cursor-agent source "$ROOT/install/user/mise.sh"
+grep -Fx "$agy_package agy" "$stub_log" >/dev/null || fail "user setup creates the Antigravity lazy stub"
 grep -Fx "$grok_package grok" "$stub_log" >/dev/null || fail "user setup creates the Grok lazy stub"
 grep -Fx "$cursor_agent_package" "$stub_log" >/dev/null || fail "user setup creates the Cursor CLI lazy stub"
 grep -Fx "$omp_package omp" "$stub_log" >/dev/null || fail "user setup creates the Oh My Pi lazy stub"
@@ -168,10 +170,55 @@ grep -Fx "$cursor_agent_package" "$stub_log" >/dev/null && fail "user setup repl
 pass "user setup keeps an existing Cursor CLI install"
 grep -Fx "$muse_package muse" "$stub_log" >/dev/null && fail "user setup replaces an existing Muse command"
 
+: >"$stub_log"
+mkdir -p "$(dirname "$agent_file")"
+printf '%s\n' gemini >"$agent_file"
+OMARCHY_TEST_MISSING_COMMAND=agy source "$ROOT/migrations/1793225995.sh" >/dev/null
+grep -Fx "$agy_package agy" "$stub_log" >/dev/null || fail "Antigravity migration creates its lazy stub"
+[[ $(<"$agent_file") == "agy" ]] || fail "Antigravity migration replaces a Gemini default"
+
+printf '  %s  \n' gemini >"$agent_file"
+source "$ROOT/migrations/1793225995.sh" >/dev/null
+[[ $(<"$agent_file") == "agy" ]] ||
+  fail "Antigravity migration replaces a padded Gemini default the launcher would still read"
+pass "Antigravity migration reads the default the way the launcher does"
+
+: >"$stub_log"
+printf '%s\n' claude >"$agent_file"
+source "$ROOT/migrations/1793225995.sh" >/dev/null
+[[ ! -s $stub_log ]] || fail "Antigravity migration reinstalls an existing Antigravity command"
+[[ $(<"$agent_file") == "claude" ]] || fail "Antigravity migration keeps a default other than Gemini"
+rm -f "$agent_file"
+pass "Antigravity migration keeps an existing Antigravity install and other defaults"
+
+for obsolete_form in 'mise use -g "gemini"' 'mise use -g --quiet "gemini"'; do
+  printf '#!/bin/bash\n%s || exit 1\n' "$obsolete_form" >"$test_home/.local/bin/gemini"
+  source "$ROOT/migrations/1793225995.sh" >/dev/null
+  [[ ! -e $test_home/.local/bin/gemini ]] ||
+    fail "Antigravity migration removes a wrapper built on [$obsolete_form]"
+done
+
+printf '#!/bin/bash\nexec /opt/gemini "$@"\n' >"$test_home/.local/bin/gemini"
+source "$ROOT/migrations/1793225995.sh" >/dev/null
+[[ -e $test_home/.local/bin/gemini ]] || fail "Antigravity migration leaves a hand-written gemini alone"
+
+printf '#!/bin/bash\n# replaced: mise use -g --quiet "gemini"\nexec /opt/gemini "$@"\n' >"$test_home/.local/bin/gemini"
+source "$ROOT/migrations/1793225995.sh" >/dev/null
+[[ -e $test_home/.local/bin/gemini ]] ||
+  fail "Antigravity migration leaves a wrapper that only mentions the installer line"
+rm -f "$test_home/.local/bin/gemini"
+pass "Antigravity migration only removes the Gemini wrapper omarchy-mise-install wrote"
+
+for skill in omarchy diagnose-crash; do
+  [[ -L $test_home/.gemini/config/skills/$skill && $(readlink "$test_home/.gemini/config/skills/$skill") == "$ROOT/default/agents/skills/$skill" ]] ||
+    fail "Antigravity migration provisions the $skill skill"
+done
+pass "Antigravity migration provisions Antigravity skills"
+
 # Upstream's Remove Preinstalls step cleared these lazy stubs here; the port
 # deleted omarchy-remove-preinstalls (commit c304e943), so the test clears them
 # itself before the checks below, which expect no agent installed.
-for command in omp grok crush cursor-agent muse; do
+for command in agy omp grok crush cursor-agent muse; do
   rm -f "$test_home/.local/bin/$command"
 done
 
@@ -226,8 +273,11 @@ declare -A expected_agents=(
   [codex]="codex"
   [crush]="crush"
   [grok]="grok"
-  [gemini]="gemini"
-  [gemini-cli]="gemini"
+  [agy]="agy"
+  [antigravity]="agy"
+  [antigravity-cli]="agy"
+  [gemini]="agy"
+  [gemini-cli]="agy"
   [copilot]="copilot"
   [github-copilot]="copilot"
   [cursor]="cursor-agent"
@@ -245,7 +295,7 @@ declare -A expected_packages=(
   [codex]="codex"
   [crush]="$crush_package"
   [grok]="$grok_package"
-  [gemini]="gemini"
+  [agy]="$agy_package"
   [copilot]="copilot"
   [cursor-agent]="$cursor_agent_package"
   [muse]="$muse_package"
@@ -299,12 +349,17 @@ mapfile -d '' -t agent_open_args <"$agent_open_log"
   fail "newly installed agent opens in the installation terminal"
 pass "missing agents install visibly and open in the same terminal"
 
-# Gemini's short name resolves to an npm package in mise's registry, which needs Node.js first.
+# OpenCode's short name resolves to an npm package in mise's registry, which needs Node.js first.
 : >"$mise_history"
-omarchy-default-agent --install gemini >/dev/null
+omarchy-default-agent --install opencode >/dev/null
 mapfile -t mise_calls <"$mise_history"
-[[ ${mise_calls[0]} == "use -g node@lts" && ${mise_calls[1]} == "use -g gemini" ]] ||
-  fail "installing Gemini installs Node.js first" "$(cat "$mise_history")"
+[[ ${mise_calls[0]} == "use -g node@lts" && ${mise_calls[1]} == "use -g opencode" ]] ||
+  fail "installing OpenCode installs Node.js first" "$(cat "$mise_history")"
+: >"$mise_history"
+omarchy-default-agent --install agy >/dev/null
+mapfile -t mise_calls <"$mise_history"
+[[ ${mise_calls[0]} == "use -g $agy_package" ]] ||
+  fail "installing Antigravity, an aqua: package, installs no Node.js" "$(cat "$mise_history")"
 pass "an agent whose registry backend is npm gets Node.js before it installs"
 
 : >"$notification_history"
@@ -504,7 +559,7 @@ assert_launch codex codex --approve-for-me -- "Review this project"
 assert_launch muse muse --approval-mode never -- "Review this project"
 assert_launch crush crush run "Review this project"
 assert_launch grok grok --permission-mode bypassPermissions -- "Review this project"
-assert_launch gemini gemini --yolo --prompt-interactive "Review this project"
+assert_launch agy agy --dangerously-skip-permissions --prompt-interactive "Review this project"
 assert_launch cursor-agent cursor-agent --yolo --trust agent -- "Review this project"
 assert_launch hermes env -u HERMES_SESSION_SOURCE hermes chat --yolo --tui "--query=Review this project"
 assert_launch copilot copilot --allow-all --interactive "Review this project"
@@ -539,7 +594,7 @@ assert_bypass codex codex --approve-for-me
 assert_bypass muse muse --approval-mode never
 assert_bypass crush crush --yolo
 assert_bypass grok grok --permission-mode bypassPermissions
-assert_bypass gemini gemini --yolo
+assert_bypass agy agy --dangerously-skip-permissions
 assert_bypass cursor-agent cursor-agent --yolo --trust
 assert_bypass hermes hermes --yolo
 assert_bypass copilot copilot --allow-all

@@ -44,19 +44,25 @@ done
 
 pass "omarchy-provision-user provisions Hermes skills"
 
+for skill in omarchy diagnose-crash; do
+  link="$test_tmp/home/.gemini/config/skills/$skill"
+  [[ -L $link && $(readlink "$link") == "$fixture/default/agents/skills/$skill" ]] ||
+    fail "omarchy-provision-user provisions the $skill skill for Antigravity"
+done
+pass "omarchy-provision-user provisions Antigravity skills"
+
 provision --force
 for skill in omarchy diagnose-crash; do
-  for directory in .agents/skills .claude/skills .codex/skills .pi/agent/skills .hermes/skills .hermes/profiles/james/skills; do
+  for directory in .agents/skills .claude/skills .codex/skills .pi/agent/skills .hermes/skills .gemini/config/skills .hermes/profiles/james/skills; do
     link="$test_tmp/home/$directory/$skill"
     [[ -L $link && $(readlink "$link") == "$fixture/default/agents/skills/$skill" ]] ||
-      fail "forced provisioning keeps baseline and Hermes skill links idempotent"
+      fail "forced provisioning keeps baseline, Hermes and Antigravity skill links idempotent"
   done
 done
-pass "forced provisioning keeps baseline and Hermes skill links idempotent"
+pass "forced provisioning keeps baseline, Hermes and Antigravity skill links idempotent"
 
 rm -rf "$test_tmp/home"
 mkdir -p "$test_tmp/home"
 provision
 [[ ! -e $test_tmp/home/.hermes/profiles ]] || fail "provisioning does not invent Hermes profiles"
-[[ ! -e $test_tmp/home/.gemini ]] || fail "Hermes provisioning does not add unrelated Antigravity setup"
 pass "provisioning without existing profiles adds only the Hermes default skill home"

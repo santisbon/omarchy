@@ -19,7 +19,7 @@ cat >"$stub_bin/mise" <<'SH'
 # Two entries from mise 2026.10.21's registry: one npm backend, one not.
 if [[ $1 == "registry" ]]; then
   case $2 in
-    gemini) echo "npm:@google/gemini-cli" ;;
+    opencode) echo "npm:@opencode/cli" ;;
     crush) echo "aqua:charmbracelet/crush" ;;
   esac
   exit 0
@@ -106,10 +106,10 @@ fi
 pass "an escaping command name removes nothing outside ~/.local/bin"
 
 # A short name that mise's registry resolves to an npm package needs Node.js first, as an npm: name does.
-install_wrapper gemini >/dev/null
+install_wrapper opencode >/dev/null
 log="$tmpdir/registry-npm.log"
 : >"$log"
-OMARCHY_MISE_TEST_LOG="$log" PATH="$stub_bin:$PATH" "$home/.local/bin/gemini" >/dev/null
+OMARCHY_MISE_TEST_LOG="$log" PATH="$stub_bin:$PATH" "$home/.local/bin/opencode" >/dev/null
 [[ $(head -1 "$log") == $'mise\tuse\t-g\t--quiet\tnode@lts' ]] ||
   fail "a registry name with an npm backend installs Node.js before the package" "$(cat "$log")"
 

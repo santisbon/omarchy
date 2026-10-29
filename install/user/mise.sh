@@ -11,7 +11,7 @@ mise settings set upgrade.auto_prune false
 omarchy-mise-install codex
 omarchy-mise-install claude
 omarchy-mise-install crush
-omarchy-mise-install gemini
+omarchy-mise-install antigravity-cli agy
 omarchy-mise-install gh
 omarchy-mise-install copilot
 omarchy-mise-install opencode

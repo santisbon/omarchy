@@ -15,7 +15,7 @@ assert(rows['remove.dictation'] && !rows['remove.ai.dictation'], 'Dictation reta
 // their installers and removers, and Remove > AI with them (port commit ef4c9211; PORT.md, "Not
 // included"), so no Remove > AI entry is left.
 assert(!Object.keys(rows).some(k => k === 'remove.ai' || k.startsWith('remove.ai.')), 'no Remove > AI entry outlives its deleted removers')
-assertDeepEqual(Object.keys(rows).filter(k => k.startsWith('setup.default.agent.')).map(k => k.split('.').pop()).sort(), ['claude', 'codex', 'copilot', 'crush', 'cursor-agent', 'gemini', 'grok', 'hermes', 'muse', 'omp', 'opencode', 'pi'], 'baseline agent choices survive, without the OpenClaw agent the port dropped')
+assertDeepEqual(Object.keys(rows).filter(k => k.startsWith('setup.default.agent.')).map(k => k.split('.').pop()).sort(), ['agy', 'claude', 'codex', 'copilot', 'crush', 'cursor-agent', 'grok', 'hermes', 'muse', 'omp', 'opencode', 'pi'], 'baseline agent choices survive, without the OpenClaw agent the port dropped')
 for (const id of ['setup.default.agent.cursor-agent', 'setup.default.editor.cursor']) {
   assertEqual(rows[id].icon, '\ue90d', `${id} uses the upstream Cursor glyph`)
   assertEqual(rows[id].iconFont, 'omarchy', `${id} uses the packaged icon font`)
