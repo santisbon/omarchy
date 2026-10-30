@@ -86,7 +86,10 @@ pass "pkg add, present and missing use Ubuntu's packages for Arch names, from th
 tree="$work/tree"
 mkdir -p "$tree"
 cp -a "$ROOT"/{bin,config,default,shell,install,migrations,port} "$tree/"
-mkdir -p "$tree/themes/hackerman" && cp "$ROOT/themes/hackerman/vscode.json" "$tree/themes/hackerman/"
+# Every theme's vscode.json, the files that name other people's VS Code extensions.
+for f in "$ROOT"/themes/*/vscode.json; do
+  t=${f#"$ROOT"/}; mkdir -p "$tree/${t%/*}" && cp "$f" "$tree/$t"
+done
 DISTRO_ID=distro DISTRO_NAME=Distro bash "$tree/port/rename.sh" --tree "$tree" >/dev/null ||
   fail "the rename passes its own leftover check"
 grep -qF '"omarchy.clock"' "$tree/config/distro/shell.json" || fail "the rename keeps built-in plugin IDs"
@@ -94,7 +97,15 @@ grep -qF 'OMARCHY_PATH' "$tree/default/bash/env-bootstrap" || fail "the rename k
 grep -qF '/usr/share/distro' "$tree/default/bash/env-bootstrap" || fail "the rename still renames paths"
 grep -qF 'manifest.omarchy' "$tree/shell/services/PluginRegistry.qml" || fail "the rename keeps the manifest's omarchy section"
 grep -qF 'org.omarchy.terminal' "$tree/bin/distro-launch-floating-terminal-with-presentation" || fail "the rename keeps app IDs"
-grep -qF '"Bjarne.hackerman-omarchy"' "$tree/themes/hackerman/vscode.json" || fail "the rename keeps a theme's VS Code extension ID" "$(cat "$tree/themes/hackerman/vscode.json")"
+# A theme's VS Code extension ID is its publisher's name: the rename leaves every one as published.
+checked=0
+for f in "$ROOT"/themes/*/vscode.json; do
+  t=${f#"$ROOT"/}
+  [[ $(jq -r .extension "$tree/$t") == "$(jq -r .extension "$f")" ]] ||
+    fail "the rename keeps $t's VS Code extension ID" "$(jq -r .extension "$f") became $(jq -r .extension "$tree/$t")"
+  checked=$((checked + 1))
+done
+((checked > 0)) || fail "the rename test found no theme vscode.json to check"
 [[ -x $tree/bin/distro-plugin-add && ! -e $tree/bin/omarchy-plugin-add ]] || fail "the rename still renames commands"
 
 user="$work/user"
