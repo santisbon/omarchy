@@ -4,7 +4,7 @@ Omarchy has built-in support for **Intel Macs**. There are a couple of known lim
 
 Please note that installing on an M-series Mac is not directly supported at this time. You can find out more about the state of this in #omarchy-on-other in our [Discord](https://discord.gg/tXFUdasqhY).
 
-> **Oaxaca: works differently.** Oaxaca is built only for 64-bit Intel and AMD processors (amd64), so M-series Macs are not supported at all. Omarchy's Discord channels are Omarchy's own: report Oaxaca's bugs at <https://github.com/santisbon/oaxaca/issues>. Oaxaca has not been tested on a Mac yet. Of Apple's other hardware, the Apple Studio Display, AirPods (_Install > Service > AirPods_) and the iPhone (_Install > Service > iPhone_) have been tested.
+> **Oaxaca: works differently.** Oaxaca is built only for 64-bit Intel and AMD processors (amd64), so M-series Macs are not supported at all. Omarchy's Discord channels are Omarchy's own: report Oaxaca's bugs at <https://github.com/santisbon/oaxaca/issues>. The Apple Studio Display, AirPods (_Install > Service > AirPods_) and the iPhone (_Install > Service > iPhone_) have been tested.
 
 In a simple test, we were able to achieve 36% performance gains on a 2019 MacBook Pro just by installing Omarchy.
 
