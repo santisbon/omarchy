@@ -14,7 +14,9 @@
 #      Omarchy's online manual (omarchy.org/manual/, opened by Learn > Omarchy) becomes the
 #      distro's manual; with DISTRO_FORK_REPO set (owner/name of this fork on GitHub, such as
 #      santisbon/omarchy), that repository's name is kept too, because the agent skills send
-#      bug reports there;
+#      bug reports there; and other people's names are kept: the VS Code extension a theme
+#      names in its vscode.json ("extension": "Bjarne.hackerman-omarchy"), a Marketplace ID
+#      that a renamed copy would make VS Code look for in vain;
 #   3. renames every file and directory whose name contains "omarchy" or "Omarchy", except
 #      Chromium's native-messaging host files, which are named after the host they declare.
 # The result is what the distro's packages install: bin/<id>-*, /usr/share/<id>/..., the
@@ -94,6 +96,7 @@ KEEP='
   s/"omarchy"(?=\s*:)/$hide->($&)/ge;
   s/(?<=[a-z]\.)(?<!hypr\.)omarchy(?=")/$hide->($&)/ge;
   s/(?<=iconFont":")omarchy(?=")|(?<=fontFamily: ")omarchy(?=")/$hide->($&)/ge;
+  s/("extension"\s*:\s*")([^"]+)(?=")/$1 . $hide->($2)/ge;
 '
 grep -rIlZ --exclude-dir=.git -E 'omarchy|Omarchy|OMARCHY' . | xargs -0 -r perl -pi -e "$KEEP"'
   # Support pointers in user-facing messages go to the distro, when the build says where.

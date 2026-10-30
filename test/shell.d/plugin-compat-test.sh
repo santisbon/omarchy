@@ -86,6 +86,7 @@ pass "pkg add, present and missing use Ubuntu's packages for Arch names, from th
 tree="$work/tree"
 mkdir -p "$tree"
 cp -a "$ROOT"/{bin,config,default,shell,install,migrations,port} "$tree/"
+mkdir -p "$tree/themes/hackerman" && cp "$ROOT/themes/hackerman/vscode.json" "$tree/themes/hackerman/"
 DISTRO_ID=distro DISTRO_NAME=Distro bash "$tree/port/rename.sh" --tree "$tree" >/dev/null ||
   fail "the rename passes its own leftover check"
 grep -qF '"omarchy.clock"' "$tree/config/distro/shell.json" || fail "the rename keeps built-in plugin IDs"
@@ -93,6 +94,7 @@ grep -qF 'OMARCHY_PATH' "$tree/default/bash/env-bootstrap" || fail "the rename k
 grep -qF '/usr/share/distro' "$tree/default/bash/env-bootstrap" || fail "the rename still renames paths"
 grep -qF 'manifest.omarchy' "$tree/shell/services/PluginRegistry.qml" || fail "the rename keeps the manifest's omarchy section"
 grep -qF 'org.omarchy.terminal' "$tree/bin/distro-launch-floating-terminal-with-presentation" || fail "the rename keeps app IDs"
+grep -qF '"Bjarne.hackerman-omarchy"' "$tree/themes/hackerman/vscode.json" || fail "the rename keeps a theme's VS Code extension ID" "$(cat "$tree/themes/hackerman/vscode.json")"
 [[ -x $tree/bin/distro-plugin-add && ! -e $tree/bin/omarchy-plugin-add ]] || fail "the rename still renames commands"
 
 user="$work/user"
