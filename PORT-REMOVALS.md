@@ -125,7 +125,6 @@ The 92 files deleted under `install/`, `etc/` and `default/` went in four port c
 | The powerprofilesctl shebang | Ubuntu's is already `/usr/bin/python3` |
 | Omarchy's ISO provisioning (the deferred install that asked for the owner at first boot) | Calamares installs and asks for the user itself; the factory reset, which shares its first-boot form, is back (see [Restored](#restored), choice 87) |
 | Network cleanup | archinstall leftovers |
-| The BCM4360's Wi-Fi driver | `broadcom-sta-dkms` only, so it needs a MOK |
 | TUXEDO and Slimbook keyboard backlight | `tuxedo-drivers` is DKMS and not in stonking |
 | Apple T2 | an out-of-tree kernel and a pacman repository |
 | FRED on Panther Lake (`intel/fred.sh`, the `fred=on` kernel parameter that `install/hardware/all.sh` added through Limine drop-ins) | `CONFIG_X86_FRED=y` and mainline's default is on, so `fred=on` changes nothing |
@@ -264,6 +263,7 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | ASUS Panther Lake display options | `xe.enable_dpcd_backlight=1` (B9406, UX5406AA) and `xe.enable_panel_replay=0` (B9406) in `/etc/modprobe.d`, on the same DMI match; need on Ubuntu not verified (the developer README's [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do)) | 55 |
 | Intel video acceleration | `libmfx-gen1.2` (Quick Sync) or `i965-va-driver` (GMA-era GPUs), by GPU, at install | 56 |
 | BCM4331 Wi-Fi firmware | `firmware-b43-installer` on that PCI id (multiverse; its postinst downloads the firmware from a third party's GitHub release at install) | 57 |
+| The BCM4360's Wi-Fi driver | `broadcom-sta-dkms` on a Mac with that PCI id whose firmware is not enforcing Secure Boot; nothing on any machine with Secure Boot on | 113 |
 | inotify watch limit | `fs.inotify.max_user_watches=524288` over localsearch's 65536 | 58 |
 | whois | in the base list | 59 |
 | Wi-Fi 7 off only on a Dell XPS on Panther Lake | the kept `fix-wifi7-eht.sh` turned Wi-Fi 7 off on every BE200 and BE211, the Legion's card included; now only on the machines its comment names, and `oaxaca-config`'s postinst removes the file elsewhere; need on Ubuntu not verified | 60 |

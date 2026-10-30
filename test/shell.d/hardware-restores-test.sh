@@ -41,9 +41,27 @@ stub lspci 'echo "02:00.0 Network controller [0280]: Broadcom Inc. and subsidiar
 run fix-bcm43xx.sh >/dev/null
 grep -qx 'pkg-add firmware-b43-installer' "$TEST_LOG" || fail "BCM4331 gets b43's firmware"
 : >"$TEST_LOG"
-stub lspci 'echo "02:00.0 Network controller [0280]: Broadcom Inc. and subsidiaries BCM4360 802.11ac [14e4:43a0] (rev 03)"'
-run fix-bcm43xx.sh >/dev/null
-[[ ! -s $TEST_LOG ]] || fail "BCM4360 gets nothing: its only driver is DKMS"
+stub lspci 'echo "03:00.0 Network controller [0280]: Broadcom Inc. and subsidiaries BCM4360 802.11ac Dual Band Wireless Network Adapter [14e4:43a0] (rev 03)"'
+mkdir -p "$work/dmi"
+run_vendor() { sed "s#/sys/class/dmi/id/#$work/dmi/#g" "$ROOT/install/hardware/fix-bcm43xx.sh" | PATH="$work/bin:$PATH" bash; }
+echo "Apple Inc." >"$work/dmi/sys_vendor"
+stub mokutil 'echo "This system doesn'"'"'t support Secure Boot"'
+run_vendor >/dev/null
+grep -qx 'pkg-add broadcom-sta-dkms' "$TEST_LOG" || fail "a Mac's BCM4360 gets wl when the firmware has no Secure Boot" "$(cat "$TEST_LOG")"
+: >"$TEST_LOG"
+stub mokutil 'echo "SecureBoot disabled"'
+run_vendor >/dev/null
+grep -qx 'pkg-add broadcom-sta-dkms' "$TEST_LOG" || fail "a Mac's BCM4360 gets wl when Secure Boot is off"
+: >"$TEST_LOG"
+stub mokutil 'echo "SecureBoot enabled"'
+run_vendor >/dev/null
+[[ ! -s $TEST_LOG ]] || fail "a BCM4360 gets nothing under Secure Boot: wl is an unsigned DKMS module"
+: >"$TEST_LOG"
+echo "Micro-Star International Co., Ltd." >"$work/dmi/sys_vendor"
+stub mokutil 'echo "SecureBoot disabled"'
+run_vendor >/dev/null
+[[ ! -s $TEST_LOG ]] || fail "a BCM4360 outside a Mac gets nothing"
+rm -f "$work/bin/mokutil" "$work/dmi/sys_vendor"
 
 rm -rf "$work/root/etc"
 stub lspci 'case "$*" in *-nn*) echo "00:14.3 Network controller [0280]: Intel Corporation Wi-Fi 7(802.11be) AX1775*/AX1790*/BE20*/BE401/BE1750* 2x2 [8086:272b] (rev 1a)" ;; *) echo "00:02.0 VGA compatible controller: Intel Corporation Raptor Lake-S UHD Graphics (rev 04)" ;; esac'

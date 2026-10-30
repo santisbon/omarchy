@@ -43,7 +43,7 @@ It is necessary to disable Apple's Secure Boot in order to boot the bootable USB
 
 The installer detects Mac hardware and applies the needed fixes automatically: Broadcom Wi-Fi drivers and firmware, the SPI keyboard driver on the MacBook models that need it, and an NVMe suspend fix for those same models.
 
-> **Oaxaca: works differently.** Oaxaca's installer runs the same per-model fix scripts, written for Ubuntu. The BCM4331 Wi-Fi of 2012 and early 2013 MacBooks gets Ubuntu's `firmware-b43-installer`, which downloads Broadcom's firmware during installation and so needs a network connection. The BCM4360 Wi-Fi of 2013 to 2015 MacBooks is not supported: its only driver is built on the machine with DKMS, and under Secure Boot such a module loads only when signed with a Machine Owner Key (a key the owner enrolls in the firmware), which Oaxaca never asks for. The SPI keyboard runs on the signed driver in Ubuntu's kernel, with one module added to the initramfs on the MacBook8,1 only; the NVMe suspend fix and the fix for Broadcom's WPA handshake are Omarchy's scripts unchanged.
+> **Oaxaca: works differently.** Oaxaca's installer runs the same per-model fix scripts, written for Ubuntu. The BCM4331 Wi-Fi of 2012 and early 2013 MacBooks gets Ubuntu's `firmware-b43-installer`, which downloads Broadcom's firmware during installation and so needs a network connection. The BCM4360 Wi-Fi of 2013 to 2015 Macs gets Broadcom's driver from the USB stick, so it needs no network. The SPI keyboard runs on the signed driver in Ubuntu's kernel, with one module added to the initramfs on the MacBook8,1 only; the NVMe suspend fix and the fix for Broadcom's WPA handshake are Omarchy's scripts unchanged.
 
 ### Known Limitations
 
