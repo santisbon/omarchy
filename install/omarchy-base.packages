@@ -107,6 +107,9 @@ systemd-oomd
 # which oaxaca-crash-watch announces and the diagnose-crash agent skill reads with coredumpctl.
 # Without it the kernel's core_pattern is plain "core" and crashes leave nothing behind (2026-10-27).
 systemd-coredump
+# gdb: the diagnose-crash skill symbolizes a core dump's backtrace with gdb and Ubuntu's debuginfod
+# server; its Recommends brings libc6-dbg, glibc's debug symbols (2026-10-30).
+gdb
 python3-gi
 qrencode
 qt6-image-formats-plugins
