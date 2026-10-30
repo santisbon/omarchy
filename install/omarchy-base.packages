@@ -117,6 +117,9 @@ qt6-image-formats-plugins
 # command in util-linux, Ubuntu in its own rfkill package. Without it the bar's Bluetooth
 # switch could not lift the soft block (2026-10-14).
 rfkill
+# iw: omarchy-network-status and omarchy-network-band read the Wi-Fi link's frequency and bitrate
+# with `iw dev <device> link`; without it the network panel shows no band (2026-10-30).
+iw
 ripgrep
 slurp
 # swappy: the screenshot editor oaxaca-capture-screenshot's notification opens, in place of
