@@ -124,6 +124,14 @@ set_theme() {
     if [[ $extension =~ ^[a-zA-Z0-9._-]+$ ]] &&
       ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxq "$extension"; then
       "$editor_cmd" --install-extension "$extension" >/dev/null 2>&1
+      # A failed install would leave colorTheme naming a theme the editor does
+      # not have, so the settings stay as they are, with the theme they can show.
+      # The list is read again, so the check does not depend on the exit status
+      # the editor's command gives a failed install.
+      if ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxq "$extension"; then
+        echo "$editor_cmd could not install $extension; its color theme is unchanged" >&2
+        return 0
+      fi
     fi
   elif [[ -f "$GENERATED_THEME" ]]; then
     # VS Code only discovers local color themes through an extension package.
