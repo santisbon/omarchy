@@ -120,15 +120,17 @@ set_theme() {
     [[ $theme_name =~ ^[^[:cntrl:]\"\\]+$ ]] || theme_name=""
 
     # Only install a well-formed publisher.name id; a malformed one skips the
-    # install without skipping the colorTheme write below.
+    # install without skipping the colorTheme write below. --list-extensions
+    # prints ids in lowercase and themes write them as published
+    # ("shadesOfBuntu.flexoki-light"), so both checks ignore case.
     if [[ $extension =~ ^[a-zA-Z0-9._-]+$ ]] &&
-      ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxq "$extension"; then
+      ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxqi "$extension"; then
       "$editor_cmd" --install-extension "$extension" >/dev/null 2>&1
       # A failed install would leave colorTheme naming a theme the editor does
       # not have, so the settings stay as they are, with the theme they can show.
       # The list is read again, so the check does not depend on the exit status
       # the editor's command gives a failed install.
-      if ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxq "$extension"; then
+      if ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxqi "$extension"; then
         echo "$editor_cmd could not install $extension; its color theme is unchanged" >&2
         return 0
       fi
