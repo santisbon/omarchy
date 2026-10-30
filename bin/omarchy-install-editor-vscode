@@ -5,23 +5,38 @@
 
 echo "Installing VSCode..."
 
-# Microsoft's snap (publisher vscode), classic confinement, so VS Code reads ~/.vscode and
-# ~/.config/Code like any other install. Microsoft's .deb fails every signed extension install
-# on this distro: its signature verifier, vsce-sign, is a .NET 9 program that finds OpenSSL only
-# as libssl.so.3 or older, and Ubuntu 26.10 ships OpenSSL 4 (libssl.so.4). The snap's vsce-sign
-# loads OpenSSL 1.1 from the core20 snap instead.
-omarchy-pkg-snap-add code --classic || exit 1
+# Microsoft's repository (HEAD 200 on 2026-10-10 for both the key and
+# repos/code/dists/stable/InRelease). The source is named vscode because the
+# code package's own postinst writes /etc/apt/sources.list.d/vscode.sources
+# when it finds none; sharing the name means there is one file either way.
+omarchy-pkg-repo-add vscode \
+  https://packages.microsoft.com/keys/microsoft.asc \
+  https://packages.microsoft.com/repos/code stable main amd64 || exit 1
 
-# An earlier install from Microsoft's apt repository goes, with the repository, so `code` is the
-# snap's. Settings and extensions stay: both installs keep them in ~/.config/Code and ~/.vscode.
-if omarchy-pkg-present code; then
-  omarchy-pkg-drop code || exit 1
+# libssl3t64: VS Code checks each extension's signature with vsce-sign, a .NET program that
+# finds OpenSSL only as libssl.so.3 or older. Ubuntu 26.10's OpenSSL is 4 (libssl.so.4), so
+# without OpenSSL 3 every signed extension install fails ("No usable version of libssl was found").
+omarchy-pkg-add code libssl3t64 || exit 1
+
+# Chromium's sandbox in VS Code creates user namespaces, which Ubuntu allows an unprivileged
+# program only through an AppArmor profile: the apparmor package's /etc/apparmor.d/code (profile
+# vscode, flags=(unconfined) with userns). Without it loaded, VS Code crashes at start. The
+# package is reinstalled when its parser or that profile is missing, and the profile is loaded
+# now, so VS Code starts before the next boot.
+if [[ ! -x /usr/sbin/apparmor_parser || ! -f /etc/apparmor.d/code ]]; then
+  sudo apt-get install -y --reinstall apparmor || exit 1
 fi
-omarchy-pkg-repo-remove vscode || exit 1
+sudo apparmor_parser -r /etc/apparmor.d/code || exit 1
+
+# The snap the menu installed for two releases goes, so `code` is the .deb's. Settings and
+# extensions stay: both installs keep them in ~/.config/Code and ~/.vscode.
+if omarchy-pkg-snap-present code; then
+  omarchy-pkg-snap-drop code || exit 1
+fi
 
 mkdir -p ~/.vscode ~/.config/Code/User
 
-# Written only on a first install, so switching an existing install keeps the user's files.
+# Written only on a first install, so reinstalling keeps the user's files.
 if [[ ! -f ~/.vscode/argv.json ]]; then
   cat > ~/.vscode/argv.json << 'ARGV'
 // This configuration file allows you to pass permanent command line arguments to VS Code.
@@ -45,5 +60,4 @@ fi
 # Apply Omarchy theme to VSCode
 omarchy-theme-set-vscode
 
-# The snap's desktop entry is code_code.desktop.
-setsid uwsm-app -- gtk-launch code_code >/dev/null 2>&1 &
+setsid uwsm-app -- gtk-launch code >/dev/null 2>&1 &

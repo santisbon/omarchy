@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Remove VS Code and its vendor repository.
+# omarchy:requires-sudo=true
+
+omarchy-pkg-drop code
+omarchy-pkg-repo-remove vscode
+
+echo ""
+echo "VSCode has been removed."
