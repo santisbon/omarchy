@@ -5,18 +5,25 @@
 
 echo "Installing VSCode..."
 
-# Microsoft's repository (HEAD 200 on 2026-10-10 for both the key and
-# repos/code/dists/stable/InRelease). The source is named vscode because the
-# code package's own postinst writes /etc/apt/sources.list.d/vscode.sources
-# when it finds none; sharing the name means there is one file either way.
-omarchy-pkg-repo-add vscode \
-  https://packages.microsoft.com/keys/microsoft.asc \
-  https://packages.microsoft.com/repos/code stable main amd64 || exit 1
-omarchy-pkg-add code || exit 1
+# Microsoft's snap (publisher vscode), classic confinement, so VS Code reads ~/.vscode and
+# ~/.config/Code like any other install. Microsoft's .deb fails every signed extension install
+# on this distro: its signature verifier, vsce-sign, is a .NET 9 program that finds OpenSSL only
+# as libssl.so.3 or older, and Ubuntu 26.10 ships OpenSSL 4 (libssl.so.4). The snap's vsce-sign
+# loads OpenSSL 1.1 from the core20 snap instead.
+omarchy-pkg-snap-add code --classic || exit 1
+
+# An earlier install from Microsoft's apt repository goes, with the repository, so `code` is the
+# snap's. Settings and extensions stay: both installs keep them in ~/.config/Code and ~/.vscode.
+if omarchy-pkg-present code; then
+  omarchy-pkg-drop code || exit 1
+fi
+omarchy-pkg-repo-remove vscode || exit 1
 
 mkdir -p ~/.vscode ~/.config/Code/User
 
-cat > ~/.vscode/argv.json << 'ARGV'
+# Written only on a first install, so switching an existing install keeps the user's files.
+if [[ ! -f ~/.vscode/argv.json ]]; then
+  cat > ~/.vscode/argv.json << 'ARGV'
 // This configuration file allows you to pass permanent command line arguments to VS Code.
 // Only a subset of arguments is currently supported to reduce the likelihood of breaking
 // the installation.
@@ -28,11 +35,15 @@ cat > ~/.vscode/argv.json << 'ARGV'
   "password-store":"gnome-libsecret"
 }
 ARGV
+fi
 
 # Ensure VSC's own auto-update feature is turned off
-printf '{\n  "update.mode": "none"\n}\n' > ~/.config/Code/User/settings.json
+if [[ ! -f ~/.config/Code/User/settings.json ]]; then
+  printf '{\n  "update.mode": "none"\n}\n' > ~/.config/Code/User/settings.json
+fi
 
 # Apply Omarchy theme to VSCode
 omarchy-theme-set-vscode
 
-setsid uwsm-app -- gtk-launch code >/dev/null 2>&1 &
+# The snap's desktop entry is code_code.desktop.
+setsid uwsm-app -- gtk-launch code_code >/dev/null 2>&1 &

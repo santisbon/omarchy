@@ -14,7 +14,7 @@ done
 chmod +x "$work/bin"/*
 
 # Remove > Package would drop these packages but leave each vendor's apt repository.
-for case in service-spotify:spotify-client:spotify editor-vscode:code:vscode editor-sublime:sublime-text:sublime-text; do
+for case in service-spotify:spotify-client:spotify editor-sublime:sublime-text:sublime-text; do
   IFS=: read -r script package repo <<<"$case"
   : >"$TEST_LOG"
   PATH="$work/bin:$PATH" bash "$ROOT/bin/omarchy-remove-$script" >/dev/null
@@ -24,7 +24,7 @@ for case in service-spotify:spotify-client:spotify editor-vscode:code:vscode edi
 done
 
 menu="$ROOT/default/omarchy/omarchy-menu.jsonc"
-for case in service.spotify:spotify-client:service-spotify service.1password:1password:service-1password editor.vscode:code:editor-vscode editor.sublime:sublime-text:editor-sublime; do
+for case in service.spotify:spotify-client:service-spotify service.1password:1password:service-1password editor.sublime:sublime-text:editor-sublime; do
   IFS=: read -r key package script <<<"$case"
   grep -q "\"remove.$key\":.*\"when\":\"omarchy-pkg-present $package\".*\"action\":\"omarchy-launch-floating-terminal-with-presentation omarchy-remove-$script\"" "$menu" ||
     fail "Remove > $key runs omarchy-remove-$script while $package is installed"
