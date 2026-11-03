@@ -82,6 +82,13 @@ OMARCHY_PATH="$ROOT" PATH="$stubs:$ROOT/bin:$PATH" omarchy-pkg-present bluez-obe
   fail "pkg missing checks an Arch name under its Ubuntu name"
 pass "pkg add, present and missing use Ubuntu's packages for Arch names, from the table and python-*"
 
+# An app that builds against GTK 4, libadwaita and WebKitGTK names them as Arch does
+# (pch/omafeed's README: omarchy pkg add rust gtk4 libadwaita webkitgtk-6.0 pkgconf).
+out=$(OMARCHY_PATH="$ROOT" "$ROOT/bin/omarchy-pkg-translate" gtk4 libadwaita webkitgtk-6.0 | paste -sd' ')
+[[ $out == "libgtk-4-1 libgtk-4-bin libgtk-4-dev libadwaita-1-0 libadwaita-1-dev libwebkitgtk-6.0-4 libwebkitgtk-6.0-dev" ]] ||
+  fail "gtk4, libadwaita and webkitgtk-6.0 bring their headers" "$out"
+pass "gtk4, libadwaita and webkitgtk-6.0 translate to the libraries and their -dev packages"
+
 # --- the renamed tree: kept names, links, migration ------------------------------------
 tree="$work/tree"
 mkdir -p "$tree"

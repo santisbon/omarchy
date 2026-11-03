@@ -20,6 +20,9 @@
 # renamed packages (PORT-REMOVALS.md). Each Ubuntu package was chosen by the files both
 # install (commands, shared libraries, Python modules), using Arch's core, extra and
 # multilib files databases and stonking's Contents-amd64, then checked by hand.
+# gtk4, libadwaita and webkitgtk-6.0 also bring Ubuntu's -dev package, the headers and
+# pkg-config files that Arch's package carries, so apps written for Omarchy that build
+# against them work as their instructions say (docs/6, choice 119).
 # Arch names whose software Ubuntu does not package are not here; docs/6, choice 86, lists them.
 
 # Build tools and languages
@@ -47,12 +50,12 @@ ggml-cpu libggml0
 ggml-vulkan libggml0-backend-vulkan
 glib2 libglib2.0-0t64 libglib2.0-bin
 gtk-layer-shell libgtk-layer-shell0
-gtk4 libgtk-4-1 libgtk-4-bin
+gtk4 libgtk-4-1 libgtk-4-bin libgtk-4-dev
 gtk4-layer-shell libgtk4-layer-shell0
 hidapi libhidapi-hidraw0 libhidapi-libusb0
 json-c libjson-c5
 json-glib libjson-glib-1.0-0 json-glib-tools
-libadwaita libadwaita-1-0
+libadwaita libadwaita-1-0 libadwaita-1-dev
 libarchive libarchive13t64 libarchive-tools
 libepoxy libepoxy0
 libevdev libevdev2 libevdev-tools
@@ -84,6 +87,7 @@ vte4 libvte-2.91-gtk4-0
 vulkan-icd-loader libvulkan1
 wayland libwayland-client0 libwayland-cursor0 libwayland-egl1 libwayland-bin
 webkit2gtk libwebkit2gtk-4.1-0
+webkitgtk-6.0 libwebkitgtk-6.0-4 libwebkitgtk-6.0-dev
 zlib zlib1g
 
 # Qt and QML (the shell's plugins are QML)
