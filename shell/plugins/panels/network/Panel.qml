@@ -502,10 +502,14 @@ Panel {
   // a second curl loop or mistaking an ordinary timeout for a captive portal.
   readonly property bool connectivityChecksEnabled: networkManagerAvailable
     && Networking.canCheckConnectivity && Networking.connectivityCheckEnabled
-  readonly property string connectivity: Model.connectivityState(kind, Networking.connectivity, {
+  readonly property string reportedConnectivity: Model.connectivityState(kind, Networking.connectivity, {
     Portal: NetworkConnectivity.Portal, Limited: NetworkConnectivity.Limited,
     Full: NetworkConnectivity.Full, None: NetworkConnectivity.None
   }, connectivityChecksEnabled)
+  // Limited on this device, but a VPN device has the internet: see Model.vpnHasInternet.
+  property bool vpnHasInternet: false
+  readonly property string connectivity: reportedConnectivity === "limited" && vpnHasInternet
+    ? "full" : reportedConnectivity
   readonly property bool hasCaptivePortal: connectivity === "portal"
   readonly property bool restricted: hasCaptivePortal || connectivity === "limited"
   readonly property string icon: Model.connectionIcon(kind, signalStrength, connectivity)
@@ -554,6 +558,23 @@ Panel {
     repeat: true
     running: root.restricted && root.connectivityChecksEnabled
     onTriggered: root.checkConnectivity()
+  }
+
+  Process {
+    id: vpnConnectivityProbe
+    command: ["nmcli", "-t", "-f", "GENERAL.TYPE,GENERAL.IP4-CONNECTIVITY", "device", "show"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: root.vpnHasInternet = Model.vpnHasInternet(text)
+    }
+  }
+
+  Timer {
+    interval: 10000
+    repeat: true
+    triggeredOnStart: true
+    running: root.reportedConnectivity === "limited"
+    onTriggered: vpnConnectivityProbe.running = true
   }
 
   // The share card is its own panel plugin (omarchy.wifiqr) so a replacement

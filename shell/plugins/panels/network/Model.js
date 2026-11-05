@@ -58,6 +58,21 @@ function connectivityState(kind, connectivity, states, checksEnabled) {
   return "unknown"
 }
 
+// A VPN that blocks traffic outside its tunnel also blocks NetworkManager's check on the Wi-Fi or
+// Ethernet device, which then reads as limited while the tunnel's device reads as full. Takes the
+// output of `nmcli -t -f GENERAL.TYPE,GENERAL.IP4-CONNECTIVITY device show`.
+function vpnHasInternet(deviceShow) {
+  var type = ""
+  var lines = String(deviceShow || "").split("\n")
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].indexOf("GENERAL.TYPE:") === 0) type = lines[i].slice(13).trim()
+    else if (lines[i].indexOf("GENERAL.IP4-CONNECTIVITY:") === 0
+      && (type === "wireguard" || type === "tun" || type === "vpn")
+      && lines[i].slice(25).trim().indexOf("4") === 0) return true
+  }
+  return false
+}
+
 function connectionIcon(kind, signalStrength, connectivity) {
   var restricted = connectivity === "portal" || connectivity === "limited"
   if (kind === "wifi") return restricted ? "󰤩" : wifiIconFor(signalStrength)
@@ -423,6 +438,7 @@ if (typeof module !== "undefined") {
     connectedSignalStrength: connectedSignalStrength,
     parseActiveApSignal: parseActiveApSignal,
     connectivityState: connectivityState,
+    vpnHasInternet: vpnHasInternet,
     captivePortalUrl: captivePortalUrl,
     formatHeaderSpeed: formatHeaderSpeed,
     formatHeaderFreq: formatHeaderFreq,

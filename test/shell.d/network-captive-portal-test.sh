@@ -34,6 +34,11 @@ for (const state of ['full', 'unknown', 'none', undefined]) {
   }
   assertEqual(network.connectionIcon('ethernet', -1, state), '󰈀', `${state} preserves the Ethernet icon`)
 }
+const tunnelFull = 'GENERAL.TYPE:wifi\nGENERAL.IP4-CONNECTIVITY:3 (limited)\nGENERAL.TYPE:wireguard\nGENERAL.IP4-CONNECTIVITY:4 (full)\n'
+assertEqual(network.vpnHasInternet(tunnelFull), true, 'a tunnel with full connectivity answers for a VPN that blocks the Wi-Fi check')
+assertEqual(network.vpnHasInternet('GENERAL.TYPE:wifi\nGENERAL.IP4-CONNECTIVITY:4 (full)\n'), false, 'a Wi-Fi device is not a VPN')
+assertEqual(network.vpnHasInternet('GENERAL.TYPE:wireguard\nGENERAL.IP4-CONNECTIVITY:3 (limited)\n'), false, 'a tunnel that is itself limited does not hide the warning')
+assertEqual(network.vpnHasInternet(''), false, 'no nmcli output hides nothing')
 const url = new URL(network.captivePortalUrl)
 assertEqual(url.protocol, 'http:', 'browser entry point uses plain HTTP so a portal can intercept it')
 assertEqual(url.hostname, 'connectivity-check.ubuntu.com', 'browser entry point is fixed rather than portal-supplied')
