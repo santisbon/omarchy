@@ -124,6 +124,7 @@
   "bar.allowIdleLock": "Allow Idle Lock & Screensaver",
   "bar.allowNotifications": "Allow Notifications",
   "bar.dayLight": "Day Light",
+  "bar.dictate": "Dictate",
   "bar.disablePasswordlessSudo": "Disable Passwordless Sudo",
   "bar.microphoneInUse": "Microphone in use",
   "bar.microphoneLive": "Microphone live",
