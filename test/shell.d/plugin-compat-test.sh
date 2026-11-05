@@ -115,6 +115,21 @@ done
 ((checked > 0)) || fail "the rename test found no theme vscode.json to check"
 [[ -x $tree/bin/distro-plugin-add && ! -e $tree/bin/omarchy-plugin-add ]] || fail "the rename still renames commands"
 
+# A theme's name drops Omarchy's prefix as well as the distro's, after the rename as before it.
+theme_stubs="$work/theme-stubs"
+mkdir -p "$theme_stubs"
+printf '#!/bin/bash\n[[ $1 == clone ]] && mkdir -p "${*: -1}"\nexit 0\n' >"$theme_stubs/git"
+printf '#!/bin/bash\nprintf "%%s\\n" "$1" >"%s"\n' "$work/theme-set-name" >"$theme_stubs/distro-theme-set"
+chmod +x "$theme_stubs"/*
+for url in https://github.com/acme/omarchy-giants-theme https://github.com/acme/distro-giants-theme.git; do
+  rm -f "$work/theme-set-name"
+  out=$(HOME="$work/home-theme" PATH="$theme_stubs:$tree/bin:$PATH" bash "$tree/bin/distro-theme-install" "$url" 2>&1) ||
+    fail "the renamed theme installer accepts $url" "$out"
+  [[ $(cat "$work/theme-set-name") == "giants" ]] ||
+    fail "the renamed theme installer names $url giants" "$(cat "$work/theme-set-name" 2>/dev/null)"
+done
+pass "a renamed theme installer drops Omarchy's prefix and the distro's from a theme's name"
+
 user="$work/user"
 mkdir -p "$user/.config/distro" "$user/.config/hypr"
 printf '{"bar":{"left":["distro.clock","acme.mine"]}}\n' >"$user/.config/distro/shell.json"

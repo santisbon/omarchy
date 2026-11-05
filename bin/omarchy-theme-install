@@ -29,7 +29,11 @@ THEMES_DIR="$HOME/.config/omarchy/themes"
 # user's home, and leaving its prefix on names the theme after the whole URL.
 REPO_PATH="$REPO_URL"
 [[ $REPO_PATH != *"://"* && $REPO_PATH == *:* && ${REPO_PATH%%:*} != */* ]] && REPO_PATH="${REPO_PATH#*:}"
-THEME_NAME=$(basename -- "$REPO_PATH" .git | sed -E 's/^omarchy-//; s/-theme$//' | tr '[:upper:]' '[:lower:]')
+# A theme repository is named <prefix>-<name>-theme, with this command's own prefix or with the
+# prefix of the Arch distro this port follows. "omar""chy" is written in two parts so the build's
+# rename keeps that second prefix: both come off, and a theme has the same name on both distros.
+upstream="omar""chy"
+THEME_NAME=$(basename -- "$REPO_PATH" .git | sed -E "s/^(omarchy|$upstream)-//; s/-theme\$//" | tr '[:upper:]' '[:lower:]')
 THEME_PATH="$THEMES_DIR/$THEME_NAME"
 
 # The name comes from the URL, is joined into a path that is about to be
