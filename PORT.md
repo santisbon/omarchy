@@ -3,8 +3,9 @@
 This branch is Omarchy ported from Arch Linux and pacman to Ubuntu and apt, for the distro
 whose build repository is `santisbon/oaxaca`. It follows Omarchy's release tag named in that
 repository's `distro.conf` (`OMARCHY_TAG`, `v4.0.6`). Each new Omarchy tag the distro adopts is
-merged into the branch, never rebased onto: the branch's commit hashes are recorded in published
-package versions. What each merge left out is at the end of `PORT-REMOVALS.md`.
+merged on a temporary branch that this branch then fast-forwards to, never rebased onto: this
+branch's commit hashes are recorded in published package versions. What each merge left out is at
+the end of `PORT-REMOVALS.md`.
 
 ## What the branch holds
 
@@ -80,22 +81,41 @@ What the tests need on the machine that runs them, beyond the build tools: `lua`
 
 ## Merging a new Omarchy tag
 
+The merge happens on a temporary branch, `merge-<new tag>`, so that `oaxaca` stays releasable:
+`santisbon/oaxaca`'s `make release` releases only from `oaxaca`.
+
 ```
 git fetch upstream --tags
-git switch oaxaca
+git switch -c merge-<new tag> oaxaca
 git merge <new tag>
 DISTRO_ID=x DISTRO_NAME=X port/rename.sh --tree <a copy>   # proves the rename still applies
-git push origin oaxaca <new tag>
 ```
 
-`git push` sends the tag to the fork, `santisbon/omarchy`, as well as the branch: the build
-repository's `build.sh` fetches `refs/tags/<OMARCHY_TAG>` from the fork to count the branch's
-commits since the tag. Then
-set `OMARCHY_TAG` in `santisbon/oaxaca`'s `distro.conf` to the new tag, rebuild
-`packages/desktop`, and run the boot test and the upgrade test (`make upgrade-test`, which
-upgrades the published packages to the new build in a chroot and runs the migrations for a seeded
-user). What the merge does not take goes into a section of its own at the end of
-`PORT-REMOVALS.md`, with the reason for each.
+To test the merge branch, set `OMARCHY_TAG` in `santisbon/oaxaca`'s `distro.conf` to the new tag
+without committing the change, rebuild `packages/desktop` from this checkout
+(`UPSTREAM_DIR=<this checkout> make build PKG=packages/desktop`), and run the boot test and the
+upgrade test (`make upgrade-test`, which upgrades the published packages to the new build in a
+chroot and runs the migrations for a seeded user). What the merge does not take goes into a
+section of its own at the end of `PORT-REMOVALS.md`, with the reason for each.
+
+A fix released during the merge is a commit on `oaxaca`. Before that release, put `OMARCHY_TAG`
+back to the tag `oaxaca` follows, because `make release` commits every change in
+`santisbon/oaxaca`. After that release, run `git merge oaxaca` on the merge branch, so that the
+fast-forward below stays possible.
+
+When the tests pass:
+
+```
+git switch oaxaca
+git merge --ff-only merge-<new tag>
+git push origin oaxaca <new tag>
+git branch -d merge-<new tag>
+```
+
+`git merge --ff-only` moves `oaxaca` to the merge branch's last commit and refuses if `oaxaca` has
+a commit the merge branch lacks. `git push` sends the tag to the fork, `santisbon/omarchy`, as well
+as `oaxaca`: the build repository's `build.sh` fetches `refs/tags/<OMARCHY_TAG>` from the fork to
+count `oaxaca`'s commits since the tag. The next `make release` commits the new `OMARCHY_TAG`.
 
 - Migrations: `migrations/` holds only the port's own (its README says why Omarchy's 106 were
   deleted). Every migration the new tag adds is read before it can run on an installed system,
