@@ -194,7 +194,7 @@ pass "a machine that can't set any layout fails the attempt after three tries, r
   # The icon is sized to the console font's real cell, which first boot can set
   # to sun12x22. Every grid column must still get the same whole number of
   # screen columns, or the icon loses its right edge or draws some strokes half
-  # as wide. Its second grid row is three strokes one grid column wide.
+  # as wide. Its second grid row is two strokes one grid column wide.
   for cell in "8 16" "12 22" "9 19" "16 32"; do
     read -r CELL_WIDTH CELL_HEIGHT <<<"$cell"
     for scale in 1 2 3; do
@@ -204,8 +204,8 @@ pass "a machine that can't set any layout fails the attempt after three tries, r
         row+=${ICON_FILL[scale * ICON_WIDTH + x]}
       done
       read -ra strokes <<<"${row//0/ }"
-      (( ${#strokes[@]} == 3 )) && [[ ${strokes[0]} == "${strokes[1]}" && ${strokes[1]} == "${strokes[2]}" ]] ||
-        fail "a ${cell/ /x} font at scale $scale draws all three strokes of the icon's second row, equally wide" "$row"
+      (( ${#strokes[@]} == 2 )) && [[ ${strokes[0]} == "${strokes[1]}" ]] ||
+        fail "a ${cell/ /x} font at scale $scale draws both strokes of the icon's second row, equally wide" "$row"
     done
   done
   pass "every console font draws the whole icon with equally wide strokes"

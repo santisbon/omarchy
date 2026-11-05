@@ -1,4 +1,4 @@
-# The install progress screen: Omarchy's icon traced as setup progresses, with
+# The install progress screen: the distro's mark traced as setup progresses, with
 # the percentage, a status line and a tip beneath it.
 #
 # The ISO install dashboard and first-boot setup (omarchy-provision-owner) both
@@ -22,8 +22,8 @@ PROGRESS_ICON_ESCAPE=$'\033''\[[0-9;?]*[A-Za-z]'
 
 # The icon uses half-block glyphs, scaled to the terminal's actual cell aspect
 # ratio so its square silhouette stays square. No graphics protocol is needed.
-# Coordinates follow the 15 x 15 grid of Omarchy's icon.svg. Each segment
-# paints the full stroke width, starting at the bottom middle of the outer ring.
+# Coordinates draw the distro's mark, the square spiral of the build repository's
+# scripts/branding.py, on a 15 x 15 grid: one spiral from the bottom left corner inward.
 ICON_WIDTH=30
 ICON_COLUMN=2
 ICON_HEIGHT=15
@@ -131,45 +131,34 @@ progress_icon_build() {
   local scale="$1" x y row
   local -a mask=(
     111111111111111
-    100000010000001
-    101111110001101
-    101000000000101
-    101000000000101
-    101000000000101
-    101000000000101
-    111000000000101
-    101000000000101
-    101000000000101
-    101000000000101
-    101000000000101
-    101111111111101
-    100000010000001
-    111111110111111
+    100000000000001
+    100000000000001
+    100000000000001
+    100011111110001
+    100010000010001
+    100010000010001
+    100010000010001
+    100010001110001
+    100010000000001
+    100010000000001
+    100010000000001
+    100011111111111
+    100000000000000
+    100000000000000
   )
   progress_icon_column "$scale"
   ICON_WIDTH=$((15 * ICON_COLUMN))
   ICON_HEIGHT=$(((15 * scale + 1) / 2))
   ICON_ORDER=() ICON_TRACE=() ICON_FILL=()
   ICON_DRAWN=0
-  # Start at the bottom middle, follow the outer left edge to the top cross,
-  # then descend into the inner shape. Fill its two bridges as we reach them.
-  progress_icon_segment "$scale" 7 14 0 14
   progress_icon_segment "$scale" 0 14 0 0
-  progress_icon_segment "$scale" 0 0 7 0
-  progress_icon_segment "$scale" 7 0 7 2
-  progress_icon_segment "$scale" 7 2 2 2
-  progress_icon_segment "$scale" 2 2 2 7
-  progress_icon_segment "$scale" 2 7 0 7
-  progress_icon_segment "$scale" 2 7 2 12
-  progress_icon_segment "$scale" 2 12 7 12
-  progress_icon_segment "$scale" 7 12 7 14
-  progress_icon_segment "$scale" 7 12 12 12
-  progress_icon_segment "$scale" 12 12 12 2
-  progress_icon_segment "$scale" 12 2 11 2
-  # Finish from the top cross: right along the outside, down, then left.
-  progress_icon_segment "$scale" 7 0 14 0
-  progress_icon_segment "$scale" 14 0 14 14
-  progress_icon_segment "$scale" 14 14 9 14
+  progress_icon_segment "$scale" 0 0 14 0
+  progress_icon_segment "$scale" 14 0 14 12
+  progress_icon_segment "$scale" 14 12 4 12
+  progress_icon_segment "$scale" 4 12 4 4
+  progress_icon_segment "$scale" 4 4 10 4
+  progress_icon_segment "$scale" 10 4 10 8
+  progress_icon_segment "$scale" 10 8 8 8
   ICON_STEPS=${#ICON_ORDER[@]}
   for ((y=0; y<15 * scale; y++)); do
     row=${mask[y / scale]}
