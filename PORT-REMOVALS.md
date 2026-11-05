@@ -344,4 +344,4 @@ Changed on the way in, rather than left out:
 
 - **Keyboard layouts:** Setup > Typing > Keyboard Layouts is Omarchy's picker, in place of the port's. It saves layouts and variants to `~/.config/omarchy/keyboard-layouts`, and `default/hypr/keyboard.lua` and `default/input-methods/configure.py` read the system's layout from `/etc/default/keyboard`. The model and options stay the system's, so a switching key saved by the port's picker no longer applies; a migration moves the layouts.
 - **Dictation:** `omarchy-install-dictation-voxtype` installs the distro's `voxtype` package and keeps the port's GPU selection. Existing users keep F9 and Super + Ctrl + X through a migration.
-- **Captive portal:** the network panel opens `http://connectivity-check.ubuntu.com/`, the address Ubuntu's `network-manager-config-connectivity-ubuntu` names.
+- **Captive portal:** the network panel opens `http://connectivity-check.ubuntu.com/`, the address that Ubuntu's `network-manager-config-connectivity-ubuntu`, preinstalled, turns NetworkManager's check on against.

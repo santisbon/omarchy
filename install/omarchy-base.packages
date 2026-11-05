@@ -120,6 +120,10 @@ gdb
 python3-gi
 # pipewire-libcamera: the PipeWire plugin that reaches libcamera cameras; Omarchy v4.5.0 adds it (2026-11-05).
 pipewire-libcamera
+# network-manager-config-connectivity-ubuntu: turns on NetworkManager's connectivity check against
+# connectivity-check.ubuntu.com, which the network panel's Open Captive Portal button reads; in
+# stonking's main component at 1.58.1-1ubuntu3 (2026-11-05).
+network-manager-config-connectivity-ubuntu
 # x11-xserver-utils: xsetroot, which default/hypr/startup-cursor.lua runs for XWayland's cursor;
 # Arch ships xsetroot as xorg-xsetroot (2026-11-05).
 x11-xserver-utils
