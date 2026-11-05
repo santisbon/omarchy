@@ -30,6 +30,33 @@ The majority of these environments are managed by [Mise](https://mise.jdx.dev/).
 
 To install, say, Ruby, you'd run `mise use -g ruby`, which will both install Ruby and set it as the global default. Or, if your project has a .ruby-version file, you can just run `mise i` in the root of that project.
 
+## Preinstalled CLI tools
+
+Omarchy makes tools such as `gh`, `uv`, and most [coding agents](17-ai.md) available through [mise's lazy installation](https://mise.jdx.dev/dev-tools/shims.html#lazy-tools). The first time you run one, mise installs it. Later runs reuse the installed version; they do not check for an update on every launch.
+
+You can also inspect the defaults or install them ahead of time:
+
+```bash
+mise ls --current              # List the tools configured for this directory
+mise install gh               # Install one tool now
+mise install --include-lazy    # Install all configured tools, including lazy tools
+```
+
+Run `omarchy update` to update installed tools with the rest of Omarchy. The `mup` alias updates mise-managed tools only. To add another tool to your own configuration, use `mise use -g <tool>`.
+
+Python setup also installs `uv` through mise. Removing the Python development environment leaves `uv` available as an independent tool.
+
+### Using your own installation
+
+mise's commands come before `~/.local/bin` on `PATH`, so a tool you installed yourself, for example with Claude Code's or Cursor's own installer, still runs mise's copy. Apps launched from the desktop also find mise's commands before system packages, so an app that runs `gh` gets mise's copy even if you installed the `gh` package with apt, and mise installs that copy the first time. To use yours instead, disable mise's copy in `~/.config/mise/config.toml`. For example, if you installed Cursor CLI yourself:
+
+```toml
+[settings]
+disable_tools = ["cursor-agent"]
+```
+
+If you already have a `[settings]` table, add the entry there; extend an existing `disable_tools` list rather than replacing it. Make sure your installation is on `PATH`. Use the mise tool name, which can differ from its command: `oh-my-pi` provides `omp`, for example. The default-agent launcher also prefers a user-installed Cursor or Muse in `~/.local/bin`.
+
 ## Docker
 
 [Docker](https://www.docker.com/) hardly needs any introduction. It allows you to run isolated containers.
@@ -40,22 +67,18 @@ To sign in to Docker Hub, Docker Desktop stores your credentials with [`pass`](h
 
 _Remove > Development > Docker Desktop_ removes it with its containers, images and settings.
 
-> **Oaxaca: works differently.** This Docker section was rewritten for Oaxaca. Omarchy instead preinstalls Docker Engine with Docker Compose and keeps the user out of the `docker` group, so `docker` runs with `sudo` unless _Setup > Security > Sudoless Docker_ adds the user to the group; Omarchy also binds the Lazydocker TUI to `Super + Shift + D` and offers _Install > Development > Docker DB_ for local databases. Oaxaca keeps all of Omarchy's Docker setup out and offers Docker Desktop instead, which runs its own engine in a virtual machine.
+> **Oaxaca: works differently.** Omarchy instead preinstalls Docker Engine with Docker Compose and keeps the user out of the `docker` group, so `docker` runs with `sudo` unless _Setup > Security > Sudoless Docker_ adds the user to the group and offers _Install > Development > Docker DB_ for local databases. Oaxaca keeps all of Omarchy's Docker setup out and offers Docker Desktop instead, which runs its own engine in a virtual machine.
 
 ## GitHub CLI
 
-[The GitHub CLI](https://cli.github.com/) lets you authenticate with your GitHub account and clone private repositories using it. Install it from _Install > Development > GitHub CLI_ in the Omarchy menu: the installer follows [GitHub's instructions for Debian and Ubuntu](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian), adding GitHub's apt repository and installing the `gh` package, so `gh` updates with the rest of the system. If you already added GitHub's repository by hand from those instructions, the installer replaces your `github-cli.list` with its own source. _Remove > Development > GitHub CLI_ removes `gh` and GitHub's repository, and keeps your sign-in in `~/.config/gh`.
+[GitHub CLI](https://cli.github.com/) is available as `gh` for working with repositories, issues, and pull requests from the terminal. Run `gh auth login` to install it on first use and authenticate, then `gh repo clone org/repo` to clone a repository. Run `gh --help` to explore its commands.
 
-`gh` is also wired up as one of the lazy-loading mise stubs, `~/.local/bin/gh`: without the package, the first time you run `gh`, mise installs it. With the package installed, `/usr/bin/gh` comes before the stub on your `PATH` and the stub stays unused. One exception: once the stub has run, mise has its own `gh`, and in a terminal mise's tools come before `/usr/bin` on your `PATH`, so that copy wins over the package. `mise ls gh` shows whether mise has one, and `mise unuse -g gh` removes it. To authenticate, run `gh auth login`. Then you can checkout private repositories using `gh repo clone org/repo`.
+To get `gh` from a package instead, use _Install > Development > GitHub CLI_ in the Omarchy menu: the installer follows [GitHub's instructions for Debian and Ubuntu](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian), adding GitHub's apt repository and installing the `gh` package, so `gh` updates with the rest of the system. If you already added GitHub's repository by hand from those instructions, the installer replaces your `github-cli.list` with its own source. Since mise's commands come before system packages on `PATH`, add `gh` to `disable_tools` as [Using your own installation](#using-your-own-installation) shows, or mise's copy still runs. _Remove > Development > GitHub CLI_ removes `gh` and GitHub's repository, and keeps your sign-in in `~/.config/gh`.
 
-You can also perform a bunch of other GitHub operations using this command. Just run `gh` to see everything that's possible.
+For a terminal interface to pull requests, run `ghui`; mise installs it on first use too. [Lazygit](https://github.com/jesseduffield/lazygit) is preinstalled for working with Git itself.
 
-There's a lazy-installing stub for `ghui` for managing your pull requests in a TUI too. And [lazygit](https://github.com/jesseduffield/lazygit) is preinstalled, if you'd like to drive git itself from a TUI as well.
-
-> **Oaxaca: works differently.** The GitHub CLI section above was rewritten for Oaxaca. Omarchy has no _Install > Development > GitHub CLI_ entry: `gh` comes only from the lazy-loading mise stub, installed the first time `gh` runs. Oaxaca preinstalls lazygit from Ubuntu's archive with Omarchy's configuration.
+> **Oaxaca: works differently.** Oaxaca preinstalls lazygit from Ubuntu's archive with Omarchy's configuration.
 
 ## AWS CLI
 
 [The AWS CLI](https://aws.amazon.com/cli/) manages your Amazon Web Services resources from the terminal with the `aws` command. Install it from _Install > Development > AWS CLI_ in the Omarchy menu: the installer runs `snap install aws-cli --classic`, the snap Amazon Web Services publishes on the Snap Store, with classic confinement so `aws` can read your `~/.aws` profiles and any file you pass it. Snaps update themselves. To set up a profile, run `aws configure`. _Remove > Development > AWS CLI_ removes the snap and keeps `~/.aws`.
-
-> **Oaxaca: added.** The AWS CLI section describes Oaxaca only: Omarchy's menu has no AWS CLI entry.

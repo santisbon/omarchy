@@ -136,9 +136,9 @@ grep -q $'^\e\\[33mOn the iPhone, open Settings > Bluetooth' "$work/out" ||
 pass "the remover prints the step on the iPhone in yellow"
 
 menu="$ROOT/default/omarchy/omarchy-menu.jsonc"
-  grep -A1 '"install.service.signal":' "$menu" | grep -q '"install.service.iphone":.*"label":"iPhone","when":"! omarchy-pkg-present iphonebridge","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-service-iphone"' ||
-  fail "Install > Service > iPhone follows Signal and runs the installer while iphonebridge is absent"
-pass "Install > Service > iPhone follows Signal and runs the installer while iphonebridge is absent"
+  grep -A1 '"install.service.signal":' "$menu" | grep -q '"install.service.iphone":.*"label":"iPhone","disabled":"omarchy-pkg-present iphonebridge","action":"omarchy-launch-floating-terminal-with-presentation omarchy-install-service-iphone"' ||
+  fail "Install > Service > iPhone follows Signal and dims once iphonebridge is installed"
+pass "Install > Service > iPhone follows Signal and dims once iphonebridge is installed"
 grep -A1 '"remove.service.signal":' "$menu" | grep -q '"remove.service.iphone":.*"label":"iPhone","when":"omarchy-pkg-present iphonebridge","action":"omarchy-launch-floating-terminal-with-presentation omarchy-remove-service-iphone"' ||
   fail "Remove > Services > iPhone follows Signal and runs the remover while iphonebridge is installed"
 pass "Remove > Services > iPhone follows Signal and runs the remover while iphonebridge is installed"

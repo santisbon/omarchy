@@ -15,14 +15,14 @@ assert(rows['remove.dictation'] && !rows['remove.ai.dictation'], 'Dictation reta
 // their installers and removers, and Remove > AI with them (port commit ef4c9211; PORT.md, "Not
 // included"), so no Remove > AI entry is left.
 assert(!Object.keys(rows).some(k => k === 'remove.ai' || k.startsWith('remove.ai.')), 'no Remove > AI entry outlives its deleted removers')
-assertDeepEqual(Object.keys(rows).filter(k => k.startsWith('setup.default.agent.')).map(k => k.split('.').pop()).sort(), ['agy', 'claude', 'codex', 'copilot', 'crush', 'cursor-agent', 'grok', 'hermes', 'muse', 'omp', 'opencode', 'pi'], 'baseline agent choices survive, without the OpenClaw agent the port dropped')
+assertDeepEqual(Object.keys(rows).filter(k => k.startsWith('setup.default.agent.')).map(k => k.split('.').pop()).sort(), ['agy', 'amp', 'claude', 'codex', 'commandcode', 'copilot', 'crush', 'cursor-agent', 'devin', 'dsh', 'freebuff', 'grok', 'hermes', 'kilo', 'kimi', 'kiro-cli', 'mcode', 'muse', 'omp', 'opencode', 'ori', 'pi', 'qwen'], 'baseline agent choices survive, without the OpenClaw agent the port dropped')
 for (const id of ['setup.default.agent.cursor-agent', 'setup.default.editor.cursor']) {
   assertEqual(rows[id].icon, '\ue90d', `${id} uses the upstream Cursor glyph`)
   assertEqual(rows[id].iconFont, 'omarchy', `${id} uses the packaged icon font`)
 }
-assertEqual(rows['setup.default.editor.cursor'].when, 'omarchy-cmd-present cursor', 'Cursor editor retains baseline default visibility')
-assertEqual(rows['setup.default.agent.muse'].icon, '󰛤', 'Muse uses the Nerd infinity glyph')
-assert(!rows['setup.default.agent.muse'].iconFont, 'Muse needs no Omarchy font addition')
+assert(!rows['setup.default.editor.cursor'].when, 'Cursor editor stays listed under Setup > Defaults, as v4.5.0 has it')
+assertEqual(rows['setup.default.agent.muse'].icon, '\ue91f', 'Muse uses its mark in the Omarchy font')
+assertEqual(rows['setup.default.agent.muse'].iconFont, 'omarchy', 'Muse draws its mark in the Omarchy font')
 assert(!fs.existsSync(path.join(root, 'bin/omarchy-theme-set-openclaw')), 'deferred OpenClaw theming is absent')
 JS
 
@@ -34,25 +34,13 @@ cat >"$test_tmp/bin/mise" <<'SH'
 #!/bin/bash
 printf 'mise:%s\n' "$*" >>"$TEST_CALLS"
 SH
-cat >"$test_tmp/bin/omarchy-mise-install" <<'SH'
-#!/bin/bash
-printf 'stub:%s\n' "$*" >>"$TEST_CALLS"
-SH
-cat >"$test_tmp/bin/omarchy-install-hermes-cli" <<'SH'
-#!/bin/bash
-printf 'hermes:%s\n' "$*" >>"$TEST_CALLS"
-exit 1
-SH
 chmod +x "$test_tmp/bin"/*
-# mise.sh asks omarchy-cmd-missing whether mise and cursor-agent are installed, so the real
-# helper has to be on PATH behind the stubs.
+# mise.sh asks omarchy-cmd-missing whether mise is installed, so the real helper has to be on
+# PATH behind the stub.
 PATH="$test_tmp/bin:$ROOT/bin:$PATH" bash -eE "$ROOT/install/user/mise.sh"
-grep -qx 'mise:settings set upgrade.auto_prune false' "$TEST_CALLS" || fail "new users retain running mise versions"
-grep -qx 'hermes:' "$TEST_CALLS" || fail "new users receive the Hermes CLI stub"
-grep -qx 'stub:cursor-agent' "$TEST_CALLS" || fail "new users receive the selected Cursor CLI stub"
-grep -Fx 'stub:http:muse[url=https://api.meta.ai/muse-launcher.sh,bin=muse,version_list_url=https://api.meta.ai/muse-code/channels/muse-stable,version_json_path=.version] muse' "$TEST_CALLS" >/dev/null || fail "new users receive the selected official Muse launcher stub"
-! grep -Eq 'stub:.*(ori|antigravity|hey-cli)' "$TEST_CALLS" || fail "mise setup avoids unrelated prerequisites"
-pass "baseline mise setup tolerates an unfinished Hermes Desktop and disables pruning"
+grep -qx 'mise:reshim --system' "$TEST_CALLS" && grep -qx 'mise:reshim' "$TEST_CALLS" ||
+  fail "new users get the lazy shims for the tools /etc/mise/conf.d declares" "$(cat "$TEST_CALLS")"
+pass "mise setup builds the lazy shims without the network"
 
 # Exercise the documented font workflow, not just fontconfig's charset reader.
 # Work on a disposable copy: adding a fixture must never edit the source font.
@@ -83,7 +71,6 @@ def snapshot():
 
 before = snapshot()
 assert before[0][before[1][0xE90D]] == 'cursor'
-assert 0xE909 not in before[1]
 listing = subprocess.check_output([sys.executable, str(tool), 'list', '--font', str(font)], text=True)
 for cp, name, _ in api['glyph_list'](str(font)):
     assert f'U+{cp:04X}' in listing and name in listing
@@ -95,12 +82,12 @@ svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><pat
 subprocess.run([sys.executable, str(tool), 'add', 'release-fixture', str(svg), '--font', str(font)], check=True, stdout=subprocess.DEVNULL)
 after = snapshot()
 assert after[0] == before[0] + ['release-fixture']
-assert after[1] == before[1] | {0xE90E: len(before[0])}
+assert after[1] == before[1] | {0xE920: len(before[0])}
 assert after[2][:-1] == before[2]
 assert after[3].startswith(before[3])
 print('ok - adding a local SVG preserves every existing name, codepoint, outline and metric')
 listing = subprocess.check_output([sys.executable, str(tool), 'list', '--font', str(font)], text=True)
-assert 'U+E90E' in listing and 'release-fixture' in listing and 'cursor' in listing
+assert 'U+E920' in listing and 'release-fixture' in listing and 'cursor' in listing
 print('ok - the real font tool lists the newly added disposable glyph')
 unchanged = font.read_bytes()
 result = subprocess.run([sys.executable, str(tool), 'add', 'collision', str(svg), '--codepoint', 'E90D', '--font', str(font)], capture_output=True, text=True)

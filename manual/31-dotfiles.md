@@ -41,10 +41,12 @@ Omarchy fires hooks at a handful of moments, and you can hang your own scripts o
 | Event | When it runs |
 | ----- | ------------ |
 | `post-boot` | Right after the desktop has started |
-| `post-update` | During `omarchy update`, after packages and migrations |
+| `post-update` | Near the end of `omarchy update`, after packages, migrations, and service restarts, before mise tools are updated |
 | `theme-set` | After a theme change (theme name in `$1`) |
 | `font-set` | After a font change (font name in `$1`) |
 | `battery-low` | When the battery gets low (percentage in `$1`) |
+
+The `post-update` hook runs as your user after Omarchy clears its cached sudo authorization, so a hook that uses `sudo` needs its own authorization and may ask for your password.
 
 Each of those directories already holds a `.sample` file showing the shape of a hook — drop the `.sample` from the name to put it to work. To install a script you've written elsewhere, use `omarchy hook install post-boot ~/my-hook`, which copies it in and makes it executable.
 
@@ -65,6 +67,10 @@ Reuse an existing id and you override that row instead of adding a new one. The 
 
 Omarchy ships with a bunch of ergonomic aliases and helpful functions, but it's very common to want to add your own. You should add both aliases, functions, and exports in `~/.bashrc`. This file will not be overwritten on updates. If you want to change any of the Omarchy defaults, you can also safely add them here.
 
+### Setting environment variables for the desktop
+
+Desktop session exports belong in `~/.config/uwsm/env.d/`. These files run before your desktop starts, so a shell error can send you back to the login screen. Keep a working terminal open while editing them. To disable an override, move it out of `env.d`. See [login recovery](45-troubleshooting.md#my-password-is-accepted-but-i-return-to-the-login-screen) if a change prevents login.
+
 ### Changing internal Omarchy files
 
 Look, this is your computer. You can do whatever you want with it, but I would advise against making changes to the files in `/usr/share/omarchy` directly. They belong to the Omarchy pacman package, so your changes will simply be overwritten on the next update. You're better off just overwriting any default values you don't like in the `~/.config/*` folder instead.
@@ -73,12 +79,13 @@ Look, this is your computer. You can do whatever you want with it, but I would a
 
 You can change just about everything that way, like the default keybindings. Just edit `~/.config/hypr/bindings.lua` to, say, replace [Obsidian](https://obsidian.md/) with [Joplin](https://joplinapp.org/) (install with `omarchy-pkg-add joplin-bin`):
 
-```
-hl.unbind("SUPER + SHIFT + O")
-o.bind("SUPER + SHIFT + O", "Joplin", "joplin-desktop")
+```lua
+o.rebind("SUPER + SHIFT + O", "Joplin", "joplin-desktop")
 ```
 
-> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian: `Super + Shift + O` opens Obsidian once Install > Productivity > Obsidian has installed its snap, and opens that installer before then. The example's `hl.unbind` line removes the binding either way.
+`o.rebind` removes the existing binding before adding its replacement. It takes the same arguments as `o.bind`, including launch helpers and binding options. Use `o.bind` to add a binding, or `hl.unbind` to remove one without replacing it.
+
+> **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian: `Super + Shift + O` opens Obsidian once Install > Productivity > Obsidian has installed its snap, and opens that installer before then. `o.rebind` replaces the binding either way.
 
 > **Oaxaca: works differently.** `oaxaca-pkg-add` installs Ubuntu packages with apt. `joplin-bin` is a package from Arch's AUR, and Ubuntu 26.10's archive has no package of that name (checked with `rmadison` on 2026-10-21), so the example's install command fails on Oaxaca.
 

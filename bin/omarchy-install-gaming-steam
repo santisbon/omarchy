@@ -20,6 +20,7 @@ fi
 # separate lib32 driver step has no counterpart here.
 omarchy-pkg-add steam-installer
 omarchy-install-32bit-graphics
+omarchy-lifecycle-dispatch post-install steam
 
 echo ""
 echo "Steam will start automatically now. This might take a while..."

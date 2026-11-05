@@ -315,3 +315,33 @@ Changed on the way in, rather than left out:
 - **Browser launching** (`3d1d4567`, `652e8c48`, `94a8fbc2`): `omarchy-launch-webapp` keeps the port's fallback to any installed Chromium-family browser around Omarchy's handoff to the running browser; `omarchy-remove-browser` keeps the port's browsers and deletes the new `omarchy.json` policy file with each.
 - **The `--` before package names** (`aeb551cf`): the port's `apt-get install` and `dpkg-query` calls take it, and `command-operand-boundaries-test.sh` checks them instead of pacman and yay.
 - **The mise PATH fix** (`6ae40920`) was already on the branch, taken ahead of the merge; its migration keeps the port's check for a missing mise.
+
+## Left out of the merge of Omarchy v4.5.0
+
+The branch merged Omarchy's `v4.5.0` tag in November 2026. These parts of it are not on the branch, each for the reason given:
+
+| What | Why it is left out |
+|---|---|
+| Omasnap, Omarchy's screenshot tool and its scroll capture | The distro's maintainer keeps swappy (docs/6, choice 29). |
+| Signed, Monologue, Omacut and Hype, with Omacut's Cut button on recording and download notifications | The distro's maintainer left them out; Xournal++, OBS Studio and Kdenlive stay as Flathub entries. |
+| Superwhisper: its package, first-login setup, adapter, Setup > Defaults > Dictation and the Remove entry | Proprietary and cloud by default; Voxtype stays the dictation engine. |
+| Holding Right Alt to dictate | Left out with Superwhisper's defaults; Alt + Space toggles dictation. |
+| The Install entries for Claude Desktop, Amp Desktop, Microsoft 365, Slack and Notion, with their Remove entries | The distro's maintainer left them out. |
+| Omarchy's Shift + Caps Lock compose key (`etc/xkb`) | A layout works as it does on any other system (docs/6, choice 90). |
+| The compiler and Qt additions to Omarchy's package list beyond docs/6's choice 106, and `vi` | The distro's maintainer left them out. |
+| The Elgato Cam Link 4K relay | Its kernel module is built by DKMS, which conflicts with Secure Boot without a MOK. |
+| Apple Silicon, ARM, Snapdragon, NVIDIA N1X and DGX Spark support, and the Dell XPS 13 Panther Lake and ASUS ProArt P14 audio packages | The distro builds for amd64, and Ubuntu's archive has none of these packages. |
+| Limine, the kernel menu (Update > Kernel), release channels, `omarchy-update-pacman`, `omarchy-update-boot` and the keyring refresh | Arch tools; the distro boots with GRUB and updates with apt. |
+| The menu's cached list of installed packages | The cache reads pacman's database; the port's prelude asks `dpkg-query`. |
+| Sudoless Docker and Lazydocker | Docker is not preinstalled (docs/6, choice 71). |
+| OpenClaw, T3 Code and Hermes Desktop installers and removers | The port removed them (see the commands section above). |
+| `geo.omarchy.org`, `ntp.omarchy.org`, Omarchy's speed test client and connectivity endpoint | Omarchy's own services. Weather stays on wttr.in, the speed test on fast.com, the clock on Ubuntu's defaults. |
+| The migrations for all of the above, and for machines no Oaxaca install ever was | `migrations/README.md` |
+
+Tests of those features are gone with them, including whole files for removed scripts and migrations, and cases inside `dictation`, `tray`, `menu-guards`, `first-run`, `locate`, `luks-rekey-journal`, `luks-parent-detection`, `hardware-quirks`, `default-apps`, `release-ai-port` and `security-fingerprint-remove`.
+
+Changed on the way in, rather than left out:
+
+- **Keyboard layouts:** Setup > Typing > Keyboard Layouts is Omarchy's picker, in place of the port's. It saves layouts and variants to `~/.config/omarchy/keyboard-layouts`, and `default/hypr/keyboard.lua` and `default/input-methods/configure.py` read the system's layout from `/etc/default/keyboard`. The model and options stay the system's, so a switching key saved by the port's picker no longer applies; a migration moves the layouts.
+- **Dictation:** `omarchy-install-dictation-voxtype` installs the distro's `voxtype` package and keeps the port's GPU selection. Existing users keep F9 and Super + Ctrl + X through a migration.
+- **Captive portal:** the network panel opens `http://connectivity-check.ubuntu.com/`, the address Ubuntu's `network-manager-config-connectivity-ubuntu` names.

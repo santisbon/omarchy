@@ -31,6 +31,6 @@ Nothing was changed. The command that ran: $command
 Look for the Ubuntu package with Install > Package in the Omarchy menu, or: apt search <name>
 EOF
 if omarchy-cmd-present omarchy-notification-send; then
-  omarchy-notification-send -u normal "$tool is not available" "Something ran \"$command\". Omarchy installs software with apt; nothing was changed." >/dev/null 2>&1 || true
+  omarchy-notification-send -u normal "$(omarchy-i18n archStandin.title "$tool")" "$(omarchy-i18n archStandin.body "$command")" >/dev/null 2>&1 || true
 fi
 exit 1

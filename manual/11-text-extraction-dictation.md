@@ -16,6 +16,6 @@ Omarchy offers AI dictation via [Voxtype](https://voxtype.io/). You install it v
 
 > **Oaxaca: works differently.** _Install > AI > Dictation_ installs the `voxtype` package from Oaxaca's own apt repository, which repackages Voxtype's release package without its ONNX GPU builds for CUDA and MIGraphX, instead of `voxtype-bin` from the AUR. GPU mode is not switched on with `voxtype setup gpu --enable`: the installer writes a drop-in for the user's voxtype service (`~/.config/systemd/user/voxtype.service.d/`) that picks the discrete GPU when its Vulkan driver is installed, else the integrated one, and falls back to the CPU with no Vulkan driver; with two GPUs, Voxtype's `gpu_isolation` lets the discrete GPU sleep between dictations.
 
-Once installed, you dictate by holding down `F9` or by toggling with `Super + Ctrl + X`, and the dictated text will appear in the focused input area.
+Once installed, you dictate by toggling with `Alt + Space`, and the dictated text will appear in the focused input area. Installs from before Alt + Space became the default keep `F9` for push-to-talk and `Super + Ctrl + X` to toggle, added to `~/.config/hypr/bindings.lua`; remove them there to give those keys back to applications.
 
-> **Oaxaca: works differently.** Besides Omarchy's notification, the Dictation installer prints the two dictation keys in its terminal window, where they stay until the done screen's key press.
+Custom bindings and scripts can use `omarchy dictation start`, `omarchy dictation stop`, and `omarchy dictation toggle`.

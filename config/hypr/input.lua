@@ -2,7 +2,7 @@
 -- replace Omarchy's defaults.
 
 -- Keyboard layout and options.
--- Setup > Keyboard in the Omarchy menu saves your layouts to ~/.config/hypr/keyboard-gui.conf
+-- Setup > Typing > Keyboard Layouts in the Omarchy menu saves your layouts to ~/.config/omarchy/keyboard-layouts
 -- instead of this file. A kb_layout set here wins over that file's layouts.
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/#input
 -- hl.config({
@@ -47,7 +47,8 @@
 -- })
 
 -- App-specific touchpad scroll speeds.
--- o.window("(Alacritty|kitty|foot)", { scroll_touchpad = 1.5 })
+-- o.window("(Alacritty|kitty)", { scroll_touchpad = 1.5 })
+-- o.window("foot", { scroll_touchpad = 2.0 })
 -- o.window("com.mitchellh.ghostty", { scroll_touchpad = 0.2 })
 
 -- Enable touchpad gestures for changing workspaces.

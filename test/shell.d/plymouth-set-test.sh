@@ -4,6 +4,9 @@ set -uo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/base-test.sh"
 
+# Fixture directories stand in for root-owned ones, whose mode no group can write.
+umask 022
+
 test_tmp=$(mktemp -d)
 [[ -n $test_tmp && -d $test_tmp ]] ||
   fail "the test creates its own scratch directory before touching anything"
@@ -73,7 +76,7 @@ else
 fi
 pass "the logo descriptor can only be opened by an unprivileged caller"
 
-# Style > Unlock picks a theme by name and hands the answer to
+# Appearance > Unlock picks a theme by name and hands the answer to
 # omarchy-launch-floating-terminal-with-presentation, which joins its arguments
 # into a script and runs that with `bash -c`. So the name is shell source
 # unless the action quotes it -- and the name is a directory name under
@@ -86,10 +89,10 @@ unlock_action=$(node -e '
   const path = require("path")
   const menu = require(path.join(process.env.ROOT, "shell/plugins/menu/MenuModel.js"))
   const items = menu.parseMenuJsonc(fs.readFileSync(path.join(process.env.ROOT, "default/omarchy/omarchy-menu.jsonc"), "utf8"))
-  process.stdout.write(items.find(item => item.id === "style.unlock").action)
+  process.stdout.write(items.find(item => item.id === "appearance.unlock").action)
 ')
 
-[[ -n $unlock_action ]] || fail "the shipped menu still carries a style.unlock action"
+[[ -n $unlock_action ]] || fail "the shipped menu still carries a appearance.unlock action"
 
 stub_dir="$test_tmp/stubs"
 mkdir -p "$stub_dir"
@@ -249,6 +252,11 @@ if [[ ${1:-} == -c && ${2:-} == %u ]]; then
 fi
 if [[ ${1:-} == -c && ${2:-} == %a && $last == /tmp ]]; then
   printf '755\n'
+  exit 0
+fi
+# The checkout stands in for the packaged, root-owned tree, whatever umask it was cloned under.
+if [[ ${1:-} == -c && ${2:-} == %a && ($last == "$ROOT" || $last == "$ROOT"/*) ]]; then
+  printf '%o\n' "$(( 8#$(/usr/bin/stat -c %a -- "$last") & ~8#022 ))"
   exit 0
 fi
 exec /usr/bin/stat "$@"

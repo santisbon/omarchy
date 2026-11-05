@@ -8,6 +8,7 @@ set -e
 # --autoremove inside omarchy-pkg-drop takes steam-libs and steam-libs-i386
 # with the installer package. The i386 architecture stays enabled: other
 # 32-bit packages may rely on it by now.
+omarchy-lifecycle-dispatch pre-remove steam
 omarchy-pkg-drop steam-installer
 
 rm -rf \

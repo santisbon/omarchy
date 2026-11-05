@@ -4,8 +4,9 @@
 #
 # State lives in ~/.local/state/omarchy/settings/weather.json as
 # {"name": ..., "latitude": ..., "longitude": ...}. A missing file means the
-# location is auto-detected from the IP address. Coordinates make the weather
-# panel exact; a hand-written {"name": "Malibu"} alone works too.
+# location is auto-detected from the IP address.
+# Coordinates make the weather panel exact; a hand-written {"name": "Malibu"}
+# alone works too.
 #
 #   (no args)           the current location: the stored name, or the
 #                       IP-detected city when nothing is set

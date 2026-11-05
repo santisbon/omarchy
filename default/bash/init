@@ -3,7 +3,7 @@ if command -v mise &> /dev/null; then
 fi
 
 if [[ $- == *i* ]] && [[ ${TERM:-} != "dumb" ]] && command -v starship &> /dev/null; then
-  eval "$(starship init bash)"
+  eval "$(starship init bash --print-full-init)"
 fi
 
 if command -v zoxide &> /dev/null; then
@@ -18,6 +18,8 @@ if command -v try &> /dev/null; then
   }
 fi
 
+# Only the key bindings (Ctrl-R, Ctrl-T, Alt-C): fzf's completion.bash rewraps
+# ~76 commands' completions on every shell start, adding ~25ms before the prompt.
 if command -v fzf &> /dev/null; then
   # Ubuntu's fzf keeps completion.bash and key-bindings.bash under /usr/share/doc/fzf/examples,
   # not Arch's /usr/share/fzf, so Ctrl+R and ** completion never loaded from those paths;

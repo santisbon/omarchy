@@ -1,60 +1,75 @@
 #!/bin/bash
 
 # omarchy:summary=Prompt for required reboot or service restarts after updates
+# omarchy:args=[--services-only|--reboot-only]
+
+mode="${1:-all}"
+case "$mode" in
+  all|--services-only|--reboot-only) ;;
+  *) echo "Unknown restart phase: $mode" >&2; exit 2 ;;
+esac
 
 echo
-
 confirm_reboot() {
-  gum confirm "$1" && { omarchy-system-reboot; exit 0; }
+  if [[ ${OMARCHY_UPDATE_UNATTENDED:-0} == "1" ]]; then
+    echo "$1 Run omarchy-system reboot when ready."
+  elif gum confirm --affirmative "$(omarchy-i18n common.yes)" --negative "$(omarchy-i18n common.no)" "$1"; then
+    omarchy-system reboot
+    exit 0
+  fi
 }
 
-# Ubuntu's kernel packages write /run/reboot-required only when
-# update-notifier-common is installed, and the distro leaves that package out.
-# The installed images are /boot/vmlinuz-<release>, so the newest release on
-# disk compared with the running one answers the same question. Other packages
-# follow Ubuntu's convention and write /run/reboot-required themselves (the
-# distro's config package does when a change only takes effect at boot), so
-# that file is checked as well; /run is a tmpfs, so a reboot clears it. sort -V keeps
-# 6.17.0-10 after 6.17.0-9, where a plain sort would not.
-running_kernel=$(uname -r)
-newest_kernel=$(
-  for image in /boot/vmlinuz-*; do
-    [[ -f $image ]] && echo "${image#/boot/vmlinuz-}"
-  done | sort -V | tail -1
-)
+if [[ $mode != "--services-only" ]]; then
+  # Ubuntu's kernel packages write /run/reboot-required only when
+  # update-notifier-common is installed, and the distro leaves that package out.
+  # The installed images are /boot/vmlinuz-<release>, so the newest release on
+  # disk compared with the running one answers the same question. Other packages
+  # follow Ubuntu's convention and write /run/reboot-required themselves (the
+  # distro's config package does when a change only takes effect at boot), so
+  # that file is checked as well; /run is a tmpfs, so a reboot clears it. sort -V keeps
+  # 6.17.0-10 after 6.17.0-9, where a plain sort would not.
+  running_kernel=$(uname -r)
+  newest_kernel=$(
+    for image in /boot/vmlinuz-*; do
+      [[ -f $image ]] && echo "${image#/boot/vmlinuz-}"
+    done | sort -V | tail -1
+  )
 
-if [[ -n $newest_kernel && $newest_kernel != "$running_kernel" ]]; then
-  confirm_reboot "Linux kernel has been updated. Reboot?"
-elif [[ -f /run/reboot-required || -f $HOME/.local/state/omarchy/reboot-required ]]; then
-  confirm_reboot "Updates require reboot. Ready?"
-fi
-
-running_hyprland=$(readlink /proc/$(pgrep -x Hyprland)/exe 2>/dev/null)
-if [[ $running_hyprland == *"(deleted)"* ]]; then
-  confirm_reboot "Hyprland has been updated. Reboot?"
-fi
-
-for file in "$HOME"/.local/state/omarchy/restart-*-required; do
-  if [[ -f $file ]]; then
-    filename=$(basename "$file")
-    service=$(echo "$filename" | sed 's/restart-\(.*\)-required/\1/')
-    echo "Restarting $service"
-    omarchy-state clear "$filename"
-    omarchy-restart-"$service"
+  if [[ -n $newest_kernel && $newest_kernel != "$running_kernel" ]]; then
+    confirm_reboot "$(omarchy-i18n update.kernelReboot)"
+  elif [[ -f /run/reboot-required || -f $HOME/.local/state/omarchy/reboot-required ]]; then
+    confirm_reboot "$(omarchy-i18n update.rebootRequired)"
   fi
-done
 
-# The user manager's environment was filled at login, before these packages. A session that
-# began before the update that introduced OMARCHY_PATH (the distro's docs/6, choice 86) lacks
-# it, and so would the units and the shell started from here on.
-if ! systemctl --user show-environment 2>/dev/null | grep -q '^OMARCHY_PATH='; then
-  systemctl --user set-environment "OMARCHY_PATH=${OMARCHY_PATH:-/usr/share/omarchy}" 2>/dev/null || true
+  running_hyprland=$(readlink /proc/$(pgrep -x Hyprland)/exe 2>/dev/null)
+  if [[ $running_hyprland == *"(deleted)"* ]]; then
+    confirm_reboot "$(omarchy-i18n update.hyprlandReboot)"
+  fi
 fi
 
-# Updates routinely replace the shell's QML, and a stale process can lazy-load
-# new files into old code. A restart failure (locked session, ssh, TTY) only
-# prints its reason: the next update or login gets a fresh shell anyway. The
-# reload message waits for the restart, which it used to precede even when the
-# restart failed (2026-10-17).
-echo -e "\e[32m\nRestarting shell\e[0m"
-omarchy-restart-shell && echo "All plugins have been reloaded" || true
+if [[ $mode != "--reboot-only" ]]; then
+  for file in "$HOME"/.local/state/omarchy/restart-*-required; do
+    if [[ -f $file ]]; then
+      filename=$(basename "$file")
+      service=$(echo "$filename" | sed 's/restart-\(.*\)-required/\1/')
+      echo "Restarting $service"
+      omarchy-state clear "$filename"
+      omarchy-restart-"$service"
+    fi
+  done
+
+  # The user manager's environment was filled at login, before these packages. A session that
+  # began before the update that introduced OMARCHY_PATH (the distro's docs/6, choice 86) lacks
+  # it, and so would the units and the shell started from here on.
+  if ! systemctl --user show-environment 2>/dev/null | grep -q '^OMARCHY_PATH='; then
+    systemctl --user set-environment "OMARCHY_PATH=${OMARCHY_PATH:-/usr/share/omarchy}" 2>/dev/null || true
+  fi
+
+  # Updates routinely replace the shell's QML, and a stale process can lazy-load
+  # new files into old code. A restart failure (locked session, ssh, TTY) only
+  # prints its reason: the next update or login gets a fresh shell anyway. The
+  # reload message waits for the restart, which it used to precede even when the
+  # restart failed (2026-10-17).
+  echo -e "\e[32m\nRestarting shell\e[0m"
+  omarchy-restart-shell && echo "All plugins have been reloaded" || true
+fi

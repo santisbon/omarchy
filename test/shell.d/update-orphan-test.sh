@@ -23,7 +23,7 @@ SH
 }
 
 run_orphan_checker() {
-  HOME="$test_home" PATH="$stub_bin:$PATH" "$ROOT/bin/omarchy-update-orphan-pkgs"
+  HOME="$test_home" PATH="$stub_bin:$ROOT/bin:$PATH" "$ROOT/bin/omarchy-update-orphan-pkgs" "$@"
 }
 
 # The port lists apt's orphans from a simulated autoremove, whose "Remv name
@@ -50,12 +50,36 @@ grep -q '^2 orphaned package(s) found. Re-run omarchy-update-orphan-pkgs in a te
   fail "orphan checker does not remove packages non-interactively"
 pass "orphan checker only reports orphans non-interactively"
 
+export REMOVAL_LOG="$test_tmp/removal.log"
+write_stub apt-get '
+if [[ $1 == "-s" && $2 == "autoremove" ]]; then
+  printf "Remv old-lib [1.0-1]\nRemv unused-tool [2.3-0ubuntu1]\n"
+  exit 0
+fi
+printf "%s\n" "$*" >"$REMOVAL_LOG"'
+write_stub sudo '"$@"'
+run_orphan_checker -y >"$test_tmp/approved.out" 2>"$test_tmp/approved.err"
+[[ $(<"$REMOVAL_LOG") == "-y autoremove --purge" ]] ||
+  fail "approved cleanup removes the orphan packages without apt's confirmation" "$(<"$REMOVAL_LOG")"
+pass "approved cleanup removes orphans without Omarchy or apt confirmation"
+
+write_stub sudo 'exit 42'
+if run_orphan_checker -y >"$test_tmp/failure.out" 2>"$test_tmp/failure.err"; then
+  fail "approved cleanup reports removal failures"
+fi
+pass "approved cleanup reports removal failures"
+
+rm -f "$REMOVAL_LOG"
+write_stub sudo '"$@"'
 write_stub apt-get '
 if [[ $1 == "-s" && $2 == "autoremove" ]]; then
   printf "Reading package lists...\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n"
   exit 0
 fi
-exit 99'
-run_orphan_checker >"$test_tmp/none.out" 2>"$test_tmp/none.err"
-[[ ! -s $test_tmp/none.out ]] || fail "orphan checker stays quiet when no orphans exist"
+printf "%s\n" "$*" >"$REMOVAL_LOG"'
+for mode in "" -y; do
+  run_orphan_checker $mode >"$test_tmp/none.out" 2>"$test_tmp/none.err"
+  [[ ! -s $test_tmp/none.out ]] || fail "orphan checker stays quiet when no orphans exist"
+done
+[[ ! -e $REMOVAL_LOG ]] || fail "orphan checker does not remove packages when no orphans exist"
 pass "orphan checker stays quiet without orphans"

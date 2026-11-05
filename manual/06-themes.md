@@ -1,6 +1,6 @@
 # Themes
 
-Omarchy comes with twenty-two beautiful themes. You can select between them via _Style > Theme_ in the Omarchy Menu (`Super + Space`) or hop directly to the theme selector using `Super + Ctrl + Shift + Space`.
+Omarchy comes with twenty-two beautiful themes. You can select between them via _Appearance > Theme_ in the Omarchy Menu (`Super + Space`) or hop directly to the theme selector using `Super + Ctrl + T`.
 
 Each theme styles the desktop, terminal, neovim, activity screen (btop), Chromium, and the entire Omarchy shell: top bar, menu, notifications, OSD, and the lock screen. (For Obsidian, you must manually select the Omarchy theme via _Appearance > Themes_ inside the app).
 
@@ -8,7 +8,7 @@ Each theme styles the desktop, terminal, neovim, activity screen (btop), Chromiu
 
 > **Oaxaca: works differently.** Obsidian is not preinstalled: Install > Productivity > Obsidian installs its snap, and a theme change then themes it as above.
 
-Themes have a set of background images that you can pick between using `Super + Ctrl + Space`.
+Themes have a set of background images that you can pick between using `Super + Ctrl + W`.
 
 You can find even more themes on [the extra themes page](https://omarchy.org/themes/) or even [make your own theme](43-making-your-own-theme.md).
 
@@ -38,8 +38,8 @@ _Miasma_
  ![hackerman](../themes/hackerman/preview.png)
 _Hackerman_
 
- ![osaka-jade](../themes/osaka-jade/preview.png)
-_Osaka Jade_
+ ![jade-horse](../themes/jade-horse/preview.png)
+_Jade Horse_
 
  ![kanagawa](../themes/kanagawa/preview.png)
 _Kanagawa_
@@ -73,9 +73,9 @@ _White_
 
 ### Unlocks
 
-Themes can also have a custom unlock design, which is used for the boot decryption process. You can select one of these under _Style > Unlock_. They look like this:
+Themes can also have a custom unlock design, which is used for the boot decryption process. You can select one of these under _Appearance > Unlock_. They look like this:
 
-> **Oaxaca: works differently.** Style > Unlock selects the boot splash theme (Plymouth's) through Ubuntu's `update-alternatives` on `default.plymouth` and rebuilds the initramfs with `update-initramfs -u`, where Omarchy runs `plymouth-set-default-theme` and mkinitcpio or Limine's `limine-mkinitcpio`.
+> **Oaxaca: works differently.** Appearance > Unlock selects the boot splash theme (Plymouth's) through Ubuntu's `update-alternatives` on `default.plymouth` and rebuilds the initramfs with `update-initramfs -u`, where Omarchy runs `plymouth-set-default-theme` and mkinitcpio or Limine's `limine-mkinitcpio`.
 
  ![catppuccin](../themes/catppuccin/preview-unlock.png)
 _Catppuccin_
@@ -98,6 +98,9 @@ _Gruvbox_
  ![hackerman](../themes/hackerman/preview-unlock.png)
 _Hackerman_
 
+ ![jade-horse](../themes/jade-horse/preview-unlock.png)
+_Jade Horse_
+
  ![kanagawa](../themes/kanagawa/preview-unlock.png)
 _Kanagawa_
 
@@ -112,9 +115,6 @@ _Miasma_
 
  ![nord](../themes/nord/preview-unlock.png)
 _Nord_
-
- ![osaka-jade](../themes/osaka-jade/preview-unlock.png)
-_Osaka Jade_
 
  ![retro-82](../themes/retro-82/preview-unlock.png)
 _Retro 82_

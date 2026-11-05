@@ -14,7 +14,7 @@ file first, if one exists.
 ├── battery-low.d/          # Low battery (percentage in $1)
 ├── font-set.d/             # After font change (font name in $1)
 ├── post-boot.d/            # After the desktop starts
-├── post-update.d/          # During `omarchy update`, after system packages and migrations
+├── post-update.d/          # At the end of `omarchy update`, after privileged work
 └── theme-set.d/            # After theme change (theme slug in $1)
 ```
 
@@ -25,3 +25,5 @@ THEME_NAME=$1
 echo "Theme changed to: $THEME_NAME"
 # Add custom actions here
 ```
+
+Update-related hooks run as your user with your PATH, inside the update's sudo authorization, so a hook that invokes `sudo` does not prompt again. `post-update` runs after the system packages, migrations and service restarts. `pre-refresh-pacman` runs after `omarchy refresh pacman` re-syncs the package config and before the package transaction, so custom repositories and `IgnorePkg` entries shape that transaction.

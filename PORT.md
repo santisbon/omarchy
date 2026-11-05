@@ -2,7 +2,7 @@
 
 This branch is Omarchy ported from Arch Linux and pacman to Ubuntu and apt, for the distro
 whose build repository is `santisbon/oaxaca`. It follows Omarchy's release tag named in that
-repository's `distro.conf` (`OMARCHY_TAG`, `v4.0.6`). Each new Omarchy tag the distro adopts is
+repository's `distro.conf` (`OMARCHY_TAG`, `v4.5.0`). Each new Omarchy tag the distro adopts is
 merged on a temporary branch that this branch then fast-forwards to, never rebased onto: this
 branch's commit hashes are recorded in published package versions. What each merge left out is at
 the end of `PORT-REMOVALS.md`.

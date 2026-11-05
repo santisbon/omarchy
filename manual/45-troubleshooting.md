@@ -14,17 +14,13 @@ Omarchy assumes a 2x high-resolution display, which requires setting `GDK_SCALE`
 
 For Spotify, you can use `Ctrl + Minus` to shrink the UI (and `Ctrl + Plus` to make it bigger).
 
-### Why isn't Caps Lock working?
+### Why did all my Super key binds stop working?
 
-In Omarchy, Caps Lock has been designated to be the xcompose key. That's how you get [quick emojis](07-hotkeys.md#quick-emojis) and [other autocompletions](07-hotkeys.md#quick-completions) done. If you really miss using Caps Lock, you can remap the xcompose key to something else by editing `~/.config/hypr/input.lua`, like setting it to the right alt key:
+On some ASUS ROG and TUF laptops, `Fn + Super` is an easy-to-miss chord that toggles a firmware Windows-key lock (meant for gaming so you don't leave a game by accident). Nothing on screen tells you it happened. While the lock is on, Super emits nothing at all — so every Omarchy bind that uses Super just stops, and it looks like Hyprland broke.
 
-```
-hl.config({
-  input = {
-    kb_options = "compose:ralt",
-  },
-})
-```
+Press `Fn + Super` once before you dig into `~/.config/hypr/`, and if that doesn't bring Super back, press it again so you don't leave the lock on. This is not Fn-lock, which only changes what the F-key row does.
+
+### Why don't the quick emojis work?
 
 > **Oaxaca: works differently.** On Oaxaca, Caps Lock is Caps Lock and no key is the Compose key: Oaxaca's Hyprland configuration takes the keyboard model and options from `/etc/default/keyboard`, which Oaxaca's installer writes, so the keyboard behaves as the layout chosen at installation does on other systems. Omarchy's quick emojis and completions in `~/.XCompose` work only after a `compose:` option is added to `kb_options` in `~/.config/hypr/input.lua`, and `compose:ralt` takes AltGr away from layouts that type characters with Right Alt, such as German, British and Spanish.
 
@@ -45,6 +41,27 @@ On some laptops, Omarchy automatically applies a speaker tuning that corrects th
 You probably typed it wrong too many times and got locked out. If this is happening on the lock screen, you can hit `CTRL + ALT + F2` to start a new TTY where you can login as root, then run `faillock --reset --user [your-username]`. That'll reset the lockout, and you're good to go.
 
 > **Oaxaca: removed.** Omarchy's faillock lockout is not set up: Ubuntu's PAM stack has no `pam_faillock`, so the lockout and its `faillock --reset` fix do not apply. Oaxaca's installer also sets no root password, so a TTY login as root is not available.
+
+### My password is accepted, but I return to the login screen
+
+A broken session environment file can prevent the desktop from starting even when your password is correct. This is especially worth checking after editing `~/.config/uwsm/env.d/`.
+
+Press `Ctrl + Alt + F2`, log in with your normal username and password, and inspect the current boot's user journal:
+
+```bash
+journalctl --user -b -t uwsm_env-preloader --no-pager
+```
+
+Look for an error naming one of your environment files, such as `bad substitution`, just before a message that the env output mark was not found. Move that file out of `env.d` before trying to log in again. For example, if the error names `99-custom`:
+
+```bash
+mkdir -p ~/.config/uwsm/disabled
+mv -i ~/.config/uwsm/env.d/99-custom ~/.config/uwsm/disabled/
+```
+
+UWSM skips a file with a syntax error, but a fatal error that only shows up while the file runs, like `bad substitution`, can still prevent the desktop from starting. A system snapshot rollback does not repair these files, because `/home` is not rolled back.
+
+Once you can log in, fix the saved copy before moving it back. `sh -n` catches syntax errors without running the file, but cannot catch every error that occurs when it is sourced. Keep a working terminal open while testing changes.
 
 ### Why isn't my 1Password authorization prompts for 1Password SSH Agent / CLI appearing?
 

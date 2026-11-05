@@ -61,9 +61,9 @@ grep -qx '{ "enable-crash-reporter": false }' "$work/home/.vscode/argv.json" || 
 pass "switching from the snap removes it and keeps the user's files"
 
 menu="$ROOT/default/omarchy/omarchy-menu.jsonc"
-grep -q '"install.editor.vscode":.*"when":"! omarchy-pkg-present code"' "$menu" ||
-  fail "Install > Editor > VSCode shows until the .deb is installed"
-pass "Install > Editor > VSCode shows until the .deb is installed"
+grep -q '"install.editor.vscode":.*"disabled":"omarchy-pkg-present code"' "$menu" ||
+  fail "Install > Editor > VSCode dims once the .deb is installed"
+pass "Install > Editor > VSCode dims once the .deb is installed"
 
 # The migration prints the command for a .deb without OpenSSL 3 and for the snap, and nothing else.
 migrate() { PATH="$work/bin:$PATH" bash -euo pipefail "$migration"; }

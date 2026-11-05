@@ -4,6 +4,12 @@
 # omarchy:args=[code|codium|cursor|zed|sublime_text|helix|vim|emacs|nvim|nano]
 # omarchy:examples=omarchy default editor | omarchy default editor code | omarchy default editor helix
 
+installing=false
+if [[ ${1:-} == "--install" ]]; then
+  installing=true
+  shift
+fi
+
 editor_file="$HOME/.local/state/omarchy/defaults/editor"
 
 if (($# == 0)); then
@@ -11,28 +17,56 @@ if (($# == 0)); then
     read -r editor <"$editor_file"
   fi
 
+  # Sublime HQ's sublime-text package ships `subl`; older defaults stored `sublime_text`.
+  [[ $editor == sublime_text ]] && editor=subl
+
   [[ -n $editor ]] && echo "$editor" || echo "nano"
   exit 0
 fi
 
 case "$1" in
-code) editor="code"; name="VSCode"; glyph= ;;
-codium) editor="codium"; name="VSCodium"; glyph= ;;
-cursor) editor="cursor"; name="Cursor"; glyph= ;;
-zed | zeditor) editor="zeditor"; name="Zed"; glyph= ;;
-sublime_text) editor="sublime_text"; name="Sublime Text"; glyph= ;;
-helix) editor="helix"; name="Helix"; glyph= ;;
-vim) editor="vim"; name="Vim"; glyph= ;;
-emacs) editor="emacs"; name="Emacs"; glyph= ;;
-nvim) editor="nvim"; name="Neovim"; glyph= ;;
-nano) editor="nano"; name="nano"; glyph=󰷈 ;;
+code) selection="code"; editor="code"; name="VSCode"; glyph= ;;
+codium) selection="codium"; editor="codium"; name="VSCodium"; glyph= ;;
+cursor) selection="cursor"; editor="cursor"; name="Cursor"; glyph= ;;
+zed | zeditor) selection="zed"; editor="zeditor"; name="Zed"; glyph= ;;
+sublime_text | subl) selection="sublime_text"; editor="subl"; name="Sublime Text"; glyph= ;;
+helix) selection="helix"; editor="helix"; name="Helix"; glyph= ;;
+vim) selection="vim"; editor="vim"; name="Vim"; glyph= ;;
+emacs) selection="emacs"; editor="emacs"; name="Emacs"; glyph= ;;
+nvim) selection="nvim"; editor="nvim"; name="Neovim"; glyph= ;;
+nano) selection="nano"; editor="nano"; name="nano"; glyph=󰷈 ;;
 *)
   echo "Usage: omarchy-default-editor <code|codium|cursor|zed|sublime_text|helix|vim|emacs|nvim|nano>"
   exit 1
   ;;
 esac
 
+# Cursor, Zed and Helix have no installer in this tree (Ubuntu's Helix is the hx package, whose
+# command is hx), and nano is in the desktop's package list, so they are set without one.
+# VSCodium comes from Flathub and has no command on PATH.
+needs_install=false
+case "$selection" in
+cursor | zed | helix | nano) ;;
+codium) omarchy-cmd-present codium || omarchy-pkg-flatpak-present com.vscodium.codium || needs_install=true ;;
+*) omarchy-cmd-missing "$editor" && needs_install=true ;;
+esac
+
+if [[ $needs_install == "true" ]]; then
+  if [[ $installing == "false" ]]; then
+    exec omarchy-launch-floating-terminal-with-presentation omarchy-default-editor --install "$selection"
+  else
+    case "$selection" in
+    code) omarchy-install-editor-vscode ;;
+    codium) omarchy-install-editor-vscodium ;;
+    sublime_text) omarchy-install-editor-sublime ;;
+    vim) omarchy-pkg-add vim ;;
+    emacs) omarchy-install-editor-emacs ;;
+    nvim) omarchy-pkg-add neovim ;;
+    esac || exit 1
+  fi
+fi
+
 mkdir -p "$(dirname "$editor_file")"
 printf '%s\n' "$editor" >"$editor_file"
 
-omarchy-notification-send -g $glyph "$name is now the default editor"
+omarchy-notification-send -g $glyph "$(omarchy-i18n default.editorSet "$name")"

@@ -16,4 +16,9 @@ if [[ -z $last_run ]]; then
   exit 1
 fi
 
-date -d "${last_run#End-Date: }" "+%A, %B %d %Y at %H:%M"
+locale=$(omarchy-language locale)
+upgraded=${last_run#End-Date: }
+
+omarchy-i18n about.updatedAt \
+  "$(LC_TIME=$locale date -d "$upgraded" +"%A %d %B %Y")" \
+  "$(date -d "$upgraded" +"%H:%M")"

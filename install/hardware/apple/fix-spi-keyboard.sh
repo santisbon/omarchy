@@ -10,7 +10,7 @@
 # which Omarchy adds for the MacBook8,1 only, so only that model gets a hook in
 # /etc/initramfs-tools/hooks that adds it and loads it at boot. The installer
 # rebuilds the initramfs after this step.
-product_name="$(cat /sys/class/dmi/id/product_name 2>/dev/null)"
+product_name="$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)"
 if [[ $product_name == "MacBook8,1" ]]; then
   echo "Detected MacBook8,1, whose SPI keyboard needs spi_pxa2xx_pci in the initramfs"
   mkdir -p /etc/initramfs-tools/hooks

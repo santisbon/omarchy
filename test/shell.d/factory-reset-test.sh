@@ -155,7 +155,7 @@ grep -qx 'XKBLAYOUT="fr"' "$KEYBOARD_FILE" || fail "a missing file is created" "
 # Every layout the form offers is one XKB knows.
 source "$ROOT/install/provisioning/setup-form.sh"
 if [[ -f /usr/share/X11/xkb/rules/evdev.lst ]]; then
-  while IFS='|' read -r label value; do
+  while IFS='|' read -r label value _; do
     layout=${value%%:*}
     awk '/^! layout/{f=1;next} /^!/{f=0} f{print $1}' /usr/share/X11/xkb/rules/evdev.lst | grep -x "$layout" >/dev/null ||
       fail "the form's layout for $label is an XKB layout" "$layout"

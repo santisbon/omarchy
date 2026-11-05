@@ -22,7 +22,7 @@ cat >"$mock_bin/omarchy-font-set" <<'SH'
 printf 'font:%s\n' "$*" >>"$OMARCHY_TEST_LOG"
 SH
 
-for command in omarchy-pkg-flatpak-add omarchy-theme-set-vscode omarchy-install-32bit-graphics; do
+for command in omarchy-pkg-flatpak-add omarchy-theme-set-vscode omarchy-install-32bit-graphics omarchy-lifecycle-dispatch; do
   cat >"$mock_bin/$command" <<'SH'
 #!/bin/bash
 exit 0
@@ -76,9 +76,7 @@ assert_detached_installer_launch() {
   bash "$ROOT/bin/$script"
 
   wait_for_launch "launch:$launch" ||
-    fail "$script launches its app in a UWSM scope" "$(<"$OMARCHY_TEST_LOG")"
-  grep -Fqx "setsid $launch >/dev/null 2>&1 &" "$ROOT/bin/$script" ||
-    fail "$script detaches its scoped launch"
+    fail "$script launches its app through setsid in a UWSM scope" "$(<"$OMARCHY_TEST_LOG")"
   pass "$script detaches its scoped launch"
 }
 

@@ -6,6 +6,8 @@ A lot of laptops come with a fingerprint sensor to do authentication. You can us
 
 That'll install the fingerprint package, collect your print, verify it, and you'll be set to go using your fingerprint to unlock from the lock screen (which you can trigger with `Super + Ctrl + L`), enter sudo mode, and authorize system prompts.
 
+Once the lock screen has turned the display off, the sensor rests to save power, so wake the screen with any key or the touchpad before touching it.
+
 > **Oaxaca: works differently.** Oaxaca preinstalls the fingerprint packages (`fprintd` and `libpam-fprintd`), so _Setup > Security > Fingerprint_ installs nothing. The entry enables Oaxaca's own pam-auth-update profile, which puts `pam_fprintd` into Ubuntu's shared `common-auth` stack, instead of editing sudo's and polkit's PAM files as Omarchy does.
 
 When your laptop lid is closed, the fingerprint prompt is automatically skipped, so you go straight to the password prompt instead of waiting on a sensor you can't reach. If you otherwise need to work on an external keyboard that doesn't have a sensor, just hit `CTRL + C`, when you're prompted for your fingerprint during `sudo`.

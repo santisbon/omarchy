@@ -8,8 +8,9 @@
 # VA-API driver (i965-va-driver, Omarchy's libva-intel-driver; universe).
 
 if INTEL_GPU=$(lspci | grep -iE 'vga|3d|display' | grep -i 'intel'); then
-  # HD Graphics / Iris / Xe / Arc / Non-Arc Panther Lake use intel-media-driver + VPL
-  if [[ ${INTEL_GPU,,} =~ (hd\ graphics|uhd\ graphics|xe|iris|arc|panther\ lake) ]]; then
+  # HD Graphics / Iris / Xe / Arc use intel-media-driver + VPL, as do the newer
+  # GPUs that lspci names only "[Intel Graphics]" (non-Arc Panther Lake, Wildcat Lake)
+  if [[ ${INTEL_GPU,,} =~ (hd\ graphics|uhd\ graphics|xe|iris|arc|panther\ lake|\[intel\ graphics) ]]; then
     omarchy-pkg-add intel-media-va-driver-non-free libvpl2 libmfx-gen1.2
   elif [[ ${INTEL_GPU,,} =~ "gma" ]]; then
     # Older generations from 2008 to ~2014-2017 use libva-intel-driver

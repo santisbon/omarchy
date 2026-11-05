@@ -60,8 +60,8 @@ case "${1:-}" in
 
     exec /usr/bin/rm -rf "$TEST_AUTHDIR"
     ;;
-  sed)
-    if (( $# != 4 )) || [[ $2 != "-i" ]]; then
+  pam-auth-update)
+    if [[ $* != "pam-auth-update --package --disable omarchy-u2f" ]]; then
       reject "$@"
     fi
     ;;
@@ -91,6 +91,8 @@ printf 'tester:credential-handle,public-key,es256,+presence\n' >"$authdir/fido2"
 invoke_remove
 grep -Fxq $'sudo\trm\t-rf\t'"$authdir" "$calls" ||
   fail "removal deletes the FIDO2 directory" "$(cat "$calls")"
+grep -Fxq $'sudo\tpam-auth-update\t--package\t--disable\tomarchy-u2f' "$calls" ||
+  fail "removal disables the FIDO2 PAM profile" "$(cat "$calls")"
 [[ ! -e $authdir ]] || fail "the FIDO2 directory is gone"
 pass "removal deletes a real FIDO2 directory"
 

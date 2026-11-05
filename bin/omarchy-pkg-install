@@ -24,5 +24,5 @@ if [[ -n $pkg_names ]]; then
 
   # Convert newline-separated selections to space-separated for apt-get
   echo "$pkg_names" | tr '\n' ' ' | xargs sudo apt-get install -y
-  omarchy-show-done
+  omarchy-show-done $?
 fi

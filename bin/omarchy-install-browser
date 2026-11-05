@@ -14,6 +14,8 @@
 # that only packages the archive lacks come from it. Every URL below answered
 # on 2026-10-10.
 
+set -e
+
 source "$OMARCHY_PATH/install/helpers/browser-policy.sh"
 
 setup_chromium_policy_directory() {
@@ -78,6 +80,7 @@ chrome)
   setup_chromium_policy_directory /etc/opt/chrome/policies/managed
   copy_chromium_flags ~/.config/chrome-flags.conf
   omarchy-theme-set-browser
+  omarchy-lifecycle-dispatch post-install chrome
   announce_browser_installed "Chrome"
   ;;
 chromium)
@@ -93,6 +96,7 @@ chromium)
   setup_chromium_policy_directory /etc/chromium/policies/managed
   copy_chromium_flags ~/.config/chromium-flags.conf
   omarchy-theme-set-browser
+  omarchy-lifecycle-dispatch post-install chromium
   announce_browser_installed "Chromium"
   ;;
 brave-origin)
@@ -108,6 +112,7 @@ brave-origin)
   setup_chromium_policy_directory /etc/brave/policies/managed
   copy_chromium_flags ~/.config/brave-flags.conf
   omarchy-theme-set-browser
+  omarchy-lifecycle-dispatch post-install brave-origin
   announce_browser_installed "Brave Origin"
   ;;
 firefox)
@@ -123,6 +128,7 @@ firefox)
   # Mozilla's deb installs under /usr/lib/firefox.
   browser_policy_setup_firefox_distribution /usr/lib/firefox/distribution
   setup_firefox_wayland
+  omarchy-lifecycle-dispatch post-install firefox
   announce_browser_installed "Firefox"
   ;;
 *)

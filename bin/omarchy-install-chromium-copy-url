@@ -15,6 +15,8 @@ browser_dirs=(
   "$HOME/.config/BraveSoftware/Brave-Browser"
   "$HOME/.config/BraveSoftware/Brave-Browser-Beta"
   "$HOME/.config/BraveSoftware/Brave-Browser-Nightly"
+  "$HOME/.config/BraveSoftware/Brave-Origin-Beta"
+  "$HOME/.config/BraveSoftware/Brave-Origin-Nightly"
 )
 
 manifest=$(sed "s|__HOST_PATH__|$HOST_PATH|g" "$TEMPLATE")

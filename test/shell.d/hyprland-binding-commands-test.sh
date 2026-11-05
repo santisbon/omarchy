@@ -39,6 +39,8 @@ end
 
 local dsp = proxy()
 rawset(dsp, "exec_cmd", function(command) return { command = command } end)
+-- A key the shell registers as a global shortcut (default/omarchy/shortcuts) spawns nothing.
+rawset(dsp, "global", function(name) return { command = "global:" .. name } end)
 
 local bindings = {}
 hl = setmetatable({
@@ -63,7 +65,7 @@ LUA
 ) || fail "the default bindings load through the shipped hyprland.lua"
 
 (( $(wc -l <<<"$bindings") > 150 )) || fail "the command check sees the full default binding set" "$bindings"
-grep -Fq $'SUPER + SPACE\tOmarchy menu\tomarchy-menu toggle' <<<"$bindings" ||
+grep -Fq $'SUPER + SPACE\tOmarchy menu\tglobal:omarchy:menu.root' <<<"$bindings" ||
   fail "the command check sees what Super+Space runs" "$(grep '^SUPER + SPACE' <<<"$bindings")"
 pass "the command check covers the full default binding set"
 
@@ -123,11 +125,26 @@ def programs(words):
             found.append((words[i + 1], words[i + 2:]))
     return found
 
+shortcuts = {" ".join(line.split()) for line in open(os.path.join(root, "default/omarchy/shortcuts"), encoding="utf-8")}
+
 for line in sys.stdin:
     keys, description, command = (line.rstrip("\n").split("\t") + ["", ""])[:3]
     if not command:
         continue
     where = f"{keys} ({description}): {command}"
+    if command.startswith("global:omarchy:"):
+        kind, _, target = command.removeprefix("global:omarchy:").partition(".")
+        if f"{kind} {target}" not in shortcuts:
+            problems.append(f"{where}: not in default/omarchy/shortcuts")
+        elif kind == "menu" and target.lower() not in routes:
+            problems.append(f"{where}: menu route {target} is not in omarchy-menu.jsonc")
+        elif kind == "panel" and target not in plugin_ids:
+            problems.append(f"{where}: no built-in plugin has the id {target}")
+        elif kind == "ipc":
+            handler, _, method = target.partition(".")
+            if method not in targets.get(handler, ()):
+                problems.append(f"{where}: no IpcHandler answers {target}")
+        continue
     try:
         words = shlex.split(command)
     except ValueError as e:
@@ -177,10 +194,12 @@ probe=$(printf '%s\n' \
   $'SUPER + F1\tProbe\tomarchy-no-such-script' \
   $'SUPER + F2\tProbe\tomarchy-menu toggle no-such-route' \
   $'SUPER + F3\tProbe\tomarchy-shell shell toggle oaxaca.menu' \
-  $'SUPER + F4\tProbe\tomarchy-shell no-such-target ping')
+  $'SUPER + F4\tProbe\tomarchy-shell no-such-target ping' \
+  $'SUPER + F5\tProbe\tglobal:omarchy:menu.no-such-shortcut')
 probe_problems=$(python3 "$tmpdir/check.py" "$ROOT" <<<"$probe")
 for expected in "omarchy-no-such-script is not an executable" "menu route no-such-route" \
-  "no built-in plugin has the id oaxaca.menu" "no IpcHandler answers target no-such-target"; do
+  "no built-in plugin has the id oaxaca.menu" "no IpcHandler answers target no-such-target" \
+  "menu.no-such-shortcut: not in default/omarchy/shortcuts"; do
   grep -Fq "$expected" <<<"$probe_problems" || fail "the command check catches: $expected" "$probe_problems"
 done
 pass "the command check catches missing scripts, menu routes, plugin ids and shell targets"

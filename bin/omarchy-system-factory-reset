@@ -45,22 +45,40 @@ FACTORY_BOOT=/var/lib/omarchy/factory/boot
 PROVISIONING_KEY=/etc/omarchy/provisioning.key
 CONF_HOOK=/etc/cryptsetup-initramfs/conf-hook
 UMASK_CONF=/etc/initramfs-tools/conf.d/omarchy-provisioning
-OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+PACKAGED_PATH=/usr/bin/omarchy-system-factory-reset
+# sudo drops OMARCHY_PATH from the environment, and omarchy-i18n, which
+# supplies every line of the prompts below, needs it there.
+export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
 TOP_MNT=/run/omarchy-system-factory-reset/top
 NEXT_NAME=@omarchy-reset-next
 NEW_ROOT=/run/omarchy-system-factory-reset/root
 BOOT_BACKUP=omarchy-reset-boot-backup
 LOG_FILE=/var/log/omarchy-system-factory-reset.log
 
+# Never replace a newer checkout reset with a different installed implementation.
+if ! /usr/bin/cmp -s -- "${BASH_SOURCE[0]}" "$PACKAGED_PATH"; then
+  echo "Factory reset differs from the installed command. Install the matching Omarchy package before resetting." >&2
+  exit 1
+fi
+
 # Self-elevate so the menu entry (and a bare shell invocation) need no sudo
 # prefix. The caller's gum theme vars are forwarded as `env` arguments rather
 # than via `sudo -E`, so styling survives even under an env_reset sudoers.
+# Always elevate the packaged copy, including when invoked from a dev checkout.
 if (( EUID != 0 )); then
-  mapfile -t gum_env < <(env | grep '^GUM_' || true)
-  exec sudo env "${gum_env[@]}" "$0" "$@"
+  mapfile -d '' -t gum_env < <(env -0 | grep -z '^GUM_[A-Za-z0-9_]*=' || true)
+  exec sudo env -- "${gum_env[@]}" "$PACKAGED_PATH" "$@"
 fi
 
 export PATH="$OMARCHY_PATH/bin:$PATH"
+
+# The questions read in the language of the person who asked for the reset.
+# Elevation left their HOME behind, so their language file is found from the
+# account sudo names, never from a path the caller passed in.
+if [[ -n ${SUDO_USER:-} && -z ${OMARCHY_LANGUAGE_FILE:-} ]]; then
+  caller_home=$(getent passwd "$SUDO_USER" | cut -d: -f6 || true)
+  [[ -n $caller_home ]] && export OMARCHY_LANGUAGE_FILE="$caller_home/.config/omarchy/language"
+fi
 
 log() {
   echo "$1" | tee -a "$LOG_FILE" >/dev/null
@@ -87,7 +105,7 @@ luks_device() {
   local src part
   src=$(root_device)
   [[ -n $src ]] || return 1
-  part=$(lsblk -nslpo NAME,FSTYPE "$src" 2>/dev/null | awk '$2=="crypto_LUKS"{print $1; exit}')
+  part=$(lsblk -nsrpo NAME,FSTYPE "$src" 2>/dev/null | awk '$2=="crypto_LUKS"{print $1; exit}')
   [[ -n $part ]] && { echo "$part"; return 0; }
   return 1
 }
@@ -106,32 +124,63 @@ generate_passphrase() {
 
 cleanup() {
   if mountpoint -q "$TOP_MNT" 2>/dev/null; then
-    if [[ -d $TOP_MNT/$NEXT_NAME && ${swap_done:-0} == 0 ]]; then
+    # Never delete the staged root while there is no @: after a root switch
+    # that could not be undone, it is one of the two systems left to recover.
+    if [[ -d $TOP_MNT/$NEXT_NAME && ${swap_done:-0} == 0 && -d $TOP_MNT/@ ]]; then
       btrfs subvolume delete --recursive "$TOP_MNT/$NEXT_NAME" >/dev/null 2>&1 || true
     fi
     umount -R "$TOP_MNT" 2>/dev/null || true
   fi
   rmdir "$TOP_MNT" 2>/dev/null || true
+  if [[ ${reset_committed:-0} == 0 ]]; then
+    revoke_reset_luks
+  fi
 }
 trap cleanup EXIT
 
 confirm_reset() {
   echo
-  gum style --bold --foreground 1 "Reset this computer to factory state?"
+  gum style --bold --foreground 1 "$(omarchy-i18n reset.question)"
   echo
-  gum style "This will permanently erase:"
-  gum style "  • All user accounts and everything in /home"
-  gum style "  • All packages and system changes made since installation"
-  gum style "  • Machine identity (network connections, host keys, machine-id)"
+  gum style "$(omarchy-i18n reset.willErase)"
+  gum style "  • $(omarchy-i18n reset.eraseAccounts)"
+  gum style "  • $(omarchy-i18n reset.erasePackages)"
+  gum style "  • $(omarchy-i18n reset.eraseIdentity)"
   gum style "  • Every Timeshift snapshot"
   echo
-  gum style "The next boot asks for a new user, exactly like a fresh install."
-  gum style --foreground 8 "Note: on disks without encryption this is deletion, not secure erasure."
+  gum style "$(omarchy-i18n reset.nextBoot)"
+  gum style --foreground 8 "$(omarchy-i18n reset.notSecureErase)"
   echo
 
   local typed
-  typed=$(gum input --placeholder "Type 'reset' to continue" --prompt "> ") || exit 1
+  typed=$(gum input --placeholder "$(omarchy-i18n reset.typeToContinue reset)" --prompt "> ") || exit 1
   [[ $typed == "reset" ]] || fail "Reset not confirmed."
+}
+
+# The slot the reset's throwaway key opens, or nothing. Restricting cryptsetup
+# to a token type no token has keeps an enrolled token from answering for it.
+reset_luks_slot() {
+  local -
+  set +x
+  LC_ALL=C cryptsetup open --test-passphrase --verbose --token-type passphrase-only \
+    --key-file <(printf '%s' "$RESET_THROWAWAY") "$RESET_LUKS_DEVICE" 2>&1 |
+    grep -o 'Key slot [0-9]* unlocked' | grep -o '[0-9]*' | head -1 || true
+}
+
+# Only the slot this attempt added goes, found by its key if the add was not
+# confirmed.
+revoke_reset_luks() {
+  local -
+  set +x
+  [[ ${RESET_LUKS_ADDED:-0} == 1 && -n ${RESET_LUKS_AUTH:-} ]] || return 0
+  [[ -n ${RESET_LUKS_SLOT:-} ]] || RESET_LUKS_SLOT=$(reset_luks_slot)
+  if [[ -n $RESET_LUKS_SLOT ]]; then
+    { cryptsetup luksKillSlot -q --key-file <(printf '%s' "$RESET_LUKS_AUTH") "$RESET_LUKS_DEVICE" "$RESET_LUKS_SLOT" ; } 2>>"$LOG_FILE" || true
+  else
+    echo "Could not find the reset's throwaway LUKS slot on $RESET_LUKS_DEVICE to revoke; check its keyslots" >>"$LOG_FILE"
+  fi
+  RESET_LUKS_ADDED=0
+  RESET_LUKS_SLOT=""
 }
 
 # Re-key to a throwaway passphrase whose keyfile auto-unlocks boot during the
@@ -146,17 +195,22 @@ stage_luks_rekey() {
     fail "the factory system's /etc/crypttab has no entry for UUID=$uuid"
 
   echo
-  gum style "Confirm your disk encryption passphrase to authorize the re-key."
+  gum style "$(omarchy-i18n reset.confirmPassphrase)"
   local current
   while true; do
-    current=$(gum input --password --placeholder "Current disk encryption passphrase" --prompt "Passphrase> ") || exit 1
-    if cryptsetup open --test-passphrase --key-file <(printf '%s' "$current") "$device" 2>/dev/null; then
+    current=$(gum input --password --placeholder "$(omarchy-i18n reset.passphrasePlaceholder)" --prompt "$(omarchy-i18n reset.passphrasePrompt)") || exit 1
+    if cryptsetup open --test-passphrase --token-type passphrase-only --key-file <(printf '%s' "$current") "$device" 2>/dev/null; then
       break
     fi
-    gum style --foreground 1 "That passphrase does not unlock $device. Try again."
+    gum style --foreground 1 "$(omarchy-i18n reset.passphraseWrong "$device")"
   done
 
   passphrase=$(generate_passphrase)
+  RESET_LUKS_AUTH=$current
+  RESET_LUKS_DEVICE=$device
+  RESET_THROWAWAY=$passphrase
+  # Revoked if the reset fails before the factory root takes over.
+  RESET_LUKS_ADDED=1
   cryptsetup luksAddKey --key-file <(printf '%s' "$current") "$device" <(printf '%s' "$passphrase")
 
   install -d -m 755 "$next$PROVISIONING_DIR"
@@ -353,7 +407,19 @@ stage_full_reset() {
   log "Activating the factory system"
   local old="@omarchy-old-$(date +%s)"
   mv "$top/@" "$top/$old"
-  mv "$next" "$top/@"
+  # Until the factory root is at @ the reset is not committed: cleanup revokes
+  # the throwaway slot, so the old root goes back to @ first.
+  if ! mv "$next" "$top/@"; then
+    if mv "$top/$old" "$top/@"; then
+      fail "could not activate the factory system; the current root is back at @ (see $LOG_FILE)"
+    fi
+    # Neither root is at @. Keep the staged one as well for recovery.
+    swap_done=1
+    fail "could not activate the factory system or put the current root back; from a live USB, mount the Btrfs top level, rename $old to @, and rebuild its boot files if it does not boot"
+  fi
+  # From here the old root is out of place, so the reset's unlock must survive,
+  # unless the boot rebuild below fails and the old root goes back.
+  reset_committed=1
   swap_done=1
 
   if ! rebuild_boot "$(root_device)"; then
@@ -362,6 +428,8 @@ stage_full_reset() {
     mv "$top/@" "$next"
     mv "$top/$old" "$top/@"
     swap_done=0
+    # The previous system boots again, so cleanup revokes the throwaway slot.
+    reset_committed=0
     if [[ -d $top/$BOOT_BACKUP ]]; then
       find /boot -mindepth 1 -maxdepth 1 ! -name efi -exec rm -rf {} +
       cp -a "$top/$BOOT_BACKUP/." /boot/
@@ -383,14 +451,11 @@ require_factory_snapshot() {
   [[ -d $TOP_MNT/@factory ]] && return 0
 
   echo
-  gum style --bold --foreground 3 "This machine has no factory snapshot to reset to."
+  gum style --bold --foreground 3 "$(omarchy-i18n reset.noSnapshot)"
   echo
-  gum style "A reset restores the @factory snapshot the Omarchy installer takes"
-  gum style "right after installing on btrfs. Machines installed on another file"
-  gum style "system, or before the installer took it, never got one, so there is"
-  gum style "no baseline here to return to."
+  gum style --width 80 "$(omarchy-i18n reset.noSnapshotWhy)"
   echo
-  gum style --foreground 8 "Reinstall from the Omarchy ISO to make this machine resettable."
+  gum style --foreground 8 "$(omarchy-i18n reset.reinstallHint)"
   exit 1
 }
 
@@ -419,11 +484,11 @@ main() {
   umount -R "$TOP_MNT" 2>/dev/null || true
 
   echo
-  gum style --bold "Reset staged. The wipe finishes on the next boot."
-  if gum confirm --affirmative "Reboot now" --negative "Reboot later" "Reboot to complete the reset?"; then
+  gum style --bold "$(omarchy-i18n reset.staged)"
+  if gum confirm --affirmative "$(omarchy-i18n reset.rebootNow)" --negative "$(omarchy-i18n reset.rebootLater)" "$(omarchy-i18n reset.rebootQuestion)"; then
     systemctl reboot
   else
-    gum style --foreground 3 "Do not keep using this machine — changes made now will be lost."
+    gum style --foreground 3 "$(omarchy-i18n reset.stopUsing)"
   fi
 }
 

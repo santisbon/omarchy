@@ -344,7 +344,9 @@ run_root_transaction() {
       (( copied_size == source_size ))
       cmp -s -- "$source" "$temporary"
       sync -f -- "$temporary"
-      mv --no-copy -fT -- "$temporary" "$destination"
+      # uutils mv, the default on Ubuntu, has no --no-copy. The temporary file is in the same
+      # directory as the destination, so mv renames it.
+      mv -fT -- "$temporary" "$destination"
       temporary=
     }
 

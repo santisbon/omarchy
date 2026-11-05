@@ -4,7 +4,7 @@ Omarchy is installed using an ISO. You can choose between a full-disk install, w
 
 > **Oaxaca: works differently.** Oaxaca's ISO boots an Ubuntu live session (casper) that opens Calamares, a graphical installer, instead of Omarchy's installer. Calamares's partition page offers modes such as "Erase disk" and "Replace a partition"; its "Encrypt system" box starts checked (LUKS2, with a separate unencrypted 4 GB `/boot`), and btrfs is the default file system, with ext4 and xfs also offered.
 
-Download the ISO first, put it on a USB stick (use [balenaEtcher](https://etcher.balena.io/) on Mac/Windows or [caligula](https://github.com/ifd3f/caligula) on Linux), and boot off the stick.
+Download the ISO first, put it on a USB stick (use [Rufus](https://rufus.ie/) on Windows, [balenaEtcher](https://etcher.balena.io/) on Mac, or [caligula](https://github.com/ifd3f/caligula) on Linux), and boot off the stick.
 
 > **Oaxaca: added.** The website's front page, under _Check the download_, has the commands that check the ISO. gpg's "WARNING: This key is not certified with a trusted signature!" only means you haven't signed Oaxaca's key yourself; the ISO is genuine when gpg reports "Good signature" with the fingerprint shown on that page and `sha256sum` prints OK.
 
@@ -62,6 +62,10 @@ Omarchy is installed with encryption by default. It's the safe, responsible choi
 But in special circumstances, like remote Omarchy installs on protected computers or for throw-away installations without sensitive data, you may want to install without encryption. You can hit `Ctrl + C` on the disk formatting confirmation to switch to an encryption-less installation.
 
 > **Oaxaca: works differently.** Calamares has no `Ctrl + C` switch: an unencrypted install is made by unchecking the "Encrypt system" box on the partition page.
+
+### Language
+
+Omarchy speaks dozens of languages, and English is the default. To switch, open the Omarchy menu and go to _Setup > Language_, or run `omarchy language <code>` in a terminal (`omarchy language list` shows the codes). The menu, desktop, and Omarchy's own notifications change language immediately, and every application you open afterwards follows too. Apps that were already open switch once you restart them.
 
 ### Help if you're stuck
 

@@ -2,17 +2,6 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/base-test.sh"
 
-export PATH="$ROOT/bin:$PATH"
-
-TMPDIR=""
-
-cleanup() {
-  if [[ -n $TMPDIR && -d $TMPDIR ]]; then
-    rm -rf "$TMPDIR"
-  fi
-}
-trap cleanup EXIT
-
 require_command jq
 require_command node
 

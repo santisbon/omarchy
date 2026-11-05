@@ -6,7 +6,7 @@ The main file you have to tweak is `colors.toml`. That defines the color set tha
 
 > **Oaxaca: works differently.** Oaxaca does not preinstall Obsidian. Once Install > Productivity > Obsidian has installed its snap, `oaxaca-theme-set-obsidian` themes it as on Omarchy.
 
-You can also use the included Aether application to create a new theme using a lovely GUI interface to play with colors and search for backgrounds. Just start it via the apps menu on `Super + Alt + Space`.
+You can also use the included Aether application to create a new theme using a lovely GUI interface to play with colors and search for backgrounds. Just start it from the app grid on `Super + Alt + Space`.
 
 > **Oaxaca: removed.** Aether, Omarchy's theme designer, is not included: Aether is not in Ubuntu 26.10's archive, and Aether's repository has no licence, so the distro cannot redistribute it.
 
@@ -30,7 +30,7 @@ If you'd like to color-match the file manager icons to your theme, add a file ca
 
 ### Unlock image
 
-Themes supplied with `unlock.png` and `preview-unlock.png` images will be listed under _Style > Unlock_. Your `unlock.png` should preferably be a transparent png. And you can create the preview image using `omarchy plymouth preview`.
+Themes supplied with `unlock.png` and `preview-unlock.png` images will be listed under _Appearance > Unlock_. Your `unlock.png` should preferably be a transparent png. And you can create the preview image using `omarchy plymouth preview`.
 
 ### Theming apps Omarchy doesn't cover
 

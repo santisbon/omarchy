@@ -8,7 +8,18 @@
 # always has Chromium, so it fell back to chromium.desktop unconditionally; this distro installs
 # no browser by default, and with only Firefox (or none) that fallback ran an empty command.
 # When no Chromium-family browser is installed, a notification says how to get one.
-exec_of() { sed -n 's/^Exec=\([^ ]*\).*/\1/p' {~/.local,~/.nix-profile,/usr}/share/applications/"$1" 2>/dev/null | head -1; }
+#
+# Exec= comes from the same data dirs omarchy-cmd-default-browser searched, so a browser it
+# resolved is one this can start.
+IFS=: read -ra data_dirs <<<"${XDG_DATA_HOME:-$HOME/.local/share}:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+exec_of() {
+  local data_dir
+  for data_dir in "${data_dirs[@]}"; do
+    [[ -f $data_dir/applications/$1 ]] || continue
+    sed -n 's/^Exec=\([^ ]*\).*/\1/p' "$data_dir/applications/$1" | head -1
+    return
+  done
+}
 
 browser=$(omarchy-cmd-default-browser)
 case $browser in
@@ -25,7 +36,8 @@ if [[ -z $browser || -z $(exec_of "$browser") ]]; then
   done
 fi
 if [[ -z $browser ]]; then
-  omarchy-notification-send "Web apps need a Chromium-based browser" "Install Chromium, Chrome or Brave Origin under Install > Browser in the menu" -u critical
+  echo "omarchy-launch-webapp: web apps need a Chromium-based browser; install Chromium with 'omarchy install browser chromium'" >&2
+  omarchy-notification-send -u critical -g 󰖟 "$(omarchy-i18n browser.webappNeedsChromium)" "$(omarchy-i18n browser.webappNeedsChromiumHint)"
   exit 1
 fi
 

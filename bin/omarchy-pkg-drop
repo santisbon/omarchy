@@ -19,5 +19,9 @@ if (( ${#installed[@]} > 0 )); then
   # purge drops the package's configuration with it, and --autoremove takes the
   # dependencies apt installed only for it. A package the desktop meta package
   # depends on takes the meta package with it; apt says so before acting.
-  sudo apt-get purge -y --autoremove "${installed[@]}"
+  if (( EUID == 0 )); then
+    apt-get purge -y --autoremove "${installed[@]}"
+  else
+    sudo apt-get purge -y --autoremove "${installed[@]}"
+  fi
 fi

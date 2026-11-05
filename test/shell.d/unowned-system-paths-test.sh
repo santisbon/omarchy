@@ -30,6 +30,9 @@ allowed = {
   # than Omarchy's, which is why neither is a candidate for the distro's packages.
   "/usr/share/chromium/extensions",
   "/usr/lib/firefox/distribution",
+  # Claude's extension is registered only when the user selects Claude.
+  "/usr/share/google-chrome/extensions",
+  "/usr/share/microsoft-edge/extensions",
   # Seeded by omarchy-install-browser only when the browser is installed, into
   # the browser package's own tree.
   "/usr/lib/chromium/initial_preferences",
@@ -56,8 +59,19 @@ packaged = "\n".join(
 # Commands that put a file somewhere, as opposed to reading one.
 # /etc is administrator territory that Omarchy legitimately edits. /usr is
 # package territory, where writing anything is the thing worth catching.
-writer = re.compile(r"\b(tee|cp|install|ln)\b|>\s*/usr/")
+# The command itself, not a word inside a longer name: omarchy-hook-install
+# copies a package's file out of /usr, which is reading it.
+writer = re.compile(r"(?<![\w.-])(tee|cp|install|ln)(?![\w.-])|>\s*/usr/")
 target = re.compile(r"/usr/[A-Za-z0-9._@/+-]+")
+for code, writes in (
+  ("omarchy-hook-install theme-set /usr/share/owe/10-owe-sync", False),
+  ("sudo install -Dm644 10-owe-sync /usr/share/owe/10-owe-sync", True),
+  ("cp -f hook /usr/lib/systemd/system-sleep/hook", True),
+  ("printf x | sudo tee /usr/share/x/y", True),
+):
+  if bool(writer.search(code)) != writes:
+    print(f"not ok - the writer pattern {'misses' if writes else 'flags'} {code!r}", file=sys.stderr)
+    sys.exit(1)
 
 problems = []
 for base in ("bin", "install", "migrations"):

@@ -81,7 +81,7 @@ case "$PROCESSING" in
     else
       edit_command=("$SCREENSHOT_EDITOR" "$FILEPATH")
     fi
-    omarchy-notification-send "Screenshot saved to clipboard and file" "Edit with Super + Alt + , (or click this)" \
+    omarchy-notification-send "$(omarchy-i18n capture.screenshotSavedCopied)" "$(omarchy-i18n capture.screenshotEditHint)" \
       --image "$FILEPATH" \
       --exec "${edit_command[@]}" || true
     ;;

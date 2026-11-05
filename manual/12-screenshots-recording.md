@@ -1,10 +1,11 @@
 # Screenshots & Recording
 
-Everything you can grab off the screen hangs off the Print Screen key. One key on its own takes a picture, and the modifiers take a recording, a colour, or the text inside a region. If your keyboard doesn't have a Print Screen key at all, `Super + Ctrl + C` opens the same set as a menu.
+Everything you can grab off the screen hangs off the Print Screen key. One key on its own takes a picture, and the modifiers take a recording, a colour, or the text inside a region. If your keyboard doesn't have a Print Screen key at all, `Super + Ctrl + Alt + C` takes the same screenshot, and `Super + Ctrl + C` opens the whole set as a menu.
 
 | Hotkey | Function |
 | ------ | -------- |
 | `Print Screen` | Screenshot |
+| `Super + Ctrl + Alt + C` | Screenshot |
 | `Alt + Print Screen` | Screenrecord (or stop the one that's running) |
 | `Super + Print Screen` | Colour picker |
 | `Super + Ctrl + Print Screen` | Extract text from a region |
@@ -13,15 +14,13 @@ Everything you can grab off the screen hangs off the Print Screen key. One key o
 
 ## Screenshots
 
-Hit `Print Screen` and the screen freezes so nothing shifts under you while you aim. Drag a box for a freeform region, or just click once and the shot snaps to whatever rectangle you clicked in — a window if you landed on one, the whole monitor if you landed on the bar or in a gap. Changed your mind? Hit `Print Screen` again to dismiss the picker.
+Hit `Print Screen` (or `Super + Ctrl + Alt + C`) and the screen freezes so nothing shifts under you while you aim. Drag a box for a freeform region, or just click once and the shot snaps to whatever rectangle you clicked in: a window if you landed on one, the whole monitor if you landed on the bar or in a gap. Changed your mind? Hit the same key again to dismiss the picker.
 
-The result goes two places at once: a PNG in your pictures directory, and the clipboard, so you can paste it straight into a chat window with `Super + V`. A notification pops up with a thumbnail. Click it (or hit `Super + Alt + ,` to invoke the last notification) and the shot opens in Tensaku, the annotation editor, where you can draw arrows and boxes on it before you send it.
+The result goes two places at once: a PNG in your pictures directory, and the clipboard, so you can paste it straight into a chat window with `Super + V`. A notification pops up with a thumbnail. Click it (or hit `Super + ,` to act on the latest notification) and the shot opens in swappy, the annotation editor, where you can draw arrows and boxes on it before you send it.
 
-> **Oaxaca: works differently.** The notification opens the shot in swappy, a Wayland annotation tool from Ubuntu's archive, because Omarchy's Tensaku has no Ubuntu build. In swappy, `Ctrl + S` saves the annotated copy next to the screenshot with `-edited` at the end of its name and closes swappy, `Ctrl + C` copies the annotated image, and `Escape` discards the drawing; the screenshot itself stays as captured.
+In swappy, `Ctrl + S` saves the annotated copy next to the screenshot with `-edited` at the end of its name and closes swappy, `Ctrl + C` copies the annotated image, and `Escape` discards the drawing. The screenshot itself stays as captured.
 
-Files land in `~/Pictures` by default, named `screenshot-2026-08-13_14-22-05.png`. If you'd rather keep them in their own folder, set `OMARCHY_SCREENSHOT_DIR` — see [the FAQ](46-faq.md) for where to put session environment variables. Omarchy creates the directory for you if it isn't there. You can swap the editor too with `OMARCHY_SCREENSHOT_EDITOR`.
-
-> **Oaxaca: works differently.** `OMARCHY_SCREENSHOT_EDITOR` defaults to `swappy` instead of `tensaku-edit`, and swappy's own configuration (`~/.config/swappy/config`) saves its edited copies in `OMARCHY_SCREENSHOT_DIR` too.
+Files land in `~/Pictures` by default, named `screenshot-2026-08-13_14-22-05.png`. If you'd rather keep them in their own folder, set `OMARCHY_SCREENSHOT_DIR`; see [the FAQ](46-faq.md) for where to put session environment variables. Omarchy creates the directory for you if it isn't there, and swappy saves its edited copies there too. You can swap the editor with `OMARCHY_SCREENSHOT_EDITOR`.
 
 From the terminal, `omarchy screenshot` takes the same shot, and you can be explicit about it: `omarchy capture screenshot region` for freeform only, `windows` to snap to window and monitor rectangles, or `fullscreen` to skip the picker entirely and grab the focused monitor. A second argument of `copy` puts the shot only on the clipboard, and `save` only on disk.
 

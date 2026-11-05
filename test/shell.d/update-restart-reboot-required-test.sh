@@ -24,7 +24,7 @@ run
 
 touch "$work/run/reboot-required"
 run
-grep -q '^gum confirm Updates require reboot. Ready?$' "$TEST_LOG" || fail "a package's /run/reboot-required brings the reboot question" "$(cat "$TEST_LOG")"
+grep -q '^gum confirm --affirmative Yes --negative No Updates require reboot. Ready?$' "$TEST_LOG" || fail "a package's /run/reboot-required brings the reboot question" "$(cat "$TEST_LOG")"
 
 pass "the update offers a reboot when a package asked for one in /run/reboot-required"
 

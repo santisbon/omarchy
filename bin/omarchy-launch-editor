@@ -23,6 +23,9 @@ if [[ $editor == codium ]] && ! omarchy-cmd-present codium && flatpak info --sys
   exec setsid uwsm-app -- flatpak run com.vscodium.codium "$@"
 fi
 
+# Sublime HQ's sublime-text package ships `subl` on PATH, not `sublime_text`.
+[[ $editor == sublime_text ]] && editor=subl
+
 # nano is the fallback and the default: the desktop's package list installs it (Ubuntu's
 # ubuntu-standard only recommends it, and the image has no ubuntu-standard). Neovim is installed
 # too, without Omarchy's configuration; Setup > Defaults > Editor picks it.

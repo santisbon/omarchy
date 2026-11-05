@@ -25,14 +25,119 @@ HOME="$test_tmp/home" PATH="$mock_bin:$PATH" OMARCHY_TEST_FINALIZE_CALLED="$fina
 [[ ! -e $finalize_called ]] || fail "completed first-run exits before any setup step"
 grep -F 'First-run already complete' "$test_tmp/output" >/dev/null || fail "completed first-run reports its lifecycle gate"
 
-if grep -F 'user-migration-notify-watch-enabled' "$ROOT/bin/omarchy-provision-first-run" >/dev/null; then
-  fail "first-run does not track the migration watcher separately"
-fi
-if grep -F 'skip-first-run-update-notification' "$ROOT/install/user/first-run/wifi.sh" >/dev/null; then
-  fail "first-run does not track update notifications separately"
-fi
+pass "completed first-run exits at its lifecycle gate"
 
-pass "first-run uses one lifecycle completion marker"
+# systemctl enables none of a list when one unit in it is unknown, so a unit
+# missing from a build must cost first-run only that unit.
+cat >"$mock_bin/systemctl" <<'SH'
+#!/bin/bash
+[[ $* != *"$OMARCHY_TEST_MISSING_UNIT"* ]] || exit 1
+printf '%s\n' "$*" >>"$OMARCHY_TEST_CALLS"
+SH
+cat >"$mock_bin/omarchy-hook-install" <<'SH'
+#!/bin/bash
+echo "hook $*" >>"$OMARCHY_TEST_CALLS"
+SH
+chmod +x "$mock_bin/systemctl" "$mock_bin/omarchy-hook-install"
+
+enable_user_units() {
+  rm -f "$test_tmp/calls"
+  PATH="$mock_bin:$PATH" OMARCHY_TEST_CALLS="$test_tmp/calls" OMARCHY_TEST_MISSING_UNIT="$1" \
+    bash "$ROOT/install/user/first-run/enable-user-units.sh"
+}
+
+enable_user_units no-such-unit || fail "first-run enables its user units"
+clean_run=$(<"$test_tmp/calls")
+grep -Fq 'hook theme-set' <<<"$clean_run" || fail "first-run installs the theme hook"
+mapfile -t units < <(sed -n 's/^--user enable --now //p' <<<"$clean_run")
+
+for unit in "${units[@]}"; do
+  [[ $unit != *" "* ]] || fail "first-run enables each unit on its own" "$unit"
+  if enable_user_units "$unit"; then
+    fail "first-run reports a unit it could not enable" "$unit"
+  fi
+  [[ $(<"$test_tmp/calls") == "$(grep -Fvx -- "--user enable --now $unit" <<<"$clean_run")" ]] ||
+    fail "a unit missing from the build costs first-run only that unit" "$unit"
+done
+(( ${#units[@]} > 1 )) || fail "first-run enables each unit on its own"
+pass "a unit missing from the build costs first-run only that unit"
+
+# First run offers an update only when there is one. A fresh install from
+# current media is already current, and a critical toast that leads to
+# "nothing to do" teaches people to dismiss the next one.
+cat >"$mock_bin/nm-online" <<'SH'
+#!/bin/bash
+exit 0
+SH
+cat >"$mock_bin/omarchy-update-available" <<'SH'
+#!/bin/bash
+exit "$OMARCHY_TEST_OMARCHY_UPDATE"
+SH
+cat >"$mock_bin/omarchy-notification-send" <<'SH'
+#!/bin/bash
+printf '%s\n' "$*" >>"$OMARCHY_TEST_CALLS"
+SH
+cat >"$mock_bin/omarchy-i18n" <<'SH'
+#!/bin/bash
+echo "$1"
+SH
+chmod +x "$mock_bin/nm-online" "$mock_bin/omarchy-update-available" \
+  "$mock_bin/omarchy-notification-send" "$mock_bin/omarchy-i18n"
+
+# Argument: omarchy-update-available's exit status. It reads apt's lists and,
+# in a development checkout, the checkout's upstream; the first-run step only
+# acts on the answer.
+offers_update() {
+  : >"$test_tmp/calls"
+  OMARCHY_PATH="$checkout" PATH="$mock_bin:$PATH" OMARCHY_TEST_CALLS="$test_tmp/calls" \
+    OMARCHY_TEST_OMARCHY_UPDATE="$1" \
+    bash -c 'source "$1"; wait' _ "$ROOT/install/user/first-run/wifi.sh"
+  grep -Fq -- '--exec omarchy-launch-floating-terminal-with-presentation omarchy-update' "$test_tmp/calls"
+}
+
+checkout="$test_tmp/omarchy-checkout"
+mkdir -p "$checkout"
+ln -s "$ROOT/install" "$checkout/install"
+
+if offers_update 1; then
+  fail "first run offers no update when nothing is pending"
+fi
+offers_update 0 || fail "first run offers an update when packages are pending"
+pass "first run offers an update only when there is one"
+
+# Choosing an agent installs it, so the invitation waits for a connection, not
+# for the first update.
+cat >"$mock_bin/omarchy-default-agent" <<'SH'
+#!/bin/bash
+SH
+cat >"$mock_bin/omarchy-done" <<'SH'
+#!/bin/bash
+[[ $1 == "ensure" ]]
+SH
+chmod +x "$mock_bin/omarchy-default-agent" "$mock_bin/omarchy-done"
+offers_update 1 || true
+grep -Fq -- '--exec omarchy menu summon setup.default.agent' "$test_tmp/calls" ||
+  fail "first run invites a default agent once there is a connection"
+pass "first run invites a default agent once there is a connection"
+
+# Arguments: the git name and email already configured, empty for unset.
+offers_git_setup() {
+  : >"$test_tmp/calls"
+  local home="$test_tmp/git-home"
+  rm -rf "$home" && mkdir -p "$home"
+  [[ -z $1 ]] || HOME="$home" git config --global user.name "$1"
+  [[ -z $2 ]] || HOME="$home" git config --global user.email "$2"
+  HOME="$home" PATH="$mock_bin:$PATH" OMARCHY_TEST_CALLS="$test_tmp/calls" \
+    bash "$ROOT/install/user/first-run/git.sh"
+  grep -Fq 'omarchy-setup-git' "$test_tmp/calls"
+}
+
+offers_git_setup "" "" || fail "first run offers git setup on a fresh account"
+offers_git_setup "Jane" "" || fail "first run offers git setup when the email is missing"
+if offers_git_setup "Jane" "jane@example.com"; then
+  fail "first run offers no git setup when the install already set an identity"
+fi
+pass "first run offers git setup only when the identity is missing"
 
 # A new user's first login, against a stand-in tree: the shipped migrations are marked done
 # before anything else, so the user is not offered them, and every step runs. In the live
@@ -41,7 +146,7 @@ pass "first-run uses one lifecycle completion marker"
 fake="$test_tmp/omarchy"
 mkdir -p "$fake/migrations" "$fake/install/user/first-run"
 touch "$fake/migrations/1700000001.sh" "$fake/migrations/1700000002.sh"
-for step in enable-user-units gnome-theme gtk-primary-paste audio-tuning welcome wifi; do
+for step in enable-user-units gnome-theme gtk-primary-paste audio-tuning welcome git wifi; do
   printf '#!/bin/bash\necho "%s live=${OMARCHY_LIVE_SESSION:-unset}" >>"$OMARCHY_TEST_STEPS"\n' "$step" \
     >"$fake/install/user/first-run/$step.sh"
 done
@@ -52,6 +157,7 @@ exit 0
 SH
 printf '#!/bin/bash\nexit 0\n' >"$mock_bin/omarchy-hook-install"
 printf '#!/bin/bash\nexit 0\n' >"$mock_bin/omarchy-notification-wait"
+printf '#!/bin/bash\nexit 0\n' >"$mock_bin/omarchy-lifecycle-dispatch"
 chmod +x "$mock_bin"/*
 
 run_first_run() {

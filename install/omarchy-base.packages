@@ -23,6 +23,13 @@ flatpak
 fcitx5-frontend-gtk3
 fcitx5-frontend-gtk4
 fcitx5-frontend-qt6
+# Input methods Setup > Input offers (default/input-methods/presets.json); preinstalled as in
+# Omarchy v4.5.0, so that an install without a network can set them up; all in stonking (2026-11-05).
+fcitx5-chewing
+fcitx5-chinese-addons
+fcitx5-hangul
+fcitx5-mozc
+fcitx5-table-extra
 fd-find
 fontconfig
 foot
@@ -111,6 +118,11 @@ systemd-coredump
 # server; its Recommends brings libc6-dbg, glibc's debug symbols (2026-10-30).
 gdb
 python3-gi
+# pipewire-libcamera: the PipeWire plugin that reaches libcamera cameras; Omarchy v4.5.0 adds it (2026-11-05).
+pipewire-libcamera
+# x11-xserver-utils: xsetroot, which default/hypr/startup-cursor.lua runs for XWayland's cursor;
+# Arch ships xsetroot as xorg-xsetroot (2026-11-05).
+x11-xserver-utils
 qrencode
 qt6-image-formats-plugins
 # rfkill: omarchy-bluetooth-power, -restart-bluetooth and -restart-wifi run it; Arch ships the
@@ -150,9 +162,6 @@ unzip
 # Restored 2026-10-16 (docs/6, choice 59): whois, a small tool Omarchy preinstalls on purpose
 # (domain and IP-block registration lookups).
 whois
-# Restored 2026-10-16 (docs/6, choice 70): dua-cli, the disk usage viewer behind Omarchy's
-# "Disk Usage" launcher (applications/Disk Usage.desktop).
-dua-cli
 # Build tools (docs/6, choice 106): what a plugin's own setup script expects from Omarchy's Arch
 # base. build-essential is the compiler and make (Arch's base-devel); the five -dev packages are the
 # headers and CMake files that Arch ships inside the library packages a script names, and that
@@ -219,7 +228,15 @@ gpg
 ca-certificates
 
 # Dropped from Omarchy's Arch list, with the reason:
-# aether, omacalc, omacut, omawrite, tensaku, tobi-try: Omarchy's own OPR packages, no Ubuntu build
+# aether, hype, monologue, omacalc, omacut, omasnap, omawrite, signed, tensaku, tobi-try: Omarchy's own
+#   OPR packages, no Ubuntu build; left out by the distro's maintainer
+# superwhisper-bin: proprietary, cloud by default; Voxtype stays the dictation engine
+# disktree-bin, gliff, omarchy-hyprland-titlebars, owe: separate packages (not in stonking; the distro's
+#   apt repository builds them, and oaxaca-desktop's Depends names them)
+# omarchy-power-profiles-daemon: Omarchy's fork for ARM laptops; power-profiles-daemon above is Ubuntu's
+# base-devel, qt6-*, ffmpeg (Omarchy's list for its omarchy-app agent skill): build-essential and the
+#   -dev packages above are docs/6's choice 106; the rest was left out by the distro's maintainer
+# vi: left out by the distro's maintainer
 # cliamp, herdr: installed per user through mise from the menu (Install > Service > cliamp,
 #   Install > Development > Herdr; the distro's docs/6, choice 80)
 # ttfx: separate package (not in stonking; the distro's apt repository builds it from source)

@@ -37,7 +37,7 @@ grep -Fq 'o.bind("SUPER + SHIFT + O", "Obsidian", { omarchy = "obsidian" })' "$R
 pass "Super+Shift+O runs the Obsidian launcher"
 
 menu="$ROOT/default/omarchy/omarchy-menu.jsonc"
-grep -q '"install.productivity.obsidian":.*"when":"! omarchy-pkg-snap-present obsidian".*omarchy-install-productivity-obsidian' "$menu" ||
+grep -q '"install.productivity.obsidian":.*"disabled":"omarchy-pkg-snap-present obsidian".*omarchy-install-productivity-obsidian' "$menu" ||
   fail "Install > Productivity > Obsidian shows while the snap is missing"
 grep -q "\"remove.productivity.obsidian\":.*\"when\":\"omarchy-pkg-snap-present obsidian\".*'omarchy-pkg-snap-drop obsidian'" "$menu" ||
   fail "Remove > Productivity > Obsidian drops the snap"

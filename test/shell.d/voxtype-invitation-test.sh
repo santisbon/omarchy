@@ -27,6 +27,13 @@ done
 EOF
 chmod +x "$test_bin/omarchy-notification-send"
 
+# Only a Voxtype the test installed counts, not one on the machine running it.
+cat >"$test_bin/omarchy-cmd-present" <<EOF
+#!/bin/bash
+[[ -x "$test_bin/\$1" ]]
+EOF
+chmod +x "$test_bin/omarchy-cmd-present"
+
 # The shell runs the click command, so the invitation must not need a unit of its
 # own to keep a blocked sender alive until the toast is answered.
 cat >"$test_bin/systemd-run" <<'EOF'
@@ -45,7 +52,7 @@ run_invitation_hook
 [[ -f $test_home/.local/state/omarchy/done/voxtype-install-invitation ]] || fail "Voxtype invitation records completion"
 [[ -f $hook_path ]] || fail "Voxtype invitation keeps its hook installed"
 [[ $(grep -c '^notification$' "$log_file") -eq 1 ]] || fail "Voxtype invitation sends one notification"
-grep -qx 'exec:omarchy-launch-floating-terminal-with-presentation omarchy-voxtype-install' "$log_file" ||
+grep -qx 'exec:omarchy-launch-floating-terminal-with-presentation omarchy-install-dictation-voxtype' "$log_file" ||
   fail "Voxtype invitation attaches the installer to the notification"
 grep -q '^systemd-run:' "$log_file" && fail "Voxtype invitation needs no unit to hold an unanswered toast"
 

@@ -10,6 +10,10 @@ Double-clicking follows sensible defaults: images open in imv, video in mpv, PDF
 
 > **Oaxaca: works differently.** PDFs open in Papers, GNOME's successor to Document Viewer (Evince) and Ubuntu's own default viewer, because Ubuntu 26.10 carries Evince only as an alpha.
 
+## Disktree
+
+When the drive fills up and you have no idea what's eating it, launch [Disktree](https://github.com/tobi/disktree) from the app launcher (`Super + Space`). It shows a graphical treemap of your home directory. Larger blocks take up more space; walk into directories with the keyboard or mouse, mark what should go, and review your selections before removing anything. Run `disktree --disk` to scan the whole disk.
+
 ## Obsidian
 
 [Obsidian](https://obsidian.md/) is a free and highly extensible note taking application that uses simple Markdown files for storage.
@@ -77,9 +81,9 @@ You start LibreOffice via the application launcher (`Super + Space`).
 
 [Omacalc](https://github.com/omacom-io/omacalc) is Omarchy's own dead-simple calculator, which opens in a floating window.
 
-You start Omacalc with `Super + Ctrl + Q` (or the calculator key, if your keyboard has one).
+You start Omacalc with `Super + Shift + Q` (or the calculator key, if your keyboard has one).
 
-> **Oaxaca: works differently.** Omacalc is not in Oaxaca, because Omacalc has no Ubuntu build. GNOME Calculator is preinstalled in Omacalc's place, takes Omacalc's bindings (`Super + Ctrl + Q` and the calculator key) and opens in a floating window as Omacalc does.
+> **Oaxaca: works differently.** Omacalc is not in Oaxaca, because Omacalc has no Ubuntu build. GNOME Calculator is preinstalled in Omacalc's place, takes Omacalc's bindings (`Super + Shift + Q` and the calculator key) and opens in a floating window as Omacalc does.
 
 ## Signal
 
@@ -99,22 +103,12 @@ You start mpv via the application launcher (`Super + Space`) or just double-clic
 
 [OBS Studio](https://obsproject.com/) lets you record or stream video from multiple inputs. You can mix a screencast with a webcam with a microphone input. It's what was used to record the Omarchy screencasts.
 
-It's not part of the base install: install it from _Install > Productivity > OBS Studio_ in the Omarchy menu (`Super + Space`), which installs the OBS project's own Flatpak from Flathub. Then start it via the application launcher (`Super + Space`).
+It's not part of the base install: install it from _Install > Productivity > OBS Studio_ in the Omarchy menu (`Super + Space`), which installs the OBS project's own Flatpak from Flathub. Then start it via the application launcher (`Super + Space`). _Remove > Productivity > OBS Studio_ removes OBS Studio again.
 
-> **Oaxaca: works differently.** The paragraph above is Oaxaca's. Omarchy preinstalls OBS Studio (`obs-studio` in Omarchy's base package list) and has no menu entry for OBS Studio. Oaxaca offers the Flathub build because the OBS project's other official channel, its PPA, has no build for Ubuntu 26.10; _Remove > Productivity > OBS Studio_ removes OBS Studio again.
+> **Oaxaca: works differently.** Oaxaca offers the Flathub build because the OBS project's other official channel, its PPA, has no build for Ubuntu 26.10.
 
 ## Kdenlive
 
 [Kdenlive](https://kdenlive.org/) is an excellent video editor. Perfect for working on video that comes out of OBS Studio before sharing it.
 
-It's not part of the base install: install it from _Install > Productivity > Kdenlive_ in the Omarchy menu (`Super + Space`), which installs KDE's Flatpak from Flathub. Then start it via the application launcher (`Super + Space`).
-
-> **Oaxaca: works differently.** The paragraph above is Oaxaca's. Omarchy preinstalls Kdenlive (`kdenlive` in Omarchy's base package list) and has no menu entry for Kdenlive. Oaxaca offers KDE's Flatpak instead, and _Remove > Productivity > Kdenlive_ removes Kdenlive again.
-
-## Omacut
-
-[Omacut](https://github.com/omacom-io/omacut) is Omarchy's own dead-simple video trimmer. When all you need is to cut the start and end off a clip, it beats firing up a full video editor.
-
-You start Omacut via the application launcher (`Super + Space`).
-
-> **Oaxaca: removed.** Omacut is not in Oaxaca: Omacut has no build in Ubuntu's archive, on Flathub or on the Snap Store.
+It's not part of the base install: install it from _Install > Productivity > Kdenlive_ in the Omarchy menu (`Super + Space`), which installs KDE's Flatpak from Flathub. Then start it via the application launcher (`Super + Space`). _Remove > Productivity > Kdenlive_ removes Kdenlive again.

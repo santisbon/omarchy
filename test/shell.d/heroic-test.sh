@@ -15,7 +15,11 @@ printf '#!/bin/bash\n"$@"\n' >"$work/bin/setsid"
 chmod +x "$work/bin"/*
 
 HOME="$work/home" PATH="$work/bin:$PATH" bash "$ROOT/bin/omarchy-install-gaming-heroic" >/dev/null
-wait
+# The launch is the installer's own background job, which this shell cannot wait for.
+for _ in {1..50}; do
+  grep -q '^uwsm-app ' "$TEST_LOG" && break
+  sleep 0.1
+done
 grep -qx 'omarchy-pkg-flatpak-add com.heroicgameslauncher.hgl' "$TEST_LOG" || fail "Heroic comes from Flathub" "$(cat "$TEST_LOG")"
 grep -qx 'uwsm-app -- flatpak run com.heroicgameslauncher.hgl' "$TEST_LOG" || fail "the installer opens Heroic"
 

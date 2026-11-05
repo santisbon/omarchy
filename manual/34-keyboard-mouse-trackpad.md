@@ -9,7 +9,7 @@ hl.config({
   input = {
     -- Use multiple keyboard layouts and switch between them with Left Alt + Right Alt
     kb_layout = "us,dk",
-    kb_options = "compose:caps,shift:both_capslock_cancel,grp:alts_toggle",
+    kb_options = "grp:alts_toggle",
 
     -- Change speed of keyboard repeat
     repeat_rate = 40,
@@ -37,9 +37,7 @@ o.window("(Alacritty|kitty|foot)", { scroll_touchpad = 1.5 })
 
 You can [see all the input options](https://wiki.hypr.land/Configuring/Basics/Variables/#input) on the Hyprland wiki for inputs.
 
-> **Oaxaca: works differently.** Oaxaca's defaults take the keyboard model and options from `/etc/default/keyboard`, which the installer writes, so Caps Lock stays Caps Lock and no key is Compose. Omarchy sets `kb_options = "compose:caps,shift:both_capslock_cancel"`, which makes Caps Lock the Compose key and puts Caps Lock on both Shift keys pressed together. A `kb_options` line in `~/.config/hypr/input.lua` replaces the installer's options, so leave out `compose:caps,shift:both_capslock_cancel` from the example above to keep Caps Lock.
-
-> **Oaxaca: added.** _Setup > Keyboard_ changes your keyboard layouts without editing a file. It opens a floating terminal that lists your current layouts, the layout chosen at installation until you change it, and offers to add a layout, remove one, or choose which one is the main layout. The first layout is the main one, which Hyprland matches keyboard shortcuts against; an added layout goes after the ones you have. Adding a layout lists every layout, then the chosen layout's variants. With two or more layouts the top bar shows the current one, and clicking it switches to the next; when you add your second layout the picker also offers Left Ctrl + Right Ctrl together as a switching key, which changes no other key, unlike the example's `grp:alts_toggle`, which turns AltGr into a plain Right Alt on the other layouts. Each change applies at once; press Esc when done. The picker saves your layouts to `~/.config/hypr/keyboard-gui.conf`, not to `~/.config/hypr/input.lua`, and the layouts apply to your Hyprland session only: the login screen and the disk encryption passphrase prompt keep the layout chosen at installation. A `kb_layout` line in `~/.config/hypr/input.lua` wins over the picker's layouts. To go back to the layout chosen at installation, choose "Go back to the layout chosen at installation" in _Setup > Keyboard_, or run `oaxaca-setup-keyboard --reset`.
+> **Oaxaca: works differently.** Oaxaca's defaults take the keyboard model and options from `/etc/default/keyboard`, which the installer writes, so Caps Lock stays Caps Lock and no key is Compose. A `kb_options` line in `~/.config/hypr/input.lua` replaces the installer's options. The example's `grp:alts_toggle` turns AltGr into a plain Right Alt on layouts that use AltGr. To use [quick emojis](07-hotkeys.md#quick-emojis) and [other completions](07-hotkeys.md#quick-completions), add a compose key, such as `compose:caps`, to `kb_options`.
 
 > **Oaxaca: works differently.** Natural scrolling on touchpads is already on in Oaxaca's defaults (`touchpad.natural_scroll = true`; Omarchy: false), while mouse wheels keep the classic direction.
 
@@ -57,9 +55,19 @@ On Dell XPS laptops with a haptic touchpad, you can also set the click strength 
 
 ### Typing in Chinese, Japanese, and other languages
 
-Omarchy runs the [fcitx5](https://fcitx-im.org/) input method framework as part of every session — it's what powers the CapsLock compose sequences. That means the plumbing for non-Latin input is already in place: install an input engine like `fcitx5-mozc` (Japanese) or `fcitx5-chinese-addons` (Chinese) with `omarchy pkg add`, plus `fcitx5-configtool` to add the engine to your input methods and set the key that switches between them.
+Add Japanese, Korean, Chinese (Simplified, Pinyin), Taiwan (Zhuyin), or Hong Kong (Cangjie) under _Setup > Typing > Input Methods_. Japanese uses Mozc, Korean uses standard two-set Hangul, Simplified Chinese uses Pinyin, Taiwan uses Chewing's standard Zhuyin arrangement, and Hong Kong uses Cangjie with Hong Kong character forms. Japanese (US keyboard) provides Mozc with a US keyboard layout. Hangul, Zhuyin, and Cangjie keys stay in their standard positions even when you type Latin letters with Dvorak, Colemak, or AZERTY.
 
-> **Oaxaca: works differently.** fcitx5 runs in every Oaxaca session too, but no CapsLock compose sequences come with it, because Caps Lock is not the Compose key on Oaxaca. `oaxaca pkg add` installs Ubuntu packages with apt: `fcitx5-mozc` and `fcitx5-chinese-addons` keep their names in Ubuntu 26.10's universe component, and the configuration tool's package is `fcitx5-config-qt`, since `fcitx5-configtool` is only the source package's name there (checked with `rmadison` on 2026-10-21).
+Typing starts in Latin mode. Press `Super + I` to cycle through configured input methods, and `Super + Shift + I` to cycle back. Tap `Shift` on its own to step out of an input method like Pinyin into Latin letters, and tap it again to go back, the way Sogou, Microsoft Pinyin, and macOS work; `Shift` plus a letter still types a capital. On Japanese keyboards, 全角/半角 toggles input, 変換 turns it on, and 無変換 turns it off. With Korean, 한/영 switches Hangul and 한자 converts to Hanja, whether your keyboard has dedicated keys or sends Right Alt and Right Ctrl for them, as many laptops do, so Right Alt and Right Ctrl are not plain modifiers there; dictation toggles with Alt + Space instead. `Ctrl + Space` stays available for Tmux and Herdr.
+
+The keyboard indicator appears on the right of the bar when you have multiple keyboard layouts or input methods. Click it to switch input languages; Japanese displays あ for hiragana. For Japanese character choices, switch to Japanese, type a word such as `nihongo`, then press Space twice. Press Enter to accept your choice. If you also have multiple keyboard layouts, right-click the indicator to cycle those.
+
+Use _Setup > Typing > Keyboard Layouts_ to select layouts such as English and French, from the same choices offered during installation. Use _Setup > Typing > Input Methods_ to select which composition engines are active. Both pickers open inside the Omarchy menu with your current selections checked. Click or press Enter to toggle a choice; each change applies immediately. Deselecting an input method removes it from the cycle without uninstalling it; the keyboard remains available.
+
+Run `omarchy setup keyboard` or `omarchy setup input` to open the same pickers. To append one language from the command line, use `omarchy setup input mozc`, `hangul`, `pinyin`, `chewing`, or `cangjie5`. Quick, Boshiamy, and Array come in the same package as Cangjie and appear in the Input Methods picker. Your custom switching keys are preserved. For alternative engine layouts or keys, install `fcitx5-configtool` with `omarchy pkg add fcitx5-configtool` and launch it from a terminal. Selecting an input language does not change the desktop language. Choosing Japanese, Korean, or Chinese under _Setup > Language_ adds its input method when you have none yet.
+
+Use `Super + I` to cycle through input methods or keyboard layouts, and `Super + Shift + I` to go back the other way, so with three configured you can move between two neighbours. The input indicator appears on the right of the bar only when more than one input method or layout is configured. This desktop binding works alongside your existing Fcitx switching keys; you can override it in `~/.config/hypr/bindings.lua`. Input engines and the compose sequences use the [Fcitx5](https://fcitx-im.org/) service already running in every session.
+
+> **Oaxaca: works differently.** Caps Lock is not the Compose key on Oaxaca, so no CapsLock compose sequences come with fcitx5. The input engines are preinstalled from Ubuntu's archive. `oaxaca pkg add` installs Ubuntu packages with apt, and the configuration tool's package is `fcitx5-config-qt`, since `fcitx5-configtool` is only the source package's name there (checked with `rmadison` on 2026-10-21).
 
 ### Use ALT as SUPER
 
@@ -68,9 +76,9 @@ On some keyboards, it's not convenient to use the primary meta key (Windows/cmd 
 ```lua
 hl.config({
   input = {
-    kb_options = "compose:caps,shift:both_capslock_cancel,altwin:swap_alt_win",
+    kb_options = "altwin:swap_alt_win",
   },
 })
 ```
 
-> **Oaxaca: works differently.** On Oaxaca, `kb_options = "altwin:swap_alt_win"` alone swaps Alt and Super and keeps Caps Lock as Caps Lock; the example's `compose:caps,shift:both_capslock_cancel` are Omarchy's defaults, which Oaxaca does not set.
+> **Oaxaca: works differently.** Caps Lock stays Caps Lock with this option.

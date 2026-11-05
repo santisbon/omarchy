@@ -1,5 +1,5 @@
 -- Essential application bindings.
-o.bind("SUPER + RETURN", "Terminal", { omarchy = "terminal" })
+o.bind("SUPER + RETURN", "Terminal", o.launch_terminal())
 o.bind("SUPER + SHIFT + RETURN", "Browser", { omarchy = "browser" })
 o.bind("SUPER + SHIFT + F", "File manager", { omarchy = "nautilus" })
 o.bind("SUPER + ALT + SHIFT + F", "File manager (cwd)", { omarchy = "nautilus-cwd" })
@@ -16,6 +16,9 @@ if o.preinstalled_bindings_enabled() then
   o.bind("SUPER + SHIFT + G", "Signal", { omarchy = "signal" })
   o.bind("SUPER + SHIFT + O", "Obsidian", { omarchy = "obsidian" })
   o.bind("SUPER + SHIFT + SLASH", "Passwords", { omarchy = "1password" })
+  -- GNOME Calculator in place of Omarchy's Omacalc, which has no Ubuntu build.
+  o.bind("SUPER + SHIFT + Q", "Calculator", "gnome-calculator")
+  o.bind("XF86Calculator", "Calculator", "gnome-calculator")
 
   o.bind("SUPER + SHIFT + A", "ChatGPT", { webapp = "https://chatgpt.com" })
   o.bind("SUPER + SHIFT + ALT + A", "Grok", { webapp = "https://grok.com" })

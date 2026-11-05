@@ -24,6 +24,7 @@ EOF
 cat >"$mock_path/sudo" <<'EOF'
 #!/bin/bash
 printf '%s\n' "$*" >"$TEST_TMP/pkg-drop-command"
+exit "${TEST_REMOVE_STATUS:-0}"
 EOF
 
 chmod +x "$mock_path/dpkg-query" "$mock_path/sudo"
@@ -41,3 +42,9 @@ PATH="$mock_path:$PATH" TEST_TMP="$test_tmp" \
 [[ ! -e $test_tmp/pkg-drop-command ]] ||
   fail "nothing installed runs no removal" "actual: $(<"$test_tmp/pkg-drop-command")"
 pass "nothing installed runs no removal"
+
+if PATH="$mock_path:$PATH" TEST_TMP="$test_tmp" TEST_REMOVE_STATUS=1 \
+  "$ROOT/bin/omarchy-pkg-drop" exact-package; then
+  fail "failed package transaction must fail removal"
+fi
+pass "package removal propagates transaction failures"
