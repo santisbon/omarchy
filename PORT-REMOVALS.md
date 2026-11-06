@@ -266,7 +266,7 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | The BCM4360's Wi-Fi driver | `broadcom-sta-dkms` on a Mac with that PCI id whose firmware is not enforcing Secure Boot; nothing on any machine with Secure Boot on | 113 |
 | inotify watch limit | `fs.inotify.max_user_watches=524288` over localsearch's 65536 | 58 |
 | whois | in the base list | 59 |
-| Wi-Fi 7 off only on a Dell XPS on Panther Lake | the kept `fix-wifi7-eht.sh` turned Wi-Fi 7 off on every BE200 and BE211, the Legion's card included; now only on the machines its comment names, and `oaxaca-config`'s postinst removes the file elsewhere; need on Ubuntu not verified | 60 |
+| Wi-Fi 7 off on the Intel BE200 and BE211 | `fix-wifi7-eht.sh` as Omarchy has it; `oaxaca-config`'s postinst adds the file once to systems installed without it | 60 |
 | Surface keyboard at the disk encryption passphrase prompt | an initramfs-tools hook that adds `surface_aggregator_hub`, the one of Omarchy's ten modules Ubuntu's initramfs lacks | 63 |
 | MacBook8,1 SPI keyboard at the same prompt | an initramfs-tools hook that adds `spi-pxa2xx-pci`, the one module Ubuntu's initramfs lacks | 64 |
 | Intel IPU7 camera (partial) | libcamera, its GStreamer element and its PipeWire plugin on the OV08X40 match; Ubuntu's kernel has the drivers and firmware | 65 |

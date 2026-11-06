@@ -65,14 +65,12 @@ rm -f "$work/bin/mokutil" "$work/dmi/sys_vendor"
 
 rm -rf "$work/root/etc"
 stub lspci 'case "$*" in *-nn*) echo "00:14.3 Network controller [0280]: Intel Corporation Wi-Fi 7(802.11be) AX1775*/AX1790*/BE20*/BE401/BE1750* 2x2 [8086:272b] (rev 1a)" ;; *) echo "00:02.0 VGA compatible controller: Intel Corporation Raptor Lake-S UHD Graphics (rev 04)" ;; esac'
-stub omarchy-hw-match '[[ $1 == XPS ]] && exit 1; exit 1'
-stub omarchy-hw-intel-ptl 'exit 1'
 run intel/fix-wifi7-eht.sh
-[[ ! -e $work/root/etc/modprobe.d/iwlwifi-disable-eht.conf ]] || fail "a BE200 outside a Dell XPS on Panther Lake keeps Wi-Fi 7"
-stub omarchy-hw-match '[[ $1 == XPS ]]'
-stub omarchy-hw-intel-ptl 'exit 0'
+grep -qx 'options iwlwifi disable_11be=Y' "$work/root/etc/modprobe.d/iwlwifi-disable-eht.conf" || fail "a BE200 gets Wi-Fi 7 off"
+rm -rf "$work/root/etc"
+stub lspci 'echo "00:14.3 Network controller [0280]: Intel Corporation Wi-Fi 6E AX210 [8086:2725]"'
 run intel/fix-wifi7-eht.sh
-grep -qx 'options iwlwifi disable_11be=Y' "$work/root/etc/modprobe.d/iwlwifi-disable-eht.conf" || fail "a Dell XPS on Panther Lake gets Wi-Fi 7 off"
+[[ ! -e $work/root/etc/modprobe.d/iwlwifi-disable-eht.conf ]] || fail "another Intel card keeps its settings"
 
 # Run a generated initramfs hook with a force_load that prints the module.
 run_hook() { sed "s#/usr/share/initramfs-tools/hook-functions#$work/hook-functions#" "$1" | sh; }
