@@ -99,3 +99,31 @@ while IFS= read -r args; do
   [[ $args == "-t -f IN-USE,SIGNAL device wifi list ifname test-wifi --rescan no" ]] || fail "in-use access point read never rescans" "$args"
 done <"$stage/nmcli.log"
 pass "network keeps Wi-Fi through OWE transition scan churn, reads the in-use access point, and discards stale reads"
+
+stage_panel vpn-limited
+# While the Wi-Fi device reports limited connectivity, a VPN device with full
+# connectivity counts as the internet. The stand-in nmcli reads the devices from
+# a file, and its monitor prints a line when the fixture asks. Never touches the
+# host's NetworkManager.
+printf 'GENERAL.TYPE:wifi\nGENERAL.IP4-CONNECTIVITY:3 (limited)\nGENERAL.TYPE:wireguard\nGENERAL.IP4-CONNECTIVITY:4 (full)\n' >"$stage/devices"
+export NETWORK_TEST_DEVICES="$stage/devices" NETWORK_TEST_EVENT="$stage/event"
+cat >"$stage/bin/nmcli" <<'SH'
+#!/bin/bash
+printf '%s\n' "$*" >> "$NETWORK_TEST_NMCLI_LOG"
+case $1 in
+  monitor)
+    printf 'NetworkManager is running\n'
+    while sleep 0.1; do
+      [[ -e $NETWORK_TEST_EVENT ]] || continue
+      rm -f -- "$NETWORK_TEST_EVENT"
+      printf 'wg0: device removed\n'
+    done
+    ;;
+  -t) [[ $* == *IP4-CONNECTIVITY* ]] && cat "$NETWORK_TEST_DEVICES" ;;
+esac
+exit 0
+SH
+chmod +x "$stage/bin/nmcli"
+run_panel "network VPN check"
+[[ $(grep -c '^monitor$' "$stage/nmcli.log") == 1 ]] || fail "network VPN check runs one monitor" "$(cat "$stage/nmcli.log")"
+pass "network trusts a VPN device with the internet, and re-checks when NetworkManager reports a change"

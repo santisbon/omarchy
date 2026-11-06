@@ -234,11 +234,11 @@ omarchy_prompt_hostname() {
 # At limit 1, --selected prints that entry even after another one was picked.
 omarchy_prompt_timezone() {
   local guess status zones
-  # A preset install media names its timezone; otherwise ask tzupdate when it is
-  # installed (stonking has no package, and no service of Omarchy's is asked), and
-  # failing that take the caller's fallback, like the language's capital.
+  # A preset install media names its timezone; otherwise ask geo.omarchy.org,
+  # Omarchy's own lookup of where this network is, and failing that take the
+  # caller's fallback, like the language's capital.
   guess=${OMARCHY_FORM_TIMEZONE_DEFAULT:-}
-  [[ -n $guess ]] || guess=$(tzupdate -p 2>/dev/null) || guess=
+  [[ -n $guess ]] || guess=$(curl -fsS --max-time 5 https://geo.omarchy.org/ 2>/dev/null | jq -r '.timezone // empty' 2>/dev/null) || guess=""
   [[ -n $guess ]] || guess=${OMARCHY_FORM_TIMEZONE_FALLBACK:-}
 
   zones=$(timedatectl list-timezones)

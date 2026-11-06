@@ -325,6 +325,7 @@ Panel {
   onOpenedChanged: {
     if (opened) {
       refresh(true)
+      if (reportedConnectivity === "limited") checkVpnInternet()
       selectedIndex = wifiNetworks.length > 0 ? 0 : -1
       wifiActionFocused = false
       focusSection = hasCaptivePortal ? "portal" : (wifiNetworks.length > 0 ? "wifi" : "dns")
@@ -508,6 +509,11 @@ Panel {
   }, connectivityChecksEnabled)
   // Limited on this device, but a VPN device has the internet: see Model.vpnHasInternet.
   property bool vpnHasInternet: false
+  property int vpnChecksLeft: 0
+  function checkVpnInternet() {
+    vpnChecksLeft = 4
+    vpnCheckTimer.restart()
+  }
   readonly property string connectivity: reportedConnectivity === "limited" && vpnHasInternet
     ? "full" : reportedConnectivity
   readonly property bool hasCaptivePortal: connectivity === "portal"
@@ -569,12 +575,26 @@ Panel {
     }
   }
 
+  // nmcli monitor prints a line when it starts and when a device or connection
+  // changes, but none when one device's connectivity does, which a new tunnel
+  // reports a moment after it connects. So each line starts a few checks.
+  Process {
+    command: ["nmcli", "monitor"]
+    running: root.reportedConnectivity === "limited"
+    stdout: SplitParser {
+      onRead: root.checkVpnInternet()
+    }
+  }
+
   Timer {
-    interval: 10000
+    id: vpnCheckTimer
+    interval: 5000
     repeat: true
     triggeredOnStart: true
-    running: root.reportedConnectivity === "limited"
-    onTriggered: vpnConnectivityProbe.running = true
+    onTriggered: {
+      vpnConnectivityProbe.running = true
+      if (--root.vpnChecksLeft <= 0) stop()
+    }
   }
 
   // The share card is its own panel plugin (omarchy.wifiqr) so a replacement
