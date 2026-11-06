@@ -196,7 +196,7 @@ Usually on Linux, you need `Ctrl + Shift + C/V` to copy'n'paste in the terminal 
 | `Alt + Shift + D` | Download the video on the current page to `~/Videos` |
 | `Alt + Space` | Start/stop dictation (requires _Install > AI > Dictation_) |
 
-> **Oaxaca: works differently.** Install > AI > Dictation installs Voxtype from the distro's own apt repository, repackaged from Voxtype's release, instead of from the AUR.
+> **Oaxaca: works differently.** Install > AI > Dictation downloads Superwhisper from its vendor.
 
 With screenrecordings, the hotkey first asks which audio you want, then starts recording. Hit it again to stop. See [screenshots and recording](12-screenshots-recording.md) for the details.
 

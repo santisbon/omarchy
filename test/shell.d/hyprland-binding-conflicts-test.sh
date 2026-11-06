@@ -149,11 +149,11 @@ stub_bin="$tmpdir/bin"
 mkdir -p "$home" "$stub_bin"
 cat > "$stub_bin/omarchy-default-dictation" <<'SH'
 #!/bin/bash
-echo voxtype
+echo superwhisper
 SH
 # The dictation keys are bound only once the selected backend is installed.
-printf '#!/bin/bash\nexit 0\n' > "$stub_bin/voxtype"
-chmod +x "$stub_bin/omarchy-default-dictation" "$stub_bin/voxtype"
+printf '#!/bin/bash\nexit 0\n' > "$stub_bin/superwhisper"
+chmod +x "$stub_bin/omarchy-default-dictation" "$stub_bin/superwhisper"
 
 bindings=$(PATH="$stub_bin:$PATH" list_bindings "$home")
 [[ -n $bindings ]] || fail "default bindings load for the conflict check"

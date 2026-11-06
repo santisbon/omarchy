@@ -14,14 +14,14 @@ tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
 # The shipped user config (config/hypr, which /etc/skel carries) loads the defaults the way
-# Hyprland does, and a stub Voxtype adds its conditional bindings, so the check covers the
+# Hyprland does, and a stub Superwhisper adds its conditional bindings, so the check covers the
 # largest set a new user gets.
 home="$tmpdir/home"
 stub_bin="$tmpdir/bin"
 mkdir -p "$home/.config" "$stub_bin"
 cp -r "$ROOT/config/hypr" "$home/.config/hypr"
-touch "$stub_bin/voxtype"
-chmod +x "$stub_bin/voxtype"
+touch "$stub_bin/superwhisper"
+chmod +x "$stub_bin/superwhisper"
 
 # One line per binding: keys, description, command (empty for a dispatcher that is not a command).
 bindings=$(HOME="$home" XDG_CONFIG_HOME="$home/.config" XDG_STATE_HOME="$home/.local/state" OMARCHY_PATH="$ROOT" PATH="$stub_bin:$PATH" \

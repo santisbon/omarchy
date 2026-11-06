@@ -234,7 +234,7 @@ ca-certificates
 # Dropped from Omarchy's Arch list, with the reason:
 # aether, hype, monologue, omacalc, omacut, omasnap, omawrite, signed, tensaku, tobi-try: Omarchy's own
 #   OPR packages, no Ubuntu build; left out by the distro's maintainer
-# superwhisper-bin: proprietary, cloud by default; Voxtype stays the dictation engine
+# superwhisper-bin: proprietary, so Install > AI > Dictation downloads it from its vendor (omarchy-superwhisper)
 # disktree-bin, gliff, omarchy-hyprland-titlebars, owe: separate packages (not in stonking; the distro's
 #   apt repository builds them, and oaxaca-desktop's Depends names them)
 # omarchy-power-profiles-daemon: Omarchy's fork for ARM laptops; power-profiles-daemon above is Ubuntu's

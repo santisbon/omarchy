@@ -93,8 +93,6 @@ run_first_run_step() {
 run_first_run_step "finish the user's setup" \
   omarchy-provision-user "${finalize_user_args[@]}"
 
-run_first_run_step "install Voxtype post-update hook" \
-  omarchy-hook-install post-update "$OMARCHY_PATH/install/user/first-run/install-voxtype.hook"
 
 run_first_run_step "enable user systemd units" \
   bash "$OMARCHY_PATH/install/user/first-run/enable-user-units.sh"

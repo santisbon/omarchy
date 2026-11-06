@@ -2,7 +2,7 @@
 
 # omarchy:summary=Get or set the default dictation backend
 # omarchy:args=[backend]
-# omarchy:examples=omarchy default dictation | omarchy default dictation voxtype
+# omarchy:examples=omarchy default dictation | omarchy default dictation superwhisper
 
 if (($# > 1)); then
   echo "Usage: omarchy default dictation [backend]" >&2
@@ -12,7 +12,7 @@ fi
 if (($# == 0)); then
   config="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/defaults/dictation"
   if [[ ! -s $config ]]; then
-    echo "No dictation backend configured. Install Voxtype from Install > AI > Dictation." >&2
+    echo "No dictation backend configured. Install it from Install > AI > Dictation." >&2
     exit 1
   fi
   read -r backend < "$config"

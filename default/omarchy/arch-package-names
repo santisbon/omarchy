@@ -202,6 +202,6 @@ tesseract-data-jpn tesseract-ocr-jpn
 tesseract-data-jpn_vert tesseract-ocr-jpn-vert
 tldr tealdeer
 vice-sdl2 vice
-voxtype-bin voxtype
 whisper-cpp whisper.cpp whisper.cpp-tools
 zbar zbar-tools
+superwhisper-bin omarchy-superwhisper

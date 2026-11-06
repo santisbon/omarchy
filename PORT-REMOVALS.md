@@ -37,7 +37,7 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 - **No commit says why anything was removed.** The commits that deleted the files, `ef4c9211` "Port Omarchy v4.0.4 to Ubuntu", `c304e943` "Trim pre-installed software", `4b680c26` "Remove features we provide through Ubuntu", `3c21fd64` "Don't customize firewall" and `963b196e`, have no message body. Every recorded reason is in docs/6, docs/1, docs/0, `PORT.md` or the comments in the port's package list.
 - **The preinstall trim rested on one choice.** docs/6 choice 15 ("nothing of Omarchy's taste") dropped Omarchy's command-line tools and preinstalled apps; neither the plan nor the policy has a rule about what to preinstall. Some of what went was basic (no `unzip`, no calculator, no system monitor), and some was still wired into the port's own files (the prompt, the `ls` and `cd` aliases, the debug report).
 - **Removals were coupled to Limine and Snapper wholesale.** Snapshots, the factory reset and two ASUS display fixes went because Omarchy delivered them through Limine or Snapper, though the feature itself works with GRUB and Timeshift.
-- **Reasons that expired were not revisited.** Voxtype's invitation went when Voxtype could not be installed and stayed gone after it could; Brave and Edge went as "proprietary builds replaced by open counterparts" and stayed gone after Chrome and VS Code came back; the `ic`/`ix`/`icx` aliases stayed gone after tmux came back.
+- **Reasons that expired were not revisited.** Brave and Edge went as "proprietary builds replaced by open counterparts" and stayed gone after Chrome and VS Code came back; the `ic`/`ix`/`icx` aliases stayed gone after tmux came back.
 - **Some "Ubuntu's configuration" removals dropped a reason specific to this desktop.** Wi-Fi power save, the SSH keepalive and the out-of-memory killer's scope had such reasons.
 - **The rule "Delete rather than stub" was not followed through.** Scripts were kept with nothing calling them, and kept scripts called deleted programs ([Broken references](#broken-references-and-leftovers)).
 
@@ -255,7 +255,6 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | Basic tools | unzip, GNOME Disks, GNOME Calculator in place of Omacalc (Super+Ctrl+Q, the Calculator key); `oaxaca-desktop-apps` dropped | 47 |
 | Share > Receive, Install > Service > Chromium Account | Omarchy's two menu lines | 49 |
 | `ic`, `ix`, `icx` aliases | `tdl c`, `tdl cx`, `tdl c cx` | 50 |
-| Voxtype's first-run invitation | the post-update hook, its line in `omarchy-provision-first-run`, and `voxtype-invitation-test.sh` | 51 |
 | The Download Video host's test | `test/shell.d/chromium-ytdlp-test.sh`, unchanged from v4.0.4 (26 cases), on 2026-10-19; the host (`omarchy-chromium-ytdlp-host`) and its installer came back on 2026-10-14 without it | 20 |
 | 1Password's Chromium extension | written and removed with 1Password | 52 |
 | Fingerprint skipped while the lid is closed | the port's own pam-auth-update profile, `omarchy-fprintd`: Ubuntu's line with Omarchy's `pam_exec` gate in front | 53 |
@@ -324,8 +323,9 @@ The branch merged Omarchy's `v4.5.0` tag in November 2026. These parts of it are
 |---|---|
 | Omasnap, Omarchy's screenshot tool and its scroll capture | The distro's maintainer keeps swappy (docs/6, choice 29). |
 | Signed, Monologue, Omacut and Hype, with Omacut's Cut button on recording and download notifications | The distro's maintainer left them out; Xournal++, OBS Studio and Kdenlive stay as Flathub entries. |
-| Superwhisper: its package, first-login setup, adapter, Setup > Defaults > Dictation and the Remove entry | Proprietary and cloud by default; Voxtype stays the dictation engine. |
-| Holding Right Alt to dictate | Left out with Superwhisper's defaults; Alt + Space toggles dictation. |
+| Superwhisper preinstalled, its first-login setup and Setup > Defaults > Dictation | Its vendor grants no license to redistribute it, so Install > AI > Dictation downloads it from the vendor, through `omarchy-superwhisper`. It starts on Cloud, as in Omarchy. |
+| Voxtype | The distro's maintainer left it out: its package, installer, adapter, configuration and the bar's Dictate indicator. |
+| Holding Right Alt to dictate | The binding takes Right Alt from layouts that use it as AltGr (Omarchy's issue #17423); Alt + Space toggles dictation. |
 | The Install entries for Claude Desktop, Amp Desktop, Microsoft 365, Slack and Notion, with their Remove entries | The distro's maintainer left them out. |
 | Omarchy's Shift + Caps Lock compose key (`etc/xkb`) | A layout works as it does on any other system (docs/6, choice 90). |
 | The compiler and Qt additions to Omarchy's package list beyond docs/6's choice 106, and `vi` | The distro's maintainer left them out. |
@@ -343,5 +343,5 @@ Tests of those features are gone with them, including whole files for removed sc
 Changed on the way in, rather than left out:
 
 - **Keyboard layouts:** Setup > Typing > Keyboard Layouts is Omarchy's picker, in place of the port's. It saves layouts and variants to `~/.config/omarchy/keyboard-layouts`, and `default/hypr/keyboard.lua` and `default/input-methods/configure.py` read the system's layout from `/etc/default/keyboard`. The model and options stay the system's, so a switching key saved by the port's picker no longer applies; a migration moves the layouts.
-- **Dictation:** `omarchy-install-dictation-voxtype` installs the distro's `voxtype` package and keeps the port's GPU selection. Existing users keep F9 and Super + Ctrl + X through a migration. The bar keeps the port's Dictate indicator (`shell/plugins/bar/indicators/Dictation.qml`, with `omarchy-voxtype-status`), which Omarchy removed when it moved to Superwhisper.
+- **Dictation:** `omarchy-install-dictation-superwhisper` asks first, because its package downloads Superwhisper from the vendor, and has no background mode, because Superwhisper is not preinstalled. A migration removes Voxtype from systems that have it and leaves the user's settings and models.
 - **Captive portal:** the network panel opens `http://connectivity-check.ubuntu.com/`, the address that Ubuntu's `network-manager-config-connectivity-ubuntu`, preinstalled, turns NetworkManager's check on against.
