@@ -124,5 +124,6 @@ for case in "asus-rog.sh omarchy-hw-asus-rog asusctl" "framework16.sh omarchy-hw
 done
 
 grep -qx 'fs.inotify.max_user_watches=524288' "$ROOT/etc/sysctl.d/90-omarchy-file-watchers.conf" || fail "the inotify limit ships"
+grep -qx 'fs.inotify.max_user_instances=1024' "$ROOT/etc/sysctl.d/90-omarchy-file-watchers.conf" || fail "the inotify instance limit ships"
 
 pass "hardware fixes apply on their own machines only"
