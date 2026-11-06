@@ -41,10 +41,6 @@ The deleted files are `git diff --name-status --diff-filter=D v4.0.4 oaxaca` on 
 - **Some "Ubuntu's configuration" removals dropped a reason specific to this desktop.** Wi-Fi power save, the SSH keepalive and the out-of-memory killer's scope had such reasons.
 - **The rule "Delete rather than stub" was not followed through.** Scripts were kept with nothing calling them, and kept scripts called deleted programs ([Broken references](#broken-references-and-leftovers)).
 
-## Open work
-
-What is left from this audit, the checks still open, is in the build repository's developer README, [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do), the one list of open work for the distro and this fork.
-
 ## Commands, launchers and menu entries
 
 85 deleted files under `bin/` and `applications/` and 70 removed menu entries, grouped by feature. The commits that deleted them, `ef4c9211` (47 files), `c304e943` (37) and `963b196e` (the HEY handler), give no reason per item; the reasons are from docs/6, docs/1, docs/0 and `PORT.md`.
@@ -102,7 +98,7 @@ The 92 files deleted under `install/`, `etc/` and `default/` went in four port c
 | `nsswitch.conf` | Ubuntu's, with mDNS |
 | The DNS and timezone sudoers rules | `omarchy-dns` on nmcli and D-Bus; `omarchy-timezone` |
 | The icon links, Chromium's first-run preferences | the distro's own setup |
-| The Bluetooth pairing agent (`bt-agent.service`, enabled in `install/user/first-run/enable-user-units.sh`) | blueman's applet, which autostarts (see the developer README's [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do)) |
+| The Bluetooth pairing agent (`bt-agent.service`, enabled in `install/user/first-run/enable-user-units.sh`) | blueman's applet, which autostarts |
 | CUPS hardening | Ubuntu's `cups-browsed` runs as its own user, browses only DNS-SD and has an AppArmor profile; `CreateRemoteCUPSPrinterQueues No` is the one setting missing |
 | NVIDIA drivers (`nvidia.sh`) | `oaxaca-drivers-install` with Canonical's signed modules, including the 580 branch for GPUs before Turing |
 | Vulkan drivers (`vulkan.sh`) | `mesa-vulkan-drivers`, in the image |
@@ -238,7 +234,7 @@ Test cases deleted from files that stay: the OpenClaw cases in `default-agent-te
 
 ## Broken references and leftovers
 
-Things in the port that call something deleted, or ship without the feature they served. Fixed ones are in [Restored](#restored); the one left, `install/omarchy-other.packages` (Arch package names, read by nothing), is in the developer README's [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do). (`omarchy-theme-set-t3code`, listed here before, is called by `omarchy-theme-set` and themes T3 Code when it is installed another way, as Helix's template does for Helix.)
+Things in the port that call something deleted, or ship without the feature they served. Fixed ones are in [Restored](#restored); the one left is `install/omarchy-other.packages` (Arch package names, read by nothing). (`omarchy-theme-set-t3code`, listed here before, is called by `omarchy-theme-set` and themes T3 Code when it is installed another way, as Helix's template does for Helix.)
 
 ## Restored
 
@@ -259,7 +255,7 @@ Every feature added back since the audit, with the choice in docs/6 that records
 | 1Password's Chromium extension | written and removed with 1Password | 52 |
 | Fingerprint skipped while the lid is closed | the port's own pam-auth-update profile, `omarchy-fprintd`: Ubuntu's line with Omarchy's `pam_exec` gate in front | 53 |
 | DNS for networks joined later | NetworkManager's global DNS over D-Bus as well as the profiles, granted by a polkit rule | 54 |
-| ASUS Panther Lake display options | `xe.enable_dpcd_backlight=1` (B9406, UX5406AA) and `xe.enable_panel_replay=0` (B9406) in `/etc/modprobe.d`, on the same DMI match; need on Ubuntu not verified (the developer README's [To do](https://github.com/santisbon/oaxaca/blob/main/docs/README.md#to-do)) | 55 |
+| ASUS Panther Lake display options | `xe.enable_dpcd_backlight=1` (B9406, UX5406AA) and `xe.enable_panel_replay=0` (B9406) in `/etc/modprobe.d`, on the same DMI match; need on Ubuntu not verified | 55 |
 | Intel video acceleration | `libmfx-gen1.2` (Quick Sync) or `i965-va-driver` (GMA-era GPUs), by GPU, at install | 56 |
 | BCM4331 Wi-Fi firmware | `firmware-b43-installer` on that PCI id (multiverse; its postinst downloads the firmware from a third party's GitHub release at install) | 57 |
 | The BCM4360's Wi-Fi driver | `broadcom-sta-dkms` on a Mac with that PCI id whose firmware is not enforcing Secure Boot; nothing on any machine with Secure Boot on | 113 |
