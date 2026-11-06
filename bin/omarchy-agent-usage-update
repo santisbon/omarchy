@@ -68,6 +68,9 @@ for collector in "$OMARCHY_PATH"/bin/omarchy-agent-usage-*; do
   [[ -x $collector ]] || continue
   agent="${collector##*/omarchy-agent-usage-}"
   [[ $agent == "update" ]] && continue
+  # No collector's name has a dot. dpkg's <name>.dpkg-new and <name>.dpkg-tmp, with the same mode as
+  # <name>, do: running the updater's own copies would start the updater again, without end.
+  [[ $agent == *.* ]] && continue
   wanted "$agent" || continue
   collect "$collector" "$agent" &
   pids+=($!)
