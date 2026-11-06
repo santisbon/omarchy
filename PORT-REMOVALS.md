@@ -335,7 +335,7 @@ The branch merged Omarchy's `v4.5.0` tag in November 2026. These parts of it are
 | The menu's cached list of installed packages | The cache reads pacman's database; the port's prelude asks `dpkg-query`. |
 | Sudoless Docker and Lazydocker | Docker is not preinstalled (docs/6, choice 71). |
 | OpenClaw, T3 Code and Hermes Desktop installers and removers | The port removed them (see the commands section above). |
-| `geo.omarchy.org`, `ntp.omarchy.org` and Omarchy's connectivity endpoint | Omarchy's own services. Weather stays on wttr.in, the clock on Ubuntu's defaults. |
+| `ntp.omarchy.org` and Omarchy's connectivity endpoint | The distro's maintainer keeps Ubuntu's defaults for the clock and the connectivity check. |
 | The migrations for all of the above, and for machines no Oaxaca install ever was | `migrations/README.md` |
 
 Tests of those features are gone with them, including whole files for removed scripts and migrations, and cases inside `dictation`, `tray`, `menu-guards`, `first-run`, `locate`, `luks-rekey-journal`, `luks-parent-detection`, `hardware-quirks`, `default-apps`, `release-ai-port` and `security-fingerprint-remove`.

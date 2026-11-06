@@ -21,14 +21,15 @@ function parseLocationFile(raw) {
 }
 
 // True when weather.json names no place: the panel then reports for wherever
-// wttr.in places this network.
+// geo.omarchy.org places this network.
 function isAutoLocation(state) {
   var s = state || {}
   return String(s.name || "") === "" && (s.latitude === null || s.latitude === undefined)
 }
 
-// The location to report for: the stored one, or with none stored, a detected
-// one in weather.json's shape.
+// The location to report for: the stored one, or with none stored, the one
+// geo.omarchy.org detected. geo.omarchy.org answers in weather.json's shape, so
+// both come from parseLocationFile.
 function effectiveLocation(configured, detected) {
   return isAutoLocation(configured) && detected ? detected : configured
 }

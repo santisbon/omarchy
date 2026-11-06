@@ -79,15 +79,16 @@ Panel {
   property var configuredLocationState: ({ name: "", latitude: null, longitude: null })
   readonly property string configuredLocation: configuredLocationState.name
 
-  // Always empty here: Omarchy fills this from its own geo service, and Oaxaca
-  // leaves the place to wttr.in's IP auto-detect.
+  // With nothing configured, where geo.omarchy.org places this network, in the
+  // same shape. Kept when a later lookup fails.
   property var detectedLocationState: ({ name: "", latitude: null, longitude: null })
   property bool detectingLocation: false
   readonly property bool autoLocation: Model.isAutoLocation(configuredLocationState)
   onAutoLocationChanged: if (autoLocation) detectLocation()
 
   // The query is the wttr.in path segment (coordinates when known, else the
-  // encoded name); empty means wttr.in's own IP auto-detect.
+  // encoded name); empty means wttr.in's own IP auto-detect, used only when
+  // geo.omarchy.org could not answer.
   readonly property var locationState: Model.effectiveLocation(configuredLocationState, detectedLocationState)
   readonly property string locationQuery: Model.wttrLocationQuery(locationState.name, locationState.latitude, locationState.longitude)
 
@@ -171,7 +172,7 @@ Panel {
     // starve retries for the rest of the session.
     forecastRetries = 0
     dailyForecastRetries = 0
-    // Until a lookup answers there is nothing to ask for: wait for it
+    // Until geo.omarchy.org answers there is nothing to ask for: wait for it
     // rather than have wttr.in look this machine up. Its answer, or its
     // failure, refreshes again.
     if (detectingLocation && locationQuery === "") return
@@ -183,7 +184,9 @@ Panel {
   }
 
   function detectLocation() {
-    refresh()
+    if (locationProc.running) return
+    detectingLocation = true
+    locationProc.running = true
   }
 
   function refreshDailyForecast(sourceReport) {
@@ -483,6 +486,28 @@ Panel {
         forecastProc.running = false
         dailyForecastProc.running = false
         Qt.callLater(root.refresh)
+      }
+    }
+  }
+
+  // Omarchy's own lookup: city and coordinates from Cloudflare's view of
+  // this network, in weather.json's shape.
+  Process {
+    id: locationProc
+    command: ["curl", "-fsS", "--max-time", "4", "https://geo.omarchy.org/"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        root.detectingLocation = false
+        var detected = Model.parseLocationFile(text)
+        var query = Model.wttrLocationQuery(detected.name, detected.latitude, detected.longitude)
+        // A new place changes locationQuery, which refreshes. An unchanged
+        // one was already fetched; a failure keeps the last place, or with
+        // none falls back to wttr.in's own lookup.
+        if (query !== "" && query !== root.locationQuery)
+          root.detectedLocationState = detected
+        else if (root.locationQuery === "")
+          root.refresh()
       }
     }
   }
