@@ -511,7 +511,7 @@ Panel {
   property bool vpnHasInternet: false
   property int vpnChecksLeft: 0
   function checkVpnInternet() {
-    vpnChecksLeft = 4
+    vpnChecksLeft = 5
     vpnCheckTimer.restart()
   }
   readonly property string connectivity: reportedConnectivity === "limited" && vpnHasInternet
@@ -588,7 +588,7 @@ Panel {
 
   Timer {
     id: vpnCheckTimer
-    interval: 5000
+    interval: 3000
     repeat: true
     triggeredOnStart: true
     onTriggered: {
