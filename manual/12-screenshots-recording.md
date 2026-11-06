@@ -5,7 +5,7 @@ Everything you can grab off the screen hangs off the Print Screen key. One key o
 | Hotkey | Function |
 | ------ | -------- |
 | `Print Screen` | Screenshot |
-| `Super + Ctrl + Alt + C` | Screenshot |
+| `Super + Shift + S` or `Super + Ctrl + Alt + C` | Screenshot |
 | `Alt + Print Screen` | Screenrecord (or stop the one that's running) |
 | `Super + Print Screen` | Colour picker |
 | `Super + Ctrl + Print Screen` | Extract text from a region |
@@ -14,7 +14,7 @@ Everything you can grab off the screen hangs off the Print Screen key. One key o
 
 ## Screenshots
 
-Hit `Print Screen` (or `Super + Ctrl + Alt + C`) and the screen freezes so nothing shifts under you while you aim. Drag a box for a freeform region, or just click once and the shot snaps to whatever rectangle you clicked in: a window if you landed on one, the whole monitor if you landed on the bar or in a gap. Changed your mind? Hit the same key again to dismiss the picker.
+Hit `Print Screen` (or `Super + Shift + S`) and the screen freezes so nothing shifts under you while you aim. Drag a box for a freeform region, or just click once and the shot snaps to whatever rectangle you clicked in: a window if you landed on one, the whole monitor if you landed on the bar or in a gap. Changed your mind? Hit the same key again to dismiss the picker.
 
 The result goes two places at once: a PNG in your pictures directory, and the clipboard, so you can paste it straight into a chat window with `Super + V`. A notification pops up with a thumbnail. Click it (or hit `Super + ,` to act on the latest notification) and the shot opens in swappy, the annotation editor, where you can draw arrows and boxes on it before you send it.
 

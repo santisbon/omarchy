@@ -56,7 +56,7 @@ You can start WhatsApp using `Super + Shift + Alt + G`.
 
 Google Messages, Google Photos, Google Maps, and Google Contacts are all included as web apps too.
 
-You can start Google Messages using `Super + Shift + Ctrl + G`, Google Photos using `Super + Shift + P`, and Google Maps using `Super + Shift + S`. Google Contacts is available through the app launcher (`Super + Space`).
+You can start Google Messages using `Super + Shift + Ctrl + G`, Google Photos using `Super + Shift + P`, and Google Maps using `Super + Shift + Alt + S`. Google Contacts is available through the app launcher (`Super + Space`).
 
 > **Oaxaca: removed.** Oaxaca ships no Google Contacts launcher; Google Contacts can be added with _Install > Web App_.
 
