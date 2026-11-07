@@ -33,7 +33,8 @@ function layoutHasWidget(layout, id) {
 // A bar widget that stands in for an app's tray item takes its place: the app's
 // own icon would only show the same thing twice.
 var widgetsForTrayItems = [
-  { widget: "omarchy.dropbox", item: "dropbox" }
+  { widget: "omarchy.dropbox", item: "dropbox" },
+  { widget: "superwhisper.panel", item: "superwhisper" }
 ]
 
 // LocalSend's item shows no state, offers only Open and Quit, and its primary
