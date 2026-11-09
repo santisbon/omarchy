@@ -15,7 +15,7 @@ call pacman, limine and snapper, and no system built from this branch ever ran t
 scripts move away from. On every merge of a new Omarchy tag, each migration the new tag adds is
 read before it can run on an installed system: one that calls pacman, limine, snapper or another
 Arch tool, or names Arch's packages, is ported (apt in place of pacman, Ubuntu's names) or
-deleted; one that only edits the user's files is kept as it comes. On 2026-11-08, 38 of the 63
+deleted; one that only edits the user's files is kept as it comes. On 2026-11-08, 38 of the 62
 migrations here came from Omarchy's tags: 12 ported, 26 unchanged. See `PORT.md`, "Merging a new
 Omarchy tag".
 

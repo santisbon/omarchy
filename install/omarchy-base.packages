@@ -281,8 +281,8 @@ ca-certificates
 # libreoffice, kdenlive, obs-studio, xournalpp: Omarchy's removable preinstalls (each is in the
 #   menu instead: LibreOffice from the Snap Store, the others from Flathub; Install > Productivity)
 # docker.io, docker-buildx, docker-compose-v2: Docker, with its scripts and binding
-# tree-sitter-cli: a command-line preference (dua-cli came back on 2026-10-16; yt-dlp, removed with
-#   them, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
+# tree-sitter-cli: a command-line preference (yt-dlp, removed with
+#   it, came back on 2026-10-14 for the Download Video extension; lazygit, btop, inxi,
 #   starship, zoxide and eza came back on 2026-10-16, listed above)
 # wf-recorder, libsecret-tools: nothing in the port calls them (unzip and whois came back 2026-10-16, listed above)
 # evince: replaced by papers (above) (gnome-disk-utility, in the optional omarchy-desktop-apps package until 2026-10-16, is listed above; ffmpegthumbnailer is a dependency of omarchy-desktop)
