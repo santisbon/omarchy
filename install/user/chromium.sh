@@ -1,6 +1,7 @@
-# No browser is preinstalled on this distro, so the Chromium native messaging
-# hosts only make sense once Chromium is actually on the machine. Without this
-# gate the two installers below would run against a browser that is not there.
+# Chromium is preinstalled, but by name rather than as a dependency, so the user
+# can remove it from the menu; the Chromium native messaging hosts only make
+# sense while Chromium is on the machine. Without this gate the two installers
+# below would run against a browser that is not there.
 if omarchy-cmd-missing chromium; then
   exit 0
 fi

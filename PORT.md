@@ -117,10 +117,11 @@ a commit the merge branch lacks. `git push` sends the tag to the fork, `santisbo
 as `oaxaca`: the build repository's `build.sh` fetches `refs/tags/<OMARCHY_TAG>` from the fork to
 count `oaxaca`'s commits since the tag. The next `make release` commits the new `OMARCHY_TAG`.
 
-- Migrations: `migrations/` holds only the port's own (its README says why Omarchy's 106 were
-  deleted). Every migration the new tag adds is read before it can run on an installed system,
-  and ported or deleted during the merge, never kept as it comes, because Omarchy's call pacman,
-  limine and snapper. A change on this branch that
+- Migrations: `migrations/` holds the port's own and those Omarchy's tags added after v4.0.4
+  (its README says why Omarchy's 106 up to v4.0.4 were deleted). Every migration the new tag adds
+  is read before it can run on an installed system: one that calls pacman, limine, snapper or
+  another Arch tool, or names Arch's packages, is ported or deleted during the merge; one that
+  only edits the user's files is kept as it comes. A change on this branch that
   moves a user's files gets a migration of its own through `omarchy-dev-add-migration`.
 
 - The icon font: `default/fonts/omarchy/omarchy.ttf` holds the distro's mark at `U+E900`, where
